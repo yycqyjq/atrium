@@ -12,13 +12,14 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
+  renameSync,
   readdirSync,
   readlinkSync,
   symlinkSync,
   unlinkSync,
 } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -30,6 +31,12 @@ if (!existsSync(join(standalone, "server.js"))) {
 }
 
 const out = join(root, "desktop-server");
+if (existsSync(out)) {
+  // 旧产物改名为 .old（避免覆盖冲突：pnpm 自引用链接 cpSync 无法覆盖自身子目录）
+  const stale = `${out}.old-${Date.now()}`;
+  renameSync(out, stale);
+  console.log(`[prepare-desktop] 旧目录已移走：${basename(stale)}`);
+}
 mkdirSync(out, { recursive: true });
 
 // server.js + 运行依赖

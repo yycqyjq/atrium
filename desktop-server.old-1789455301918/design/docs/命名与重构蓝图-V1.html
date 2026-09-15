@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>重命名与重构蓝图 · ARK Admin 提案 V1</title>
+<style>
+  :root {
+    --paper: #f9f7f2;
+    --ink: #201e19;
+    --ink-2: #5a564c;
+    --ink-3: #8f8a7e;
+    --rule: #e4dfd3;
+    --rule-soft: #eeeadf;
+    --accent: #2e6b52;
+    --accent-deep: #22513d;
+    --serif: "Noto Serif SC", "Songti SC", "STSong", "Source Han Serif SC", "SimSun", serif;
+    --sans: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC", -apple-system, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ============ 布局：侧栏目录 + 主画布 ============ */
+
+  .layout {
+    display: grid;
+    grid-template-columns: 236px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    border-right: 1px solid var(--rule);
+    padding: 44px 28px;
+  }
+
+  .sidebar .brand {
+    font-family: var(--serif);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--rule-soft);
+    margin-bottom: 20px;
+  }
+
+  .sidebar nav a {
+    display: block;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 2.2;
+    transition: color 0.15s;
+  }
+
+  .sidebar nav a:hover { color: var(--accent-deep); }
+
+  .sidebar .toc-note {
+    margin-top: 32px;
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.7;
+    border-top: 1px solid var(--rule-soft);
+    padding-top: 16px;
+  }
+
+  main {
+    max-width: 1040px;
+    padding: 56px clamp(24px, 5vw, 72px) 96px;
+  }
+
+  /* ============ 封面区 ============ */
+
+  .cover { padding-bottom: 44px; }
+
+  .kicker {
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    font-weight: 500;
+    margin-bottom: 18px;
+  }
+
+  .cover h1 {
+    font-family: var(--serif);
+    font-size: clamp(32px, 4.6vw, 46px);
+    font-weight: 600;
+    line-height: 1.22;
+    letter-spacing: -0.01em;
+    margin-bottom: 22px;
+  }
+
+  .standfirst {
+    font-size: 16.5px;
+    line-height: 1.85;
+    color: var(--ink-2);
+    max-width: 40em;
+    margin-bottom: 30px;
+  }
+
+  .meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    border-top: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 14px 0;
+    font-size: 12.5px;
+    color: var(--ink-3);
+  }
+
+  .meta-row .m b {
+    color: var(--ink-2);
+    font-weight: 500;
+    margin-right: 6px;
+  }
+
+  /* ============ 章节 ============ */
+
+  section { padding-top: 58px; }
+
+  .sec-head {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 26px;
+  }
+
+  .sec-no {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  .sec-head h2 {
+    font-family: var(--serif);
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+
+  .prose p {
+    max-width: 42em;
+    margin-bottom: 1.1em;
+  }
+
+  .prose p:last-child { margin-bottom: 0; }
+
+  .lede {
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.85;
+    max-width: 40em;
+    margin-bottom: 1.2em;
+  }
+
+  /* ============ 表格 ============ */
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 28px 0 8px;
+    font-size: 14px;
+  }
+
+  th {
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    color: var(--ink-3);
+    padding: 0 14px 10px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  td {
+    padding: 11px 14px 11px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    vertical-align: top;
+    line-height: 1.65;
+  }
+
+  td:first-child { white-space: nowrap; font-weight: 500; }
+
+  td .sub { color: var(--ink-3); font-size: 12.5px; }
+
+  .table-note {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-top: 10px;
+  }
+
+  /* ============ 名牌（候选名样张） ============ */
+
+  .nameplate {
+    display: grid;
+    grid-template-columns: 264px minmax(0, 1fr);
+    gap: 44px;
+    padding: 40px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .nameplate:last-of-type { border-bottom: 1px solid var(--rule); }
+
+  .np-name .cn {
+    font-family: var(--serif);
+    font-size: 42px;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+
+  .np-name .py {
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .np-name .badge {
+    display: inline-block;
+    font-size: 11.5px;
+    letter-spacing: 0.1em;
+    color: var(--accent-deep);
+    border: 1px solid var(--accent);
+    padding: 3px 10px;
+    border-radius: 2px;
+  }
+
+  .np-name svg {
+    display: block;
+    margin-top: 22px;
+    color: var(--ink-2);
+  }
+
+  .np-body .metaphor {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.8;
+    margin-bottom: 16px;
+    max-width: 30em;
+  }
+
+  .np-body ul {
+    list-style: none;
+    margin-bottom: 18px;
+  }
+
+  .np-body ul li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 8px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 36em;
+  }
+
+  .np-body ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 7px;
+    height: 1.5px;
+    background: var(--ink-3);
+  }
+
+  .np-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .np-meta .lbl {
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-right: 2px;
+  }
+
+  .tag {
+    font-size: 12px;
+    color: var(--ink-2);
+    border: 1px solid var(--rule);
+    padding: 2px 9px;
+    border-radius: 2px;
+    background: var(--paper);
+  }
+
+  .np-caution {
+    margin-top: 14px;
+    font-size: 13px;
+    color: var(--ink-3);
+    border-left: 2px solid var(--rule);
+    padding-left: 12px;
+    max-width: 34em;
+    line-height: 1.7;
+  }
+
+  /* ============ 边界三栏 ============ */
+
+  .boundary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 32px;
+    margin-top: 26px;
+  }
+
+  .boundary .b-item h3 {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+    font-weight: 500;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 14px;
+  }
+
+  .boundary .b-item ul { list-style: none; }
+
+  .boundary .b-item li {
+    font-size: 13.5px;
+    line-height: 1.6;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule-soft);
+    color: var(--ink-2);
+  }
+
+  .boundary .b-item li b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ============ 阶段 ============ */
+
+  .phase {
+    display: grid;
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 32px;
+    padding: 34px 0;
+    border-top: 1px solid var(--rule);
+  }
+
+  .phase:last-of-type { border-bottom: 1px solid var(--rule); }
+
+  .phase .ph-no {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .phase .ph-no small {
+    display: block;
+    font-family: var(--sans);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-top: 8px;
+  }
+
+  .phase h3 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .phase .ph-why {
+    font-size: 14.5px;
+    color: var(--ink-2);
+    max-width: 36em;
+    margin-bottom: 14px;
+  }
+
+  .phase ul { list-style: none; margin-bottom: 14px; }
+
+  .phase ul li {
+    position: relative;
+    padding-left: 18px;
+    margin-bottom: 7px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 38em;
+  }
+
+  .phase ul li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.72em;
+    width: 7px;
+    height: 1.5px;
+    background: var(--ink-3);
+  }
+
+  .phase ul li b { color: var(--ink); font-weight: 500; }
+
+  .phase .ph-out {
+    font-size: 13px;
+    color: var(--ink-3);
+  }
+
+  .phase .ph-out b {
+    color: var(--ink-2);
+    font-weight: 500;
+  }
+
+  /* ============ 引句块 ============ */
+
+  .callout {
+    border-left: 2px solid var(--accent);
+    padding: 6px 0 6px 20px;
+    margin: 30px 0;
+    max-width: 40em;
+  }
+
+  .callout p {
+    font-family: var(--serif);
+    font-size: 16.5px;
+    line-height: 1.85;
+  }
+
+  .callout .src {
+    font-family: var(--sans);
+    font-size: 12.5px;
+    color: var(--ink-3);
+    margin-top: 10px;
+  }
+
+  /* ============ 终章 & 版权栏 ============ */
+
+  .accept { counter-reset: acc; }
+
+  .accept li {
+    list-style: none;
+    position: relative;
+    padding: 12px 0 12px 40px;
+    border-bottom: 1px solid var(--rule-soft);
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--ink-2);
+    max-width: 40em;
+  }
+
+  .accept li::before {
+    counter-increment: acc;
+    content: counter(acc, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.04em;
+  }
+
+  .colophon {
+    margin-top: 72px;
+    border-top: 1px solid var(--rule);
+    padding-top: 20px;
+    font-size: 12px;
+    color: var(--ink-3);
+    line-height: 1.9;
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  /* ============ 响应式 ============ */
+
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    main { padding-top: 44px; }
+    .nameplate { grid-template-columns: 1fr; gap: 20px; padding: 30px 0; }
+    .np-name .cn { font-size: 34px; }
+    .np-name svg { display: none; }
+    .boundary { grid-template-columns: 1fr; }
+    .phase { grid-template-columns: 1fr; gap: 14px; }
+    .phase .ph-no { font-size: 30px; }
+    td:first-child { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="brand">重命名与重构提案</div>
+    <nav>
+      <a href="#s1">01 · 现状速写</a>
+      <a href="#s2">02 · 命名提案</a>
+      <a href="#s3">03 · 重构边界</a>
+      <a href="#s4">04 · 三阶段路线</a>
+      <a href="#s5">05 · 第一刀建议</a>
+    </nav>
+    <div class="toc-note">
+      本提案基于 ark-admin 仓库源码审阅（2026-09-15）。四个候选名、重构保留边界与三阶段路线，供拍板参考。
+    </div>
+  </aside>
+
+  <main>
+
+    <header class="cover">
+      <div class="kicker">RENAME &amp; RESTRUCTURE PROPOSAL · V1</div>
+      <h1>从「管理后台」，<br>回到「自己的空间」</h1>
+      <p class="standfirst">
+        ARK Admin 是一套以 GitHub 为唯一持久层的个人中枢：博客、图库、工具、趋势与组件陈列共居一室。它的问题不在工程质量——而在身份：名字叫 Admin，长相是管理后台，但产品的实质是一个人的数字空间。本提案回答两件事：它该叫什么名字，以及如何重构才能让名字落地。
+      </p>
+      <div class="meta-row">
+        <span class="m"><b>现名</b>ark-admin</span>
+        <span class="m"><b>候选</b>4 个方向</span>
+        <span class="m"><b>提案版本</b>V1</span>
+        <span class="m"><b>日期</b>2026-09-15</span>
+      </div>
+    </header>
+
+    <!-- ================= 01 现状速写 ================= -->
+
+    <section id="s1">
+      <div class="sec-head">
+        <span class="sec-no">01</span>
+        <h2>现状速写</h2>
+      </div>
+
+      <div class="prose">
+        <p class="lede">
+          先说结论：这个项目的底子相当好。pnpm monorepo、前后端分离、Electron 桌面端、Playwright 端到端测试、commitlint 提交规范——工程骨架是一个认真维护的项目该有的样子。真正的问题集中在表达层：它把自己打扮成了一个「后台」。
+        </p>
+        <p>
+          架构上，GitHub 仓库承担了数据库、CDN 与 CMS 三重角色：文章是仓库里的 Markdown，图片是仓库里的资源，工具书签是仓库里的 tools.json。本地 Koa 服务只做三件事——保管 Token、代理请求、聚合缓存。这是一套自洽且低成本的个人架构，值得原封不动地保留。
+        </p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 18%">模块</th>
+            <th style="width: 52%">现有能力</th>
+            <th>数据源</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>博客</td>
+            <td>Markdown 渲染、代码高亮、目录树、文章 TOC、图片迁移<span class="sub">（detail / DirTree / MarkdownRenderer / TableOfContents）</span></td>
+            <td>GitHub 仓库</td>
+          </tr>
+          <tr>
+            <td>图库</td>
+            <td>图片上传 / 删除、目录管理、EXIF 解析、缓存加载<span class="sub">（Gallery / CachedImage / exifr）</span></td>
+            <td>GitHub 仓库</td>
+          </tr>
+          <tr>
+            <td>工具集</td>
+            <td>动态书签、分组、站点标题识别<span class="sub">（Portfolio / Bookmarks / identify 接口）</span></td>
+            <td>GitHub 仓库 tools.json</td>
+          </tr>
+          <tr>
+            <td>GitHub 趋势</td>
+            <td>热门项目浏览、按语言 / 话题筛选<span class="sub">（GitHubTrending，挂在 Portfolio 下）</span></td>
+            <td>GitHub Trending</td>
+          </tr>
+          <tr>
+            <td>组件陈列</td>
+            <td>组件 demo 与功能示例、热力图等<span class="sub">（Components / DemoRenderer / AMapHeatmap）</span></td>
+            <td>本地内置</td>
+          </tr>
+          <tr>
+            <td>账号与设置</td>
+            <td>登录、GitHub Token 安全链路、站点名 / 主题配置<span class="sub">（Login / auth / SettingsModal / ThemeToggle）</span></td>
+            <td>本地后端</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="table-note">平台资产另有：Koa 后端（Token 代理、OpenAPI、坐标反查）、Electron 壳、Playwright e2e、docker-compose 与 devcontainer。</p>
+
+      <div class="callout">
+        <p>
+          核心矛盾：名字叫 Admin、导航是后台菜单、视觉是组件库默认皮肤——内容像被「管理」，而不是被「居住」。
+        </p>
+        <div class="src">这不是丑的问题，是没有身份的问题。</div>
+      </div>
+    </section>
+
+    <!-- ================= 02 命名提案 ================= -->
+
+    <section id="s2">
+      <div class="sec-head">
+        <span class="sec-no">02</span>
+        <h2>命名提案</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          起名的依据不是好听，而是：名字能不能给重构后的信息架构一个心智模型。以下四个方向分属不同气质家族，各自附带隐喻、理由与视觉联想。
+        </p>
+      </div>
+
+      <!-- 中庭 -->
+      <div class="nameplate">
+        <div class="np-name">
+          <div class="cn">中庭</div>
+          <div class="py">Zhōng Tíng · Atrium</div>
+          <span class="badge">提案推荐</span>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="4" y="4" width="48" height="48" stroke="currentColor" stroke-width="1.6"/>
+            <rect x="16" y="16" width="24" height="24" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="28" y1="4" x2="28" y2="16" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="28" y1="40" x2="28" y2="52" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="4" y1="28" x2="16" y2="28" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="40" y1="28" x2="52" y2="28" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="np-body">
+          <p class="metaphor">家的中心天井——所有房间围绕它展开，光从顶部进来。GitHub 是地基，应用是这座房子的中庭。</p>
+          <ul>
+            <li><b>它直接命名了重构方向</b>：从「管理后台」变成「有房间的家」。博客是书房、图库是画廊、工具是工具房、组件是陈列廊，中庭把它们聚在一起——导航结构天然成立。</li>
+            <li><b>架构语义准确</b>：所有数据从 GitHub 汇入这个中心再分发到各房间，「中庭」就是这套数据流的形状。</li>
+            <li><b>可扩展</b>：未来加新模块等于加新房间，心智模型不会崩；对外展示时也撑得起「个人站点」的身份。</li>
+          </ul>
+          <div class="np-meta">
+            <span class="lbl">视觉联想</span>
+            <span class="tag">回字框</span>
+            <span class="tag">天井俯视图</span>
+            <span class="lbl" style="margin-left:10px;">气质</span>
+            <span class="tag">沉稳</span>
+            <span class="tag">建筑感</span>
+            <span class="tag">家的秩序</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自留地 -->
+      <div class="nameplate">
+        <div class="np-name">
+          <div class="cn">自留地</div>
+          <div class="py">Zì Liú Dì · Homestead</div>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <line x1="8" y1="20" x2="48" y2="20" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="8" y1="30" x2="48" y2="30" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="8" y1="40" x2="48" y2="40" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M28 12 V20 M28 22 V30 M28 32 V40" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M24 16 L28 12 L32 16" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="np-body">
+          <p class="metaphor">互联网上属于你的一小块地——种什么、什么时候收，全由你自己定。</p>
+          <ul>
+            <li><b>天然共鸣</b>：中文开发者圈早已用「数字自留地」形容个人站点，这个名字自带归属感，一听就懂。</li>
+            <li><b>隐喻与 GitHub 相配</b>：仓库是田，文章是庄稼，工具是农具——「耕耘」的语义和这套架构严丝合缝。</li>
+            <li><b>有烟火气</b>：个人项目不端着，随性生长，很有「自己的地盘」的松弛感。</li>
+          </ul>
+          <div class="np-meta">
+            <span class="lbl">视觉联想</span>
+            <span class="tag">田垄线</span>
+            <span class="tag">一株苗</span>
+            <span class="lbl" style="margin-left:10px;">气质</span>
+            <span class="tag">温暖</span>
+            <span class="tag">随性</span>
+            <span class="tag">生长感</span>
+          </div>
+          <div class="np-caution">注意：气质偏田园、偏私享。如果未来想往「专业作品集、对外展示」的方向走，这个名字会显得软一些。</div>
+        </div>
+      </div>
+
+      <!-- 码头 -->
+      <div class="nameplate">
+        <div class="np-name">
+          <div class="cn">码头</div>
+          <div class="py">Mǎ Tóu · Wharf</div>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="28" cy="28" r="6" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M28 6 V16 M28 40 V50 M6 28 H16 M40 28 H50" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M12 12 L18 18 M44 12 L38 18 M12 44 L18 38 M44 44 L38 38" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="np-body">
+          <p class="metaphor">GitHub 是货仓和船队，这里是你的私人码头——内容装卸、中转、再出发。</p>
+          <ul>
+            <li><b>技术隐喻最准确</b>：整套架构就是「内容从 GitHub 仓库流入本地应用」，码头命名了这条数据水路。</li>
+            <li><b>有枢纽的动感</b>：汇聚与出发，适合强调「一切从这里进出」的中心感。</li>
+            <li><b>英文友好</b>：Wharf 简短好记，域名、仓库名、npm 包名都干净。</li>
+          </ul>
+          <div class="np-meta">
+            <span class="lbl">视觉联想</span>
+            <span class="tag">缆桩俯视</span>
+            <span class="tag">吊臂线稿</span>
+            <span class="lbl" style="margin-left:10px;">气质</span>
+            <span class="tag">硬朗</span>
+            <span class="tag">工业感</span>
+            <span class="tag">枢纽</span>
+          </div>
+          <div class="np-caution">注意：「码头」是功能视角的名字，情感浓度偏低——它像一件趁手的工具，而不是一个家。</div>
+        </div>
+      </div>
+
+      <!-- 工坊 -->
+      <div class="nameplate">
+        <div class="np-name">
+          <div class="cn">工坊</div>
+          <div class="py">Gōng Fāng · Atelier</div>
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="6" y="30" width="44" height="20" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M14 30 V22 H26 V30" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M34 30 V12 H44 V30" stroke="currentColor" stroke-width="1.6"/>
+            <line x1="6" y1="40" x2="50" y2="40" stroke="currentColor" stroke-width="1.6"/>
+          </svg>
+        </div>
+        <div class="np-body">
+          <p class="metaphor">手艺人的工作室——写文章、做工具、攒组件，都是你的手艺。</p>
+          <ul>
+            <li><b>Maker 视角</b>：产出物（文章 / 工具 / 组件）在这个名字下都是「作品」，与开发者的身份最契合。</li>
+            <li><b>组件陈列最顺</b>：demo 区在工坊隐喻里就是「成品架」，语义自然。</li>
+            <li><b>Atelier 有格调</b>：法语里艺术家工作室的词，中英双名都拿得出手。</li>
+          </ul>
+          <div class="np-meta">
+            <span class="lbl">视觉联想</span>
+            <span class="tag">工作台俯视</span>
+            <span class="tag">刻刀木纹</span>
+            <span class="lbl" style="margin-left:10px;">气质</span>
+            <span class="tag">手作</span>
+            <span class="tag">匠心</span>
+            <span class="tag">专业</span>
+          </div>
+          <div class="np-caution">注意：「坊」字近几年被各类工作坊用得略多，独特性在四个候选里最弱。</div>
+        </div>
+      </div>
+
+      <div class="prose" style="margin-top: 34px;">
+        <p>
+          <b>推荐「中庭」。</b>理由只有一条但足够硬：这次重构的核心命题是「让内容有主人感」，而「中庭」不止是个名字——它直接给了重构后的信息架构一个可以落地的空间隐喻（中庭 + 四厢，见第 04 节）。其他三个名字都很好，但它们描述的是这个项目的某个侧面；「中庭」描述的是它重构之后想要成为的样子。
+        </p>
+      </div>
+    </section>
+
+    <!-- ================= 03 重构边界 ================= -->
+
+    <section id="s3">
+      <div class="sec-head">
+        <span class="sec-no">03</span>
+        <h2>重构边界</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          重构不是推倒重来。先划清哪些东西动不得、哪些放开手改，才不会越改越散。
+        </p>
+      </div>
+
+      <div class="boundary">
+        <div class="b-item">
+          <h3>必须保留</h3>
+          <ul>
+            <li><b>GitHub 存储架构</b>——仓库即数据库 / CDN / CMS，这是项目的灵魂</li>
+            <li><b>五大模块既有功能</b>——博客、图库、工具、趋势、组件，一个不减</li>
+            <li><b>Token 安全链路</b>——后端代理、不落前端</li>
+            <li><b>Electron 桌面端</b>与 pnpm monorepo 结构</li>
+            <li><b>登录与配置体系</b>——含 siteName 降级链</li>
+          </ul>
+        </div>
+        <div class="b-item">
+          <h3>放开重构</h3>
+          <ul>
+            <li><b>信息架构</b>——导航分区、模块归属、路由命名</li>
+            <li><b>视觉系统</b>——tokens、主题、字体、组件密度</li>
+            <li><b>首页形态</b>——从功能列表改为个人主页</li>
+            <li><b>导航形态</b>——顶栏 / 侧栏 / 命令面板的选型</li>
+            <li><b>文案与命名</b>——项目名、页面标题、空态文案</li>
+          </ul>
+        </div>
+        <div class="b-item">
+          <h3>平庸之源</h3>
+          <ul>
+            <li><b>Admin 心智</b>——名字、布局、语气都在说「后台」，而不是「我的空间」</li>
+            <li><b>默认皮肤</b>——AntD 默认蓝 + 默认样式，没有任何属于这个项目的识别度</li>
+            <li><b>平铺导航</b>——六个一级菜单等权重排列，没有主次与叙事</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 04 三阶段路线 ================= -->
+
+    <section id="s4">
+      <div class="sec-head">
+        <span class="sec-no">04</span>
+        <h2>三阶段路线</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          顺序刻意安排为「先立身份、再换皮肤、最后磨细节」——名字和骨架定了，视觉才有落点；视觉定了，细节才不白磨。以「中庭」为例，新的信息架构如下：
+        </p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 30%">现状</th>
+            <th>新归属（以「中庭」为例）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>首页（文章 + 工具杂烩）</td><td>中庭 · 个人主页——身份、近期文章、常用工具、快速入口</td></tr>
+          <tr><td>博客</td><td>书房 · 读——文章与长内容</td></tr>
+          <tr><td>GitHub 趋势（现挂 Portfolio）</td><td>书房 · 读——并入，作为「在读 / 风向」</td></tr>
+          <tr><td>图库</td><td>画廊 · 看——图片与影像</td></tr>
+          <tr><td>照片查看器（现挂 Portfolio）</td><td>画廊 · 看——并入</td></tr>
+          <tr><td>工具集 + 书签</td><td>工具房 · 用——工具、书签、外链</td></tr>
+          <tr><td>组件陈列</td><td>陈列廊 · 造——组件 demo 与实验</td></tr>
+          <tr><td>关于</td><td>廊下 · 简页</td></tr>
+        </tbody>
+      </table>
+      <p class="table-note">分区词汇随最终选定的名字调整：自留地 → 田垄，码头 → 泊位，工坊 → 工位。结构不变，只有措辞随名。</p>
+
+      <div class="phase" style="margin-top: 44px;">
+        <div class="ph-no">A<small>PHASE A</small></div>
+        <div>
+          <h3>定位与骨架</h3>
+          <p class="ph-why">把名字落进代码，把导航从「六个等权菜单」重组为「一个中心 + 四个分区」。</p>
+          <ul>
+            <li><b>全链路改名</b>——仓库名、package name、站点标题默认链（siteName → username → 兜底名）一次换净，不留 admin 残留</li>
+            <li><b>导航与路由重组</b>——按上表迁移模块归属；GitHub 趋势、照片查看器各归其位</li>
+            <li><b>首页改为个人主页</b>——回答「这是谁的空间」：身份区 + 近期文章 + 常用工具 + 快速入口</li>
+          </ul>
+          <p class="ph-out"><b>产出</b>：新信息架构 + 新导航 + 改名提交</p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="ph-no">B<small>PHASE B</small></div>
+        <div>
+          <h3>视觉系统</h3>
+          <p class="ph-why">从组件库默认皮肤，换成属于这个名字的一套 tokens。</p>
+          <ul>
+            <li><b>建立设计 tokens</b>——主色系（与名字气质匹配）、字体层级（标题 / 正文 / 代码）、间距与圆角刻度</li>
+            <li><b>亮暗双主题重调</b>——现状是变量简单反转；重做暗色的层级、对比度与边框透明度</li>
+            <li><b>导航形态升级</b>——顶栏改为侧栏工作台，或顶栏 + 命令面板（⌘K 快速跳转，很配「个人中枢」的定位）</li>
+          </ul>
+          <p class="ph-out"><b>产出</b>：tokens 文件 + 双主题 + 导航改造</p>
+        </div>
+      </div>
+
+      <div class="phase">
+        <div class="ph-no">C<small>PHASE C</small></div>
+        <div>
+          <h3>体验细节</h3>
+          <p class="ph-why">骨架和皮肤立住之后，把每个房间的细节磨到位。</p>
+          <ul>
+            <li><b>三态统一</b>——Loading / Empty / Error 全站一套规范（现有组件基础好，缺的是空态设计）</li>
+            <li><b>移动端审计</b>——现有 768px 断点较基础，逐页过手机宽度</li>
+            <li><b>性能与手感</b>——图片懒加载补全、路由过渡、设置与登录的微文案</li>
+          </ul>
+          <p class="ph-out"><b>产出</b>：状态规范 + 移动端全过</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 05 第一刀建议 ================= -->
+
+    <section id="s5">
+      <div class="sec-head">
+        <span class="sec-no">05</span>
+        <h2>第一刀建议</h2>
+      </div>
+
+      <div class="prose">
+        <p>
+          不要大爆炸式重构。建议第一刀只切一个纵切面：<b>新首页 + 新导航 + 核心 tokens</b>，一次提交立住方向。切完之后，方向对不对一眼可见，后续每个模块按新骨架逐个迁移即可，随时可以停在一个可用的状态上。
+        </p>
+      </div>
+
+      <ul class="accept" style="margin-top: 26px;">
+        <li>名字、站点标题、导航语义、登录后首屏一次对齐，全站无 admin 残留</li>
+        <li>新首页能一眼回答「这是谁的空间」——身份、近期内容、常用入口</li>
+        <li>主色、字体、间距、圆角来自 tokens 文件，不再来自组件库默认值</li>
+        <li>暗色模式是重新调过的第二套层级，不是简单反色</li>
+        <li>桌面与手机宽度各过一遍首页与一个内容页，布局不塌</li>
+      </ul>
+
+      <footer class="colophon">
+        <span>基于 ark-admin 仓库源码审阅 · 2026-09-15</span>
+        <span>重命名与重构提案 · V1</span>
+      </footer>
+    </section>
+
+  </main>
+</div>
+
+</body>
+</html>
