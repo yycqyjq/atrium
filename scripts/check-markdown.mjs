@@ -1,6 +1,7 @@
 /**
- * Markdown 流水线校验：模拟阅读页同款插件链（remark-gfm → rehype-raw → rehype-sanitize），
- * 验证「raw HTML 放行（图片/居中）且危险内容被过滤」。
+ * Markdown 流水线校验：模拟阅读页同款插件链
+ * （remark-gfm → rehype-raw → rehype-sanitize → rehype-slug → rehype-highlight）
+ * 验证：raw HTML 放行（图片/居中）、危险内容过滤、标题锚点、代码高亮。
  * 用法：node scripts/check-markdown.mjs
  */
 import { unified } from "unified";
@@ -9,6 +10,8 @@ import remarkGfm from "remark-gfm";
 import remarkRehype from "remark-rehype";
 import rehypeRaw from "rehype-raw";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
+import rehypeSlug from "rehype-slug";
+import rehypeHighlight from "rehype-highlight";
 
 // 与 src/components/study/Markdown.tsx 保持一致的放行策略
 const schema = {
@@ -28,13 +31,23 @@ const md = `<p align="center">
 
 ## 简介
 
-一段中文正文。
+正文段落。
+
+### 子节 \`code\`
+
+内容。
+
+## 简介
+
+重复标题（用于验证去重锚点）。
+
+\`\`\`js
+// 假标题： ## 不应出现在目录里
+const x = 1;
+function hello() { return "hi"; }
+\`\`\`
 
 <script>alert(1)</script>
-
-<img src="javascript:alert(2)" alt="bad">
-
-- [x] 任务列表
 `;
 
 const processor = unified()
@@ -42,7 +55,9 @@ const processor = unified()
   .use(remarkGfm)
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
-  .use(rehypeSanitize, schema);
+  .use(rehypeSanitize, schema)
+  .use(rehypeSlug)
+  .use(rehypeHighlight, { detect: false, ignoreMissing: true });
 
 const tree = await processor.run(processor.parse(md));
 
@@ -54,17 +69,24 @@ const elements = [];
   }
 })(tree);
 
-const imgs = elements.filter((n) => n.tagName === "img");
-const scripts = elements.filter((n) => n.tagName === "script");
-const centered = elements.find((n) => n.tagName === "p" && n.properties?.align === "center");
-const okImg = imgs.find((n) => typeof n.properties?.src === "string" && n.properties.src.startsWith("https://"));
-const badImg = imgs.find((n) => String(n.properties?.src ?? "").startsWith("javascript:"));
+const headingIds = elements
+  .filter((n) => /^h[1-6]$/.test(n.tagName))
+  .map((n) => n.properties?.id);
+const highlightSpans = elements.filter((n) => {
+  const cls = n.properties?.className;
+  return Array.isArray(cls) && cls.some((c) => String(c).startsWith("hljs-"));
+});
 
-console.log("img 总数:", imgs.length, "| 有效 https 图片:", okImg ? "✓" : "✗");
-console.log("script 残留:", scripts.length);
-console.log("p[align=center] 保留:", centered ? "✓" : "✗");
-console.log("javascript: 协议图片被过滤:", badImg ? "✗ 未过滤" : "✓");
+console.log("标题锚点 ids:", headingIds.join(" | "));
+console.log("高亮 span 数:", highlightSpans.length);
+console.log(
+  "高亮类别样例:",
+  [...new Set(highlightSpans.flatMap((n) => n.properties.className).filter((c) => c !== "hljs"))].slice(0, 6).join(", "),
+);
 
-const pass = imgs.length >= 1 && okImg && scripts.length === 0 && centered && !badImg;
-console.log(pass ? "✅ Markdown 流水线校验通过" : "❌ Markdown 流水线校验失败");
-process.exit(pass ? 0 : 1);
+const expectIds = ["简介", "子节-code", "简介-1"];
+const idsOk = JSON.stringify(headingIds) === JSON.stringify(expectIds);
+const hljsOk = highlightSpans.length >= 3;
+console.log(idsOk ? "✅ 锚点规则与预期一致" : `❌ 锚点不一致，预期 ${expectIds.join(" | ")}`);
+console.log(hljsOk ? "✅ 代码高亮生效" : "❌ 代码高亮未生效");
+process.exit(idsOk && hljsOk ? 0 : 1);

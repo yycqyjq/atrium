@@ -158,7 +158,7 @@
     max-width: 30em;
   }
   .md-body h1 {
-    font-size: 28px;
+    font-size: 30px;
   }
   .md-body h2 {
     font-size: 23px;
@@ -177,7 +177,7 @@
     color: var(--accent);
     text-decoration: underline;
     text-underline-offset: 3px;
-    text-decoration-thickness: 1px;
+    text-decoration-thickness: 1.5px;
     transition: color 150ms ease;
   }
   .md-body a:hover {
@@ -202,27 +202,28 @@
     margin: 0.35em 0;
   }
   .md-body li::marker {
-    color: var(--ink-3);
+    color: var(--accent);
   }
   .md-body blockquote {
     margin: 1em 0;
     padding-left: 1em;
-    border-left: 2px solid var(--line-strong);
+    border-left: 3px solid color-mix(in srgb, var(--accent) 70%, var(--line-strong));
     color: var(--ink-2);
     max-width: 44em;
   }
   .md-body code {
     font-family: var(--font-mono);
     font-size: 0.92em;
-    background: var(--wash);
-    border: 1px solid var(--line);
+    background: var(--accent-soft);
+    color: var(--accent-ink);
+    border: 0;
     border-radius: 8px;
     padding: 0.1em 0.4em;
   }
   .md-body pre {
-    margin: 1em 0;
-    padding: 14px 18px;
-    background: var(--surface-raised);
+    margin: 1.1em 0;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--accent) 3%, var(--surface-raised));
     border: 1px solid var(--line);
     border-radius: 8px;
     overflow-x: auto;
@@ -231,6 +232,7 @@
     padding: 0;
     border: 0;
     background: none;
+    color: var(--ink);
     font-size: 13px;
     line-height: 1.7;
   }
@@ -254,11 +256,103 @@
   .md-body th,
   .md-body td {
     border: 1px solid var(--line);
-    padding: 8px 12px;
+    padding: 10px 14px;
     text-align: left;
   }
   .md-body th {
-    background: var(--wash);
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
     font-weight: 600;
+  }
+  .md-body table {
+    border: 1px solid var(--line);
+  }
+}
+
+/* ---------- 代码高亮（中庭配色体系内） ---------- */
+
+@layer components {
+  .md-body :is(h1, h2, h3, h4) {
+    scroll-margin-top: 24px;
+  }
+
+  .hljs-comment,
+  .hljs-quote {
+    color: var(--ink-3);
+  }
+  .hljs-keyword,
+  .hljs-selector-tag,
+  .hljs-literal,
+  .hljs-doctag {
+    color: oklch(45% 0.085 155);
+  }
+  .hljs-string,
+  .hljs-regexp {
+    color: oklch(51% 0.105 75);
+  }
+  .hljs-number,
+  .hljs-symbol,
+  .hljs-bullet {
+    color: oklch(55% 0.12 35);
+  }
+  .hljs-title,
+  .hljs-section,
+  .hljs-name {
+    color: oklch(45% 0.06 220);
+  }
+  .hljs-built_in,
+  .hljs-type,
+  .hljs-attr,
+  .hljs-attribute {
+    color: oklch(48% 0.07 230);
+  }
+  .hljs-meta,
+  .hljs-variable,
+  .hljs-template-variable,
+  .hljs-params {
+    color: var(--ink-2);
+  }
+  .hljs-emphasis {
+    font-style: italic;
+  }
+  .hljs-strong {
+    font-weight: 600;
+  }
+
+  :root[data-theme="dark"] .hljs-comment,
+  :root[data-theme="dark"] .hljs-quote {
+    color: oklch(74% 0.012 92);
+  }
+
+  :root[data-theme="dark"] .hljs-keyword,
+  :root[data-theme="dark"] .hljs-selector-tag,
+  :root[data-theme="dark"] .hljs-literal,
+  :root[data-theme="dark"] .hljs-doctag {
+    color: oklch(78% 0.08 158);
+  }
+  :root[data-theme="dark"] .hljs-string,
+  :root[data-theme="dark"] .hljs-regexp {
+    color: oklch(78% 0.07 70);
+  }
+  :root[data-theme="dark"] .hljs-number,
+  :root[data-theme="dark"] .hljs-symbol,
+  :root[data-theme="dark"] .hljs-bullet {
+    color: oklch(80% 0.08 45);
+  }
+  :root[data-theme="dark"] .hljs-title,
+  :root[data-theme="dark"] .hljs-section,
+  :root[data-theme="dark"] .hljs-name {
+    color: oklch(80% 0.04 250);
+  }
+  :root[data-theme="dark"] .hljs-built_in,
+  :root[data-theme="dark"] .hljs-type,
+  :root[data-theme="dark"] .hljs-attr,
+  :root[data-theme="dark"] .hljs-attribute {
+    color: oklch(78% 0.05 210);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

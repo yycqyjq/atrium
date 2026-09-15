@@ -3,8 +3,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import Footer from "@/components/shell/Footer";
 import Markdown from "@/components/study/Markdown";
+import Toc from "@/components/study/Toc";
 import { IconArrowRight } from "@/components/icons";
 import { getPostBySlug } from "@/lib/content";
+import { extractToc } from "@/lib/toc";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +65,7 @@ export default async function PostPage({ params }: Props) {
   if (!post) notFound();
 
   const { meta, body } = post;
+  const toc = extractToc(body);
 
   return (
     <>
@@ -98,9 +101,22 @@ export default async function PostPage({ params }: Props) {
           </p>
         </header>
 
-        <article className="md-body">
-          <Markdown>{body}</Markdown>
-        </article>
+        <div
+          className={
+            toc.length >= 2
+              ? "grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_228px]"
+              : ""
+          }
+        >
+          <article className="md-body min-w-0">
+            <Markdown>{body}</Markdown>
+          </article>
+          {toc.length >= 2 ? (
+            <aside className="hidden xl:block">
+              <Toc items={toc} />
+            </aside>
+          ) : null}
+        </div>
 
         <div className="mt-14 border-t border-line pt-6">
           <Link

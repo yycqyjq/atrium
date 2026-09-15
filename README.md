@@ -28,7 +28,7 @@ pnpm start        # 生产：http://localhost:3000
 
 要求 Node.js 22+。桌面端见下文「桌面端（Electron）」一节。
 
-（可选）`node scripts/check-markdown.mjs` 可校验 Markdown 渲染流水线（raw HTML 放行 + 危险内容过滤）。
+（可选）`node scripts/check-markdown.mjs` 校验 Markdown 渲染流水线；`node scripts/preview-markdown.mjs` 可生成排版预览（详见脚本头部注释）。
 
 > 说明：dev 脚本内置了 `WATCHPACK_POLLING=true`（文件轮询），用于规避 macOS 上文件监视句柄受限导致的 `EMFILE` 报错；如果你的环境无此问题、想关掉轮询，去掉该环境变量即可。
 
@@ -121,6 +121,7 @@ atrium/
 - [x] 静态方向样板（`design/`）
 - [x] Next.js 骨架：首页 + 四间房路由 + 内容源抽象
 - [x] 书房：列表与阅读页接通真实数据（front-matter 标题/摘要/标签，Markdown 渲染）
+- [x] 阅读体验：代码高亮（双主题）+ 文章目录（锚点与滚动定位）
 - [x] Electron 壳（本地服务模式：自动拉起本地服务、窗口加载中庭）
 - [ ] 画廊 / 工具房 / 陈列廊逐间迁移
 - [ ] 桌面安装包（electron-builder 与应用图标）
