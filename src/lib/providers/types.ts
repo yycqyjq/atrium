@@ -61,4 +61,7 @@ export interface RepoProvider {
 
   /** 文件最后一次提交时间（毫秒），失败返回 null */
   lastCommitDate(filePath: string): Promise<number | null>;
+
+  /** 由仓库路径构建可直接访问的原始文件 URL（用于图片等静态资源） */
+  rawUrl(filePath: string): string;
 }

@@ -1,4 +1,4 @@
-import { resolveRepoConfig } from "@/lib/config";
+import { resolveRepoConfig, type ResolvedRepoConfig } from "@/lib/config";
 import {
   ProviderError,
   type RepoEntry,
@@ -6,8 +6,8 @@ import {
   type RepoProvider,
 } from "./types";
 
-export async function githubProvider(): Promise<RepoProvider> {
-  const cfg = await resolveRepoConfig("github");
+export async function githubProvider(override?: ResolvedRepoConfig): Promise<RepoProvider> {
+  const cfg = override ?? (await resolveRepoConfig("github"));
   const configured = Boolean(cfg.owner && cfg.repo);
 
   const call = async (apiPath: string, init?: RequestInit): Promise<Response> => {
@@ -112,6 +112,11 @@ export async function githubProvider(): Promise<RepoProvider> {
       } catch {
         return null;
       }
+    },
+
+    rawUrl(filePath: string) {
+      const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
+      return `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${encodeURIComponent(cfg.branch)}/${encoded}`;
     },
   };
 }

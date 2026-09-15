@@ -1,4 +1,4 @@
-import { resolveRepoConfig } from "@/lib/config";
+import { resolveRepoConfig, type ResolvedRepoConfig } from "@/lib/config";
 import {
   ProviderError,
   type RepoEntry,
@@ -12,8 +12,8 @@ import {
  * 配置 GITEE_OWNER / GITEE_REPO / GITEE_BRANCH / GITEE_TOKEN（或写入 data/config.json）。
  * 注意：Gitee OpenAPI 与 GitHub 存在细节差异，首次接入时请先用 /api/providers 验证连通性。
  */
-export async function giteeProvider(): Promise<RepoProvider> {
-  const cfg = await resolveRepoConfig("gitee");
+export async function giteeProvider(override?: ResolvedRepoConfig): Promise<RepoProvider> {
+  const cfg = override ?? (await resolveRepoConfig("gitee"));
   const configured = Boolean(cfg.owner && cfg.repo);
 
   const call = async (apiPath: string, init?: RequestInit): Promise<Response> => {
@@ -119,6 +119,11 @@ export async function giteeProvider(): Promise<RepoProvider> {
       } catch {
         return null;
       }
+    },
+
+    rawUrl(filePath: string) {
+      const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
+      return `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`;
     },
   };
 }

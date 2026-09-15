@@ -82,8 +82,10 @@ atrium/
 | --- | --- |
 | GitHub | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN` |
 | Gitee | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN` |
+| 画廊（可选独立仓库） | `GITHUB_GALLERY_OWNER` `GITHUB_GALLERY_REPO` `GITHUB_GALLERY_BRANCH`（Gitee 前缀替换为 `GITEE_GALLERY_`） |
 
 用 `ATRIUM_DEFAULT_PROVIDER` 可指定默认内容源（缺省 `github`），例如切到 Gitee：`ATRIUM_DEFAULT_PROVIDER=gitee`。
+画廊目录可用 `ATRIUM_GALLERY_DIR` 指定（缺省 `images/`）；不设 `GITHUB_GALLERY_*` 时画廊跟随主仓库。
 
 未配置时首页显示设计好的空态；配置后自动出现最近文章。也可以直接 `POST /api/config` 写入本地配置（文件权限 0600，且不会被 git 跟踪）。
 
@@ -127,5 +129,6 @@ atrium/
 - [x] 书房：列表与阅读页接通真实数据（front-matter 标题/摘要/标签，Markdown 渲染）
 - [x] 阅读体验：代码高亮（双主题）+ 文章目录（锚点与滚动定位）
 - [x] Electron 壳（本地服务模式：自动拉起本地服务、窗口加载中庭）
-- [ ] 画廊 / 工具房 / 陈列廊逐间迁移
+- [x] 画廊：相册与图片墙（真实数据）
+- [ ] 工具房 / 陈列廊迁移
 - [x] 桌面安装包（独立 .app + 应用图标；dmg 可用 desktop:dist）
