@@ -1,32 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
+import StudyList from "@/components/study/StudyList";
 import { listPosts, type ContentReason, type PostMeta } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "书房" };
-
-type MonthGroup = { key: string; label: string; items: PostMeta[] };
-
-function groupByMonth(items: PostMeta[]): MonthGroup[] {
-  const nowYear = new Date().getFullYear();
-  const groups: MonthGroup[] = [];
-  for (const item of items) {
-    const d = item.lastModified ? new Date(item.lastModified) : null;
-    const key = d ? `${d.getFullYear()}-${d.getMonth() + 1}` : "unknown";
-    const label = d
-      ? `${d.getFullYear() !== nowYear ? `${d.getFullYear()}年` : ""}${d.getMonth() + 1}月`
-      : "未记日期";
-    let group = groups.find((g) => g.key === key);
-    if (!group) {
-      group = { key, label, items: [] };
-      groups.push(group);
-    }
-    group.items.push(item);
-  }
-  return groups;
-}
 
 function emptyCopy(reason: ContentReason) {
   if (reason === "not-configured") {
@@ -49,7 +29,6 @@ function emptyCopy(reason: ContentReason) {
 
 export default async function StudyPage() {
   const { items, reason } = await listPosts();
-  const groups = groupByMonth(items);
   const copy = emptyCopy(reason);
 
   return (
@@ -82,45 +61,7 @@ export default async function StudyPage() {
         </header>
 
         {items.length > 0 ? (
-          <div>
-            {groups.map((group) => (
-              <section key={group.key} className="mt-9 first:mt-3">
-                <h2 className="mb-1 text-[12.5px] font-medium tracking-[0.14em] text-ink-2">
-                  {group.label}
-                </h2>
-                <ul>
-                  {group.items.map((post) => (
-                    <li key={post.path} className="border-b border-line last:border-0">
-                      <Link
-                        href={`/study/${post.slug}`}
-                        className="grid grid-cols-[78px_minmax(0,1fr)_auto] items-start gap-[22px] rounded-ctl py-4 pr-3 transition-colors duration-150 hover:bg-wash max-xs:block max-xs:pr-0"
-                      >
-                        <span className="flex flex-col gap-0.5 pt-[3px] text-[12.5px] leading-[1.7] text-ink-3 tabular-nums max-xs:mb-1 max-xs:flex-row max-xs:gap-2.5 max-xs:pt-0">
-                          <span>{post.dateLabel}</span>
-                        </span>
-                        <span className="block min-w-0">
-                          <span className="block font-serif text-[17px] leading-normal tracking-[0.015em] text-ink">
-                            {post.title}
-                          </span>
-                          {post.description ? (
-                            <span className="mt-1 block max-w-[44em] text-[13px] leading-[1.65] text-ink-3">
-                              {post.description}
-                            </span>
-                          ) : null}
-                        </span>
-                        {post.category ? (
-                          <span className="mt-1 hidden text-right text-[12.5px] tracking-[0.05em] text-ink-3 sm:block">
-                            {post.category}
-                          </span>
-                        ) : null}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-            <p className="mt-7 text-[12.5px] tracking-[0.05em] text-ink-3">共 {items.length} 篇</p>
-          </div>
+          <StudyList posts={items} />
         ) : (
           <div className="py-16 text-center">
             <p className="mb-2 font-serif text-[19px] tracking-[0.02em]">{copy.title}</p>
