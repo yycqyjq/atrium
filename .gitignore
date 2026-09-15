@@ -6,6 +6,7 @@ dist/
 release/
 desktop-server/
 desktop-server.old-*/
+desktop-server.bloat-*/
 desktop-server.tar.gz
 
 # 运行时数据与密钥（config.json 可能包含访问令牌）

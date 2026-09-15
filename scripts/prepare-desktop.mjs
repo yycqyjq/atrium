@@ -40,7 +40,13 @@ if (existsSync(out)) {
 mkdirSync(out, { recursive: true });
 
 // server.js + 运行依赖
-cpSync(standalone, out, { recursive: true });
+// 白名单复制：standalone 可能被 Turbopack 带入项目根的其它目录（certs/docs/release 等），
+// 只复制运行必需项，既防膨胀也防证书等敏感文件被打进应用包。
+const KEEP = ["server.js", "package.json", "node_modules", ".next"];
+for (const name of KEEP) {
+  const from = join(standalone, name);
+  if (existsSync(from)) cpSync(from, join(out, name), { recursive: true, dereference: false });
+}
 
 // 静态资源
 const staticSrc = join(root, ".next", "static");
