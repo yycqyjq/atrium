@@ -66,7 +66,19 @@ export default async function StudyPage() {
           <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
             书房
           </h1>
-          <p className="max-w-[34em] text-ink-2">文章与长文。读也好，写也好，都在这里。</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p className="max-w-[34em] text-ink-2">文章与长文。读也好，写也好，都在这里。</p>
+            <Link
+              href="/study/write"
+              className="group inline-flex items-center gap-1.5 text-[12.5px] tracking-[0.03em] text-accent transition-colors duration-150 hover:text-accent-hover"
+            >
+              写作台
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-[13px] transition-transform duration-200 group-hover:translate-x-0.5">
+                <path d="M5 12 H19" />
+                <path d="M13.5 6.5 L19 12 L13.5 17.5" />
+              </svg>
+            </Link>
+          </div>
         </header>
 
         {items.length > 0 ? (
