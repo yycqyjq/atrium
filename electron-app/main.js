@@ -12,11 +12,12 @@
  *   pnpm desktop:smoke    # 自检
  */
 const { app, BrowserWindow, shell } = require("electron");
-const { spawn } = require("node:child_process");
+const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
+const IS_PACKAGED = app.isPackaged;
 const PORT = Number(process.env.ATRIUM_PORT || 3299);
 const SMOKE = process.env.ATRIUM_SMOKE === "1";
 const READY_TIMEOUT_MS = 30000;
@@ -24,22 +25,65 @@ const READY_TIMEOUT_MS = 30000;
 let serverProc = null;
 let win = null;
 
+/** 打包版：把内置服务包解压到 userData（首次运行或版本更新时），返回服务根目录 */
+function ensurePackagedServer() {
+  const base = path.join(app.getPath("userData"), "server");
+  const marker = path.join(base, ".version");
+  const source = path.join(process.resourcesPath, "server.tar.gz");
+  const upToDate =
+    fs.existsSync(path.join(base, "server.js")) &&
+    fs.existsSync(marker) &&
+    fs.readFileSync(marker, "utf8").trim() === app.getVersion();
+
+  if (!upToDate) {
+    fs.mkdirSync(base, { recursive: true });
+    console.log("[electron] 解压内置服务到", base);
+    const result = spawnSync("tar", ["-xzf", source, "-C", base], { stdio: "inherit" });
+    if (result.status !== 0) throw new Error("解压内置服务失败");
+    fs.writeFileSync(marker, app.getVersion());
+  }
+  return base;
+}
+
+/** 服务入口与工作目录：开发=项目根（走 start.mjs）；打包=userData/server（直接起 standalone） */
+function serverPlan() {
+  if (IS_PACKAGED) {
+    const serverRoot = ensurePackagedServer();
+    return { serverRoot, entry: path.join(serverRoot, "server.js"), cwd: serverRoot };
+  }
+  return {
+    serverRoot: ROOT,
+    entry: path.join(ROOT, "scripts", "start.mjs"),
+    cwd: ROOT,
+  };
+}
+
 function startServer() {
   return new Promise((resolve, reject) => {
+    const plan = serverPlan();
     const env = {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "1",
       PORT: String(PORT),
       HOSTNAME: "127.0.0.1",
     };
-    // 相对证书路径转绝对（standalone server 会 chdir）
-    if (env.NODE_EXTRA_CA_CERTS && !path.isAbsolute(env.NODE_EXTRA_CA_CERTS)) {
-      env.NODE_EXTRA_CA_CERTS = path.resolve(ROOT, env.NODE_EXTRA_CA_CERTS);
-    }
-    env.ATRIUM_DATA_DIR = env.ATRIUM_DATA_DIR || path.join(ROOT, "data");
 
-    serverProc = spawn(process.execPath, [path.join(ROOT, "scripts", "start.mjs")], {
-      cwd: ROOT,
+    // 证书：相对路径转绝对；打包版支持从 userData/certs/watt-toolkit.pem 自动注入
+    if (env.NODE_EXTRA_CA_CERTS && !path.isAbsolute(env.NODE_EXTRA_CA_CERTS)) {
+      env.NODE_EXTRA_CA_CERTS = path.resolve(plan.cwd, env.NODE_EXTRA_CA_CERTS);
+    }
+    if (!env.NODE_EXTRA_CA_CERTS && IS_PACKAGED) {
+      const userCert = path.join(app.getPath("userData"), "certs", "watt-toolkit.pem");
+      if (fs.existsSync(userCert)) env.NODE_EXTRA_CA_CERTS = userCert;
+    }
+
+    // 数据目录：开发=项目 data/；打包=系统 userData（应用包保持只读）
+    env.ATRIUM_DATA_DIR =
+      env.ATRIUM_DATA_DIR ||
+      (IS_PACKAGED ? path.join(app.getPath("userData"), "data") : path.join(ROOT, "data"));
+
+    serverProc = spawn(process.execPath, [plan.entry], {
+      cwd: plan.cwd,
       env,
       stdio: ["ignore", "inherit", "inherit"],
     });
@@ -121,8 +165,8 @@ app.whenReady().then(async () => {
     }
   } catch (err) {
     console.error("[electron] ❌ 启动失败：", err);
-    process.exitCode = 1;
-    app.quit();
+    if (serverProc && serverProc.exitCode === null) serverProc.kill("SIGTERM");
+    app.exit(1);
   }
 });
 

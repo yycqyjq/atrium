@@ -34,16 +34,20 @@ pnpm start        # 生产：http://localhost:3000
 
 ## 桌面端（Electron）
 
-桌面壳已就位：启动时自动拉起本地服务，窗口直接加载中庭（本地服务模式，与网页版同一套代码）。
+桌面壳：启动时自动拉起本地服务，窗口直接加载中庭（本地服务模式，与网页版同一套代码）。
 
 ```bash
 pnpm build            # 首次或代码更新后：构建 standalone 产物
 pnpm desktop:cert     # 打开桌面窗口（本机含证书的启动方式）
 pnpm desktop:smoke    # 自检：隐藏窗口启动、验证全链路后自动退出
+
+pnpm desktop:pack     # 打包为独立 App：release/mac-arm64/中庭.app（双击即用，未签名）
+pnpm desktop:dist     # 额外产出 dmg 安装包
 ```
 
-- 桌面端读取的配置与网页端一致（环境变量 / `data/config.json`）；
-- 打包分发（安装包、应用图标）将在后续接入。
+- 打包版首次启动会把内置服务解压到 `~/Library/Application Support/atrium-desktop/server`，配置与数据在该目录的 `data/` 下；
+- 本机证书（Watt Toolkit 等）放到 `~/Library/Application Support/atrium-desktop/certs/watt-toolkit.pem`，打包版启动时自动加载；
+- 应用图标：`build/icon.svg`（源）与 `build/icon.png`（1024，构建时自动转换为 icns）。
 
 ## 目录结构
 
@@ -124,4 +128,4 @@ atrium/
 - [x] 阅读体验：代码高亮（双主题）+ 文章目录（锚点与滚动定位）
 - [x] Electron 壳（本地服务模式：自动拉起本地服务、窗口加载中庭）
 - [ ] 画廊 / 工具房 / 陈列廊逐间迁移
-- [ ] 桌面安装包（electron-builder 与应用图标）
+- [x] 桌面安装包（独立 .app + 应用图标；dmg 可用 desktop:dist）

@@ -2,15 +2,19 @@
   "name": "atrium",
   "version": "0.1.0",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "WATCHPACK_POLLING=true next dev",
     "dev:cert": "WATCHPACK_POLLING=true NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
     "build": "next build",
     "start": "node scripts/start.mjs",
     "start:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem node scripts/start.mjs",
-    "desktop": "electron electron/main.js",
-    "desktop:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem electron electron/main.js",
-    "desktop:smoke": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem ATRIUM_SMOKE=1 electron electron/main.js",
+    "desktop": "electron electron-app/main.js",
+    "desktop:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem electron electron-app/main.js",
+    "desktop:smoke": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem ATRIUM_SMOKE=1 electron electron-app/main.js",
+    "desktop:prepare": "node scripts/prepare-desktop.mjs",
+    "desktop:pack": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac --dir",
+    "desktop:dist": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac",
     "typecheck": "tsc --noEmit"
   },
   "pnpm": {

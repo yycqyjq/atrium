@@ -3,6 +3,9 @@ node_modules/
 .next/
 out/
 dist/
+release/
+desktop-server/
+desktop-server.tar.gz
 
 # 运行时数据与密钥（config.json 可能包含访问令牌）
 data/config.json

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- 暖纸底 + 回字标志（macOS 圆角比例；主体约 73%） -->
+  <rect x="100" y="100" width="824" height="824" rx="184" fill="#f6f4ee"/>
+  <rect x="101" y="101" width="822" height="822" rx="183" fill="none" stroke="#e4dfd3" stroke-width="2"/>
+  <g stroke="#224c36" stroke-width="36" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="212" y="212" width="600" height="600"/>
+    <rect x="427" y="427" width="170" height="170"/>
+    <path d="M512 212 V427 M512 597 V812 M212 512 H427 M597 512 H812"/>
+  </g>
+</svg>

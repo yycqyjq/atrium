@@ -1,0 +1,27 @@
+# 中庭 · electron-builder 配置（桌面壳独立目录，不打包业务依赖）
+appId: com.yycqyjq.atrium
+productName: 中庭
+
+directories:
+  app: electron-app
+  output: release
+  buildResources: build
+
+files:
+  - main.js
+  - package.json
+  - "!**/node_modules/**"
+
+extraResources:
+  - from: desktop-server.tar.gz
+    to: server.tar.gz
+
+asar: true
+npmRebuild: false
+electronDist: node_modules/electron/dist
+
+mac:
+  category: public.app-category.productivity
+  icon: build/icon.png
+  target:
+    - dmg
