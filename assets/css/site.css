@@ -271,6 +271,7 @@ svg { display: block; }
   line-height: 1.65;
   max-width: 15em;
   text-wrap: balance;
+  word-break: keep-all;
 }
 
 .door-arrow {

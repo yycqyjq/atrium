@@ -53,7 +53,7 @@
   --font-mono: "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
 
   /* ---- 字号(7 档) ---- */
-  --fs-2xs: 12px;
+  --fs-2xs: 12.5px;
   --fs-xs: 13px;
   --fs-sm: 14px;
   --fs-base: 15px;
@@ -94,8 +94,8 @@
    ============================================================ */
 
 :root[data-theme="dark"] {
-  --bg-sidebar: #0b0a07;
-  --bg-sidebar: oklch(14.5% 0.008 95);
+  --bg-sidebar: #090805;
+  --bg-sidebar: oklch(13.5% 0.008 95);
   --bg-content: #1a1814;
   --bg-content: oklch(21% 0.009 95);
   --bg-raised: #22201b;
@@ -124,8 +124,8 @@
   --on-accent: #0a0906;
   --on-accent: oklch(14% 0.008 95);
 
-  --motif: #7f7d75;
-  --motif: oklch(59% 0.012 95);
+  --motif: #8e8c84;
+  --motif: oklch(64% 0.012 95);
 
   --wash: rgba(233, 230, 221, 0.06);
 }
