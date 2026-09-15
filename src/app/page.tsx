@@ -2,16 +2,19 @@ import DoorBand from "@/components/home/DoorBand";
 import Greeting from "@/components/home/Greeting";
 import QuickLinks from "@/components/home/QuickLinks";
 import RecentPosts from "@/components/home/RecentPosts";
+import RecentShots from "@/components/home/RecentShots";
 import Skylight from "@/components/home/Skylight";
 import Footer from "@/components/shell/Footer";
 import { getRecentPosts } from "@/lib/content";
+import { recentShots } from "@/lib/shots";
 import { githubProfileUrl } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [{ items, reason }, githubUrl] = await Promise.all([
+  const [{ items, reason }, { shots }, githubUrl] = await Promise.all([
     getRecentPosts(4),
+    recentShots(8).catch(() => ({ shots: [] })),
     githubProfileUrl(),
   ]);
 
@@ -29,6 +32,11 @@ export default async function HomePage() {
           items={items}
           reason={reason}
           className="motion-safe:animate-rise [animation-delay:240ms]"
+        />
+
+        <RecentShots
+          shots={shots}
+          className="motion-safe:animate-rise [animation-delay:280ms]"
         />
 
         <QuickLinks
