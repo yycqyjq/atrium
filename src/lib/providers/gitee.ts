@@ -123,7 +123,17 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
 
     rawUrl(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
-      return `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`;
+      const primary = `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`;
+      return primary;
+    },
+
+    rawUrlCandidates(filePath: string) {
+      const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
+      return [
+        // 主源：jsDelivr 国内线路；备用：Gitee raw
+        `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`,
+        `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`,
+      ];
     },
   };
 }

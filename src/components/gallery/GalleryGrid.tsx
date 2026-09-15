@@ -3,6 +3,35 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryImage } from "@/lib/gallery";
 
+/** 带备用源降级的图片：主源加载失败时自动依次切换 fallbackUrls */
+function SmartImage({
+  src,
+  fallbacks,
+  alt,
+  loading,
+  className,
+}: {
+  src: string;
+  fallbacks: string[];
+  alt: string;
+  loading?: "lazy" | "eager";
+  className?: string;
+}) {
+  const [idx, setIdx] = useState(0);
+  const chain = [src, ...fallbacks];
+  const current = chain[Math.min(idx, chain.length - 1)] ?? src;
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={current}
+      alt={alt}
+      loading={loading}
+      className={className}
+      onError={() => setIdx((i) => (i < chain.length - 1 ? i + 1 : i))}
+    />
+  );
+}
+
 /**
  * 画廊图片墙 + 灯箱：
  * 点击打开大图，Esc / 点击背景关闭，← → 或滑动翻页，可查看原图。
@@ -48,12 +77,15 @@ export default function GalleryGrid({
     };
   }, [current, close, step]);
 
-  // 预加载相邻两张，翻页更顺
+  // 预加载相邻两张（含备用源链），翻页更顺
   useEffect(() => {
     if (current == null) return;
     for (const d of [-1, 1]) {
-      const probe = new window.Image();
-      probe.src = images[(current + d + images.length) % images.length].url;
+      const next = images[(current + d + images.length) % images.length];
+      for (const url of [next.url, ...next.fallbackUrls]) {
+        const probe = new window.Image();
+        probe.src = url;
+      }
     }
   }, [current, images]);
 
@@ -81,9 +113,9 @@ export default function GalleryGrid({
             title={image.name}
           >
             {/* 图片直接来自仓库原始文件（raw），按需懒加载 */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SmartImage
               src={image.url}
+              fallbacks={image.fallbackUrls}
               alt={image.name}
               loading="lazy"
               className="block aspect-[4/3] w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
@@ -101,17 +133,17 @@ export default function GalleryGrid({
           onTouchStart={onTouchStart}
           onTouchEnd={onTouchEnd}
         >
-          <div className="flex items-center justify-between gap-3 px-5 py-3.5 text-white/85">
-            <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em]">{active.name}</p>
+          <div className="flex items-center justify-between gap-3 px-5 py-3.5 text-white">
+            <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">{active.name}</p>
             <div className="flex shrink-0 items-center gap-4">
               <span className="text-[12px] tabular-nums">
                 {current! + 1} / {images.length}
               </span>
               <a
-                href={active.url}
+                href={active.fallbackUrls[active.fallbackUrls.length - 1] ?? active.url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-[12px] underline decoration-white/30 underline-offset-4 transition-colors duration-150 hover:text-white"
+                className="text-[12px] text-white/85 underline decoration-white/40 underline-offset-4 transition-colors duration-150 hover:text-white"
               >
                 原图
               </a>
@@ -120,7 +152,7 @@ export default function GalleryGrid({
                 type="button"
                 onClick={close}
                 aria-label="关闭"
-                className="rounded-full p-1.5 text-white/80 transition-colors duration-150 hover:bg-white/10 hover:text-white"
+                className="rounded-full p-1.5 text-white ring-1 ring-white/40 transition-colors duration-150 hover:bg-white/10 hover:text-white"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -143,10 +175,10 @@ export default function GalleryGrid({
               if (e.target === e.currentTarget) close();
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <SmartImage
               key={active.url}
               src={active.url}
+              fallbacks={active.fallbackUrls}
               alt={active.name}
               className="max-h-full max-w-full rounded-ctl object-contain shadow-2xl"
             />

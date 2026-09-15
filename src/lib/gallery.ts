@@ -5,7 +5,7 @@ import type { ContentReason } from "@/lib/content";
 
 export type { ContentReason };
 
-export type GalleryImage = { name: string; path: string; url: string };
+export type GalleryImage = { name: string; path: string; url: string; fallbackUrls: string[] };
 export type GalleryAlbum = { name: string; path: string };
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
@@ -60,7 +60,10 @@ export async function listGallery(album?: string): Promise<{
     const images = entries
       .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
       .slice(0, IMAGE_CAP)
-      .map((e) => ({ name: e.name, path: e.path, url: provider.rawUrl(e.path) }));
+      .map((e) => {
+        const candidates = provider.rawUrlCandidates(e.path);
+        return { name: e.name, path: e.path, url: candidates[0], fallbackUrls: candidates.slice(1) };
+      });
 
     return { albums, images, current: album ?? null, dir: rootDir, reason: "ok" };
   } catch (err) {

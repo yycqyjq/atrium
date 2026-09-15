@@ -116,7 +116,18 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
 
     rawUrl(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
-      return `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${encodeURIComponent(cfg.branch)}/${encoded}`;
+      const primary = `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`;
+      return primary;
+    },
+
+    rawUrlCandidates(filePath: string) {
+      const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
+      return [
+        // 主源：jsDelivr 国内线路（对 raw 不稳定的网络环境更可靠；分支内容有短时缓存）
+        `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`,
+        // 备用：GitHub raw（永远最新，但部分网络环境不稳）
+        `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${encodeURIComponent(cfg.branch)}/${encoded}`,
+      ];
     },
   };
 }

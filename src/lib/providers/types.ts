@@ -64,4 +64,7 @@ export interface RepoProvider {
 
   /** 由仓库路径构建可直接访问的原始文件 URL（用于图片等静态资源） */
   rawUrl(filePath: string): string;
+
+  /** 原始文件的候选源列表（第一个为主源，后续为降级备用；至少一个） */
+  rawUrlCandidates(filePath: string): string[];
 }
