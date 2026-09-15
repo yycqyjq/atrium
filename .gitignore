@@ -1,7 +1,18 @@
-.DS_Store
+# 依赖与构建产物
 node_modules/
+.next/
+out/
 dist/
-*.log
-*.local
+
+# 运行时数据与密钥（config.json 可能包含访问令牌）
+data/config.json
 .env
 .env.*
+
+# 本机证书（说明见 certs/README.md）
+certs/*.pem
+
+# 系统与日志
+.DS_Store
+*.log
+*.local

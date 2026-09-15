@@ -1,81 +1,106 @@
 # 中庭 Atrium
 
-个人数字空间「中庭」的重构第一步：新的首页、导航与设计 tokens。
+个人数字空间「中庭」：一个中心，四间房。全栈 Next.js 实现。
 
-## 背景
+- **中庭**：个人主页，身份、房间入口与最近动态
+- **书房**：文章与长文（读）
+- **画廊**：照片与影像（看）
+- **工具房**：书签与常用工具（用）
+- **陈列廊**：组件与实验（造）
 
-由 ark-admin（React 18 + Vite + Ant Design 的个人中枢）重构而来，目标实现栈为 Next.js（App Router）。第一步先在轻量原型上把方向立住：一个中心「中庭」，四间房围绕展开。
+`design/` 目录是重构前期的静态方向样板（视觉基准）；本工程是它落地到真实代码的实现。
 
-- **中庭**：个人主页，身份与最近动态
-- **书房**：文章与长文（已开放样板）
-- **画廊**：照片与影像（布置中）
-- **工具房**：书签与常用工具（布置中）
-- **陈列廊**：组件与实验（布置中）
+## 技术栈
 
-## 预览
+- **框架**：Next.js 16（App Router）+ React 19，全栈一体（原 Koa 后端的职责由 Route Handlers 承接）
+- **样式**：Tailwind CSS v4（`src/app/globals.css` 中的 `@theme` 定义了全部设计 tokens）
+- **语言**：TypeScript（严格模式）
+- **桌面端**：Electron 壳内启动本地 Next 服务（后续接入，`next.config.ts` 已开启 `standalone` 输出）
 
-不依赖构建工具，直接双击打开，或在终端运行：
+## 快速开始
 
-    open index.html
+```bash
+pnpm install
+pnpm dev          # 开发：http://localhost:3000
+pnpm build        # 构建
+pnpm start        # 生产：http://localhost:3000
+```
+
+要求 Node.js 22+。桌面端集成前，直接用浏览器访问即可。
 
 ## 目录结构
 
-    atrium/
-    ├── index.html            中庭（首页）
-    ├── study.html            书房
-    ├── gallery.html          画廊
-    ├── tools.html            工具房
-    ├── atelier.html          陈列廊
-    ├── assets/
-    │   ├── css/
-    │   │   ├── tokens.css    设计 tokens（色板 / 字体 / 间距 / 动效）
-    │   │   └── site.css      布局与组件
-    │   └── js/
-    │       └── app.js        主题切换 / 问候语 / 书房筛选
-    ├── docs/
-    │   └── 命名与重构蓝图-V1.html
-    ├── README.md
-    └── .gitignore
+```
+atrium/
+├── src/
+│   ├── app/                  页面与 API（App Router）
+│   │   ├── page.tsx          中庭（首页）
+│   │   ├── study|gallery|tools|atelier/page.tsx  四间房
+│   │   └── api/
+│   │       ├── providers/    内容源清单与配置状态
+│   │       ├── config/       站点配置读写（合并式，永不整体覆盖）
+│   │       └── posts/        文章列表（服务端缓存 + 降级语义）
+│   ├── components/
+│   │   ├── shell/            侧栏、主题切换、页脚
+│   │   ├── home/             首页区块（问候、天井、四扇门、列表、常用）
+│   │   └── RoomStub.tsx      房间占位组件（迁移中状态）
+│   └── lib/
+│       ├── config.ts         配置解析（环境变量 > data/config.json）
+│       ├── content.ts        内容服务（列表、缓存、降级）
+│       └── providers/        内容源抽象（GitHub / Gitee / 可扩展）
+├── design/                   静态方向样板（视觉基准，可直接双击浏览）
+├── data/                     运行时数据（config.json 不进 git）
+└── next.config.ts
+```
 
-## 设计 tokens
+## 配置内容源
 
-- 色板：暖纸系中性色 + 单一松绿强调色，oklch 定义，含亮暗两套，对比度全部实测（正文 ≥ 4.5:1）
-- 字体：衬线做标题（Songti SC 体系），无衬线做正文与界面，等宽做日期与元信息
-- 圆角统一 8px（头像为圆形）；分隔只用 1px hairline；无阴影
-- 亮暗双主题：首访跟随系统，侧栏底部按钮手动切换（演示性质，跨页记忆随正式应用落地）
+读取公开仓库不需要令牌；写入（发文章、传图）需要。优先级：**环境变量 > `data/config.json`**。
 
-迁移到 React 时，`assets/css/tokens.css` 可直接复用：CSS 自定义属性与设计变量一一对应。
-
-## 迁移对照（ark-admin → 中庭）
-
-| 现状 | 目标 |
+| 内容源 | 环境变量 |
 | --- | --- |
-| 顶部导航（六个平级菜单） | 左侧廊道（中庭 / 书房 / 画廊 / 工具房 / 陈列廊） |
-| 首页（文章 + 工具杂烩） | 中庭（身份、房间入口、近期文章、常用） |
-| Portfolio（工具 / 趋势 / 照片混装） | 工具房 / 画廊 / 书房 各自归位 |
-| GitHub 趋势挂在 Portfolio 下 | 并入书房，作为「在读 / 风向」 |
-| Ant Design 默认蓝 | 中庭 tokens（本目录） |
+| GitHub | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN` |
+| Gitee | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN` |
 
-## 说明
+未配置时首页显示设计好的空态；配置后自动出现最近文章。也可以直接 `POST /api/config` 写入本地配置（文件权限 0600，且不会被 git 跟踪）。
 
-- 文章列表与常用链接为排版示例，接入 GitHub 数据后显示真实内容
-- 画廊、工具房、陈列廊为「布置中」状态页，将按新骨架逐个落位
-- 登录、设置等应用逻辑留在正式迁移阶段
+## 常见问题
 
-## 改哪里（快速指引）
+**抓取仓库失败，报 `UNABLE_TO_VERIFY_LEAF_SIGNATURE`？**
 
-| 想改什么 | 动哪个文件 |
-| --- | --- |
-| 颜色、字号、间距、圆角、动效 | `assets/css/tokens.css` |
-| 布局与组件样式 | `assets/css/site.css` |
-| 页面文案与列表内容 | 对应页面 `.html`（index / study / gallery / tools / atelier） |
-| 导航项与侧栏 | 各页面里的 `.sidebar` 区块（5 个页面需同步） |
-| 主题切换、问候语、筛选逻辑 | `assets/js/app.js` |
+本机有对 GitHub 做代理/加速的工具（如 Watt Toolkit）时，Node 不信任其自签根证书。
+按 `certs/README.md` 导出证书后，改用 `pnpm dev:cert` / `pnpm start:cert` 启动即可。
 
-## 下一步
+**首页没有文章？**
 
-1. 书房接入真实文章数据
-2. 画廊模块迁移
-3. 工具房模块迁移
-4. 陈列廊模块迁移
-5. 回填 Next.js 应用与 Electron 壳
+- 未配置内容源时会显示设计好的空态；配置后自动出现最近文章。
+- 仓库是私有的：读取同样需要 `GITHUB_TOKEN`。
+
+## 设计系统
+
+视觉完全来自 `design/` 样板的 tokens（暖纸底 + 松绿强调色，双主题，oklch 定义）。
+在 Tailwind v4 里以 CSS 变量 + `@theme inline` 暴露：`bg-surface`、`text-ink-2`、`border-line`、`text-accent` 等工具类直接可用；
+深色主题挂在 `<html data-theme="dark">` 上，首帧前由内联脚本决定（支持记忆与 `?theme=dark` 调试参数）。
+
+## 扩展指南
+
+**新增内容源（如 GitLab / Gitea）**
+
+1. 在 `src/lib/providers/` 新建实现文件，对齐 `RepoProvider` 接口（`types.ts`）；
+2. 在 `PROVIDER_KEYS` 登记 key；
+3. 到 `providers/index.ts` 的 `FACTORIES` 注册。
+   完成这三步，首页、列表、后续编辑器等所有功能自动获得对新数据源的支持，无需改动业务代码。
+
+**新增房间页面**
+
+1. `src/app/<room>/page.tsx` 建页面；
+2. 在 `src/components/shell/Sidebar.tsx` 的 `rooms` 数组加一项（含图标与单字标签）。
+
+## 路线
+
+- [x] 项目命名与重构蓝图（`design/docs/`）
+- [x] 静态方向样板（`design/`）
+- [x] Next.js 骨架：首页 + 四间房路由 + 内容源抽象
+- [ ] 书房：列表与阅读页接通真实数据
+- [ ] 画廊 / 工具房 / 陈列廊逐间迁移
+- [ ] Electron 壳（本地服务模式）与打包
