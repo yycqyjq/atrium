@@ -83,6 +83,7 @@ atrium/
 | GitHub | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN` |
 | Gitee | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN` |
 | 画廊（可选独立仓库） | `GITHUB_GALLERY_OWNER` `GITHUB_GALLERY_REPO` `GITHUB_GALLERY_BRANCH`（Gitee 前缀替换为 `GITEE_GALLERY_`） |
+| 工具清单（可选） | `ATRIUM_TOOLS_FILE`（缺省 `admin/tools.json`，兼容旧版 ark-admin 格式；以 `/` 或 `./` 开头时读本地文件） |
 
 用 `ATRIUM_DEFAULT_PROVIDER` 可指定默认内容源（缺省 `github`），例如切到 Gitee：`ATRIUM_DEFAULT_PROVIDER=gitee`。
 画廊目录可用 `ATRIUM_GALLERY_DIR` 指定（缺省 `images/`）；不设 `GITHUB_GALLERY_*` 时画廊跟随主仓库。
@@ -130,5 +131,6 @@ atrium/
 - [x] 阅读体验：代码高亮（双主题）+ 文章目录（锚点与滚动定位）
 - [x] Electron 壳（本地服务模式：自动拉起本地服务、窗口加载中庭）
 - [x] 画廊：相册与图片墙（真实数据）
-- [ ] 工具房 / 陈列廊迁移
+- [x] 工具房：书签清单（兼容 admin/tools.json）
+- [x] 陈列廊：设计系统展台（色板 / 排印 / 组件）
 - [x] 桌面安装包（独立 .app + 应用图标；dmg 可用 desktop:dist）
