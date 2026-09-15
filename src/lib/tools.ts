@@ -75,7 +75,8 @@ export async function listTools(): Promise<{
         return { groups: [], count: 0, reason: "not-configured", source };
       }
       const f = await provider.getFile(file);
-      raw = f.content;
+      // contents API 返回 base64，需要解码；本地文件分支已是文本
+      raw = Buffer.from(f.content, "base64").toString("utf8");
     }
   } catch (err) {
     if (err instanceof ProviderError && err.status === 404) {

@@ -64,8 +64,8 @@ export default async function ToolsPage() {
                         rel="noreferrer"
                         className="group block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
                       >
-                        <span className="mb-0.5 flex items-center justify-between gap-3">
-                          <span className="font-medium tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
+                        <span className="mb-0.5 flex items-start justify-between gap-3">
+                          <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
                             {tool.name}
                           </span>
                           <svg
@@ -86,7 +86,7 @@ export default async function ToolsPage() {
                           {hostOf(tool.url)}
                         </span>
                         {tool.description ? (
-                          <span className="mt-1.5 block text-[13px] leading-relaxed text-ink-2">
+                          <span className="mt-1.5 line-clamp-2 block text-[13px] leading-relaxed text-ink-2">
                             {tool.description}
                           </span>
                         ) : null}
