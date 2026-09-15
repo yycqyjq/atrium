@@ -1,0 +1,49 @@
+# 中庭 · 部署指南（Vercel）
+
+中庭是 Next.js 应用，可以一键部署到 Vercel（免费额度足够个人使用）。
+仓库即数据库：Vercel 上的网页版和你桌面上的 App 读的是同一个 GitHub 仓库。
+
+## 一、部署步骤
+
+1. 打开 <https://vercel.com/new>，用 GitHub 账号登录（本仓库已推送到 `yycqyjq/atrium`）；
+2. Import 该仓库，Framework 自动识别为 Next.js，构建命令与输出**全部保持默认**（不用填）；
+3. 在 **Environment Variables** 中添加：
+
+| 变量 | 值（示例） | 说明 |
+| --- | --- | --- |
+| `GITHUB_OWNER` | `yycqyjq` | 内容仓库归属 |
+| `GITHUB_REPO` | `ark-notes` | 内容仓库名（文章 + admin/tools.json） |
+| `GITHUB_BRANCH` | `main` | 分支 |
+| `GITHUB_TOKEN` | `ghp_…`（可选但**强烈建议**） | 提升速率限制 60/h → 5000/h |
+| `ATRIUM_DEFAULT_PROVIDER` | `github` | 缺省即 github，可省略 |
+| `GITHUB_GALLERY_REPO` | `ark-images` | 画廊用独立仓库（不设则跟主仓库） |
+| `ATRIUM_GALLERY_DIR` | ``（留空 = 仓库根） | 画廊图片目录 |
+
+4. 点 **Deploy**，一分钟内完成，得到 `https://atrium-<你的子域>.vercel.app`。
+
+> 建议在 Vercel 项目 Settings → Domains 里绑定自己的域名（可选）。
+
+## 二、为什么建议配 GITHUB_TOKEN
+
+未配置令牌时，GitHub 匿名限额是 **60 次/小时**（按 IP 共享），部署实例与本地开发共享同一出口 IP 时会互相挤占。配置后变为 **5000 次/小时**，且按令牌计，网页版稳定得多。
+
+生成令牌：<https://github.com/settings/tokens>（Fine-grained 或 classic 均可，勾选 `repo` 中对 ark-notes / ark-images 的读权限即可）。
+
+## 三、画廊图源说明
+
+图片默认走 **jsDelivr 国内线路**（`gcore.jsdelivr.net`），加载失败自动降级到 GitHub raw。
+注意 jsDelivr 对分支内容有缓存（数小时），刚推送的新图可能短暂未更新，降级链会自动用 raw 补位。
+
+## 四、部署后验证
+
+- 打开首页：应显示中庭门厅与四间房入口；
+- `/study`：文章列表来自 ark-notes 根目录的 `.md` 文件；
+- `/gallery`：图片来自 ark-images；
+- `/tools`：书签来自 ark-notes 的 `admin/tools.json`；
+- `/api/providers`：`{"github":{"configured":true,...}}` 即接入正常。
+
+## 五、与桌面端的关系
+
+- 桌面 App（`release/mac-arm64/中庭.app`）走本地服务，数据目录在 `~/Library/Application Support/atrium-desktop/`；
+- 网页版走 Vercel，两边读同一个仓库，内容一致；
+- 桌面端配置令牌：把 `GITHUB_TOKEN` 写进 `data/config.json`（打包版在 userData/data/ 下）。
