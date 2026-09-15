@@ -4,6 +4,42 @@ import { getProvider } from "@/lib/providers";
 
 export const dynamic = "force-dynamic";
 
+/** 删除文章：DELETE /api/write?slug=<不含扩展名>，先取 sha 再删 */
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const slug = (searchParams.get("slug") ?? "").trim();
+
+  if (!/^[0-9A-Za-z\u4e00-\u9fff][0-9A-Za-z\u4e00-\u9fff _/-]*$/.test(slug) || slug.includes("..")) {
+    return NextResponse.json({ error: "slug 不合法" }, { status: 400 });
+  }
+
+  try {
+    const provider = await getProvider();
+    if (!(await provider.isConfigured())) {
+      return NextResponse.json({ error: "内容源未配置" }, { status: 400 });
+    }
+
+    const filePath = `${slug}.md`;
+    let sha: string;
+    try {
+      const existing = await provider.getFile(filePath);
+      sha = existing.sha;
+    } catch {
+      return NextResponse.json({ error: "文章不存在或已删除" }, { status: 404 });
+    }
+
+    await provider.deleteFile(filePath, `docs(study): 移除《${slug}》`, sha);
+    return NextResponse.json({ ok: true, path: filePath, requestId: randomUUID() });
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (status === 401 || status === 403) {
+      return NextResponse.json({ error: "令牌没有写入权限（需要 repo 权限）" }, { status: 502 });
+    }
+    console.warn("[write] 删除失败：", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "删除失败，请稍后再试" }, { status: 500 });
+  }
+}
+
 /**
  * 写作发布 API：新建 / 更新书房文章，直接写入配置的内容仓库。
  * 仅限本地服务使用（桌面 App / 本机开发），部署到 Vercel 前需自行加鉴权。
