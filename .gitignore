@@ -19,3 +19,6 @@ certs/*.pem
 .DS_Store
 *.log
 *.local
+
+# 探针遗留（不再使用，未跟踪即不影响构建）
+.openclaw-tmp-dist-check/
