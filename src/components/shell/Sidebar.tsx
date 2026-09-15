@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import ThemeToggle from "./ThemeToggle";
 import {
   IconBook,
@@ -28,6 +29,16 @@ function activeKey(pathname: string): string {
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [connected, setConnected] = useState(true); // 默认按已连接渲染，避免闪烁
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => {
+        const gh = d?.repos?.github;
+        setConnected(Boolean(gh?.tokenSet && gh?.owner && gh?.repo));
+      })
+      .catch(() => {});
+  }, []);
   const active = activeKey(pathname);
 
   return (
