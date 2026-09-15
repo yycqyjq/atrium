@@ -13,6 +13,7 @@
  */
 const { app, BrowserWindow, shell } = require("electron");
 const { spawn } = require("node:child_process");
+const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
@@ -103,6 +104,16 @@ app.whenReady().then(async () => {
     console.log("[electron] 本地服务就绪，创建窗口");
     await createWindow();
     console.log("[electron] 页面加载完成：", win.webContents.getURL());
+
+    // 调试/自检用：将窗口实际渲染结果保存为截图（先等入场动画结束）
+    const shotPath = process.env.ATRIUM_SHOT_PATH;
+    if (shotPath) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const image = await win.webContents.capturePage();
+      fs.writeFileSync(shotPath, image.toPNG());
+      console.log("[electron] 窗口截图已保存：", shotPath);
+    }
+
     if (SMOKE) {
       console.log("[electron] ✅ SMOKE 自检通过");
       process.exitCode = 0;
