@@ -114,9 +114,10 @@
       <li><span class="n">02</span><a href="#s2">四间房</a><span class="dots"></span></li>
       <li><span class="n">03</span><a href="#s3">写作：从一句话到一篇文章</a><span class="dots"></span></li>
       <li><span class="n">04</span><a href="#s4">图片：直传图床</a><span class="dots"></span></li>
-      <li><span class="n">05</span><a href="#s5">配置参考</a><span class="dots"></span></li>
-      <li><span class="n">06</span><a href="#s6">部署到 Vercel</a><span class="dots"></span></li>
-      <li><span class="n">07</span><a href="#s7">故障排查</a><span class="dots"></span></li>
+      <li><span class="n">05</span><a href="#s5">连接仓库（登录）</a><span class="dots"></span></li>
+      <li><span class="n">06</span><a href="#s6">配置参考</a><span class="dots"></span></li>
+      <li><span class="n">07</span><a href="#s7">部署到 Vercel</a><span class="dots"></span></li>
+      <li><span class="n">08</span><a href="#s8">故障排查</a><span class="dots"></span></li>
     </ol>
   </nav>
 
@@ -177,7 +178,19 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
   </section>
 
   <section id="s5">
-    <div class="sec-head"><span class="sec-n">05</span><h2>配置参考</h2></div>
+    <div class="sec-head"><span class="sec-n">05</span><h2>连接仓库（登录）</h2></div>
+    <p>中庭的「登录」= 连接你的 GitHub 仓库。侧边栏左下角的头像就是入口：未连接时显示虚线方块与「连接仓库」，已连接时显示用户名。</p>
+    <ol class="steps">
+      <li><span class="no">1</span><span class="tx">点击左下角用户条，进入连接仓库页。</span></li>
+      <li><span class="no">2</span><span class="tx">填写 GitHub 用户名、内容仓库名（文章与书签所在）、分支，以及访问令牌（生成入口见页内链接，勾选 repo 权限即可）。</span></li>
+      <li><span class="no">3</span><span class="tx">可选：填画廊仓库名与目录（独立图床时）。不填则画廊跟随内容仓库。</span></li>
+      <li><span class="no">4</span><span class="tx">点「保存并连接」，书房、画廊、工具房、写作台立即点亮。</span></li>
+    </ol>
+    <div class="note"><b>安全</b>：令牌只保存在本机配置文件（权限 600），页面里只写不显；线上部署的站点对访客默认只读。</div>
+  </section>
+
+  <section id="s6">
+    <div class="sec-head"><span class="sec-n">06</span><h2>配置参考</h2></div>
     <p>配置有两处：<code>data/config.json</code>（桌面端在系统数据目录 <code>~/Library/Application Support/atrium-desktop/data/</code>）与环境变量。环境变量优先。</p>
     <table>
       <tr><th>作用</th><th>变量 / 字段</th></tr>
@@ -198,8 +211,8 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
 }</code></pre>
   </section>
 
-  <section id="s6">
-    <div class="sec-head"><span class="sec-n">06</span><h2>部署到 Vercel</h2></div>
+  <section id="s7">
+    <div class="sec-head"><span class="sec-n">07</span><h2>部署到 Vercel</h2></div>
     <ol class="steps">
       <li><span class="no">1</span><span class="tx">打开 vercel.com/new，GitHub 登录，Import「atrium」。</span></li>
       <li><span class="no">2</span><span class="tx">环境变量填：<code>GITHUB_OWNER=yycqyjq</code>、<code>GITHUB_REPO=ark-notes</code>、<code>GITHUB_TOKEN=你的令牌</code>（建议加 <code>GITHUB_GALLERY_REPO=ark-images</code>）。</span></li>
@@ -209,10 +222,12 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
     <div class="note"><b>安全边界</b>：线上部署默认<strong>只读</strong>——写接口全部 403，访客无法改动你的仓库。这是机制保证，不依赖任何人记得配置。</div>
   </section>
 
-  <section id="s7">
-    <div class="sec-head"><span class="sec-n">07</span><h2>故障排查</h2></div>
+  <section id="s8">
+    <div class="sec-head"><span class="sec-n">08</span><h2>故障排查</h2></div>
     <table>
       <tr><th>现象</th><th>原因与处理</th></tr>
+      <tr><td>写作台/添加工具/上传入口不见了</td><td>未连接仓库。点侧边栏左下角「连接仓库」，配好令牌后入口全部出现。</td></tr>
+      <tr><td>画廊空但书房有文章</td><td>画廊仓库指向未配置（跟随了内容仓库）。在连接页填画廊仓库名，或配置文件写 galleryRepo。</td></tr>
       <tr><td>书房 / 工具房空</td><td>检查 config.json 的仓库指向与令牌；<code>/api/providers</code> 返回 configured:true 即接入正常。</td></tr>
       <tr><td>画廊图片偶发破图</td><td>jsDelivr 对新文件有缓存延迟（数小时），会自动恢复；也可稍后刷新触发 raw 兜底。</td></tr>
       <tr><td>写作 / 上传 403</td><td>本地出现即说明启动脚本未注入开关（正常不会发生）；线上 403 是设计行为。</td></tr>
