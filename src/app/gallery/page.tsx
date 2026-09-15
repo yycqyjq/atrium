@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import GalleryGrid from "@/components/gallery/GalleryGrid";
+import GalleryUpload from "@/components/gallery/GalleryUpload";
 import { listGallery, type ContentReason } from "@/lib/gallery";
+import { resolveGalleryConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,8 @@ export default async function GalleryPage({
   const { albums, images, current, dir, reason } = await listGallery(album);
   const viewNum = view != null ? Number.parseInt(view, 10) : Number.NaN;
   const copy = emptyCopy(reason, dir);
+  const galleryCfg = await resolveGalleryConfig();
+  const canUpload = Boolean(galleryCfg.token);
 
   return (
     <>
@@ -53,6 +57,8 @@ export default async function GalleryPage({
           </h1>
           <p className="max-w-[34em] text-ink-2">照片与影像。存放目光的地方。</p>
         </header>
+
+        {canUpload ? <GalleryUpload dir={current ?? ""} albums={albums.map((a) => a.name)} /> : null}
 
         {albums.length > 0 || current ? (
           <div className="mb-5 flex flex-wrap items-center gap-2">

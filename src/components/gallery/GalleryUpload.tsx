@@ -1,0 +1,160 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+/**
+ * 画廊上传：选择本地图片 → 直传图床仓库（GitHub Contents API）。
+ * galleryDir 可指定子目录（缺省仓库根）；文件名冲突时自动加时间戳后缀。
+ * 仅限本地服务使用。
+ */
+export default function GalleryUpload({ dir, albums }: { dir: string; albums: string[] }) {
+  const router = useRouter();
+  const [state, setState] = useState<"idle" | "uploading" | "done" | "error">("idle");
+  const [message, setMessage] = useState("");
+  const [target, setTarget] = useState(dir || "");
+  const [dragOver, setDragOver] = useState(false);
+
+  async function uploadFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setState("uploading");
+    setMessage(`准备上传 ${files.length} 张…`);
+
+    const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
+    let ok = 0;
+    const failed: string[] = [];
+
+    for (const file of Array.from(files)) {
+      if (!IMAGE_RE.test(file.name)) {
+        failed.push(`${file.name}（不是图片）`);
+        continue;
+      }
+      if (file.size > 20 * 1024 * 1024) {
+        failed.push(`${file.name}（超过 20MB）`);
+        continue;
+      }
+      try {
+        const buffer = await file.arrayBuffer();
+        let base64 = "";
+        const bytes = new Uint8Array(buffer);
+        const chunk = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunk) {
+          base64 += String.fromCharCode(...bytes.subarray(i, i + chunk));
+        }
+        const contentBase64 = btoa(base64);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: file.name,
+            contentBase64,
+            dir: target,
+          }),
+        });
+        const data = (await res.json()) as { ok?: boolean; path?: string; error?: string };
+        if (!res.ok || !data.ok) {
+          failed.push(`${file.name}（${data.error ?? "上传失败"}）`);
+          continue;
+        }
+        ok += 1;
+        setMessage(`已上传 ${ok} / ${files.length} 张…`);
+      } catch {
+        failed.push(`${file.name}（网络异常）`);
+      }
+    }
+
+    if (ok > 0 && failed.length === 0) {
+      setState("done");
+      setMessage(`已上传 ${ok} 张到 ${target || "仓库根"}。图床仓库刷新后即可在画廊看到。`);
+      router.refresh();
+    } else if (ok > 0) {
+      setState("done");
+      setMessage(`成功 ${ok} 张；失败：${failed.join("、")}`);
+      router.refresh();
+    } else {
+      setState("error");
+      setMessage(failed.join("、") || "上传失败");
+    }
+  }
+
+  const box = `rounded-ctl border border-dashed px-6 py-8 text-center transition-colors duration-200 ${
+    dragOver ? "border-accent bg-accent-soft" : "border-line-strong hover:border-accent"
+  }`;
+
+  return (
+    <div className="mb-10">
+      <div
+        className={box}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          uploadFiles(e.dataTransfer.files);
+        }}
+      >
+        {state === "uploading" ? (
+          <p className="text-[13.5px] text-ink-2">{message}</p>
+        ) : (
+          <>
+            <p className="mb-2 text-[13.5px] text-ink-2">
+              拖拽图片到这里，或
+              <label className="mx-1 cursor-pointer text-accent underline decoration-accent/40 underline-offset-4 transition-colors duration-150 hover:text-accent-hover">
+                选择文件
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={(e) => uploadFiles(e.target.files)}
+                />
+              </label>
+              直传图床仓库
+            </p>
+            <p className="text-[12px] text-ink-3">
+              支持多选，单张不超过 20MB；存入
+              <select
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                className="mx-1.5 rounded border border-line bg-raised px-1.5 py-0.5 text-[12px] text-ink-2 outline-none"
+              >
+                <option value="">仓库根</option>
+                {albums.map((album) => (
+                  <option key={album} value={album}>
+                    {album}/
+                  </option>
+                ))}
+              </select>
+              目录，文件名冲突自动加时间戳
+            </p>
+          </>
+        )}
+      </div>
+      {state === "error" || state === "done" ? (
+        <p
+          className={`mt-3 text-[12.5px] ${
+            state === "error" ? "text-accent-ink" : "text-ink-3"
+          }`}
+        >
+          {message}
+          {state === "error" ? " " : ""}
+          {state === "done" ? " " : ""}
+          <button
+            type="button"
+            onClick={() => {
+              setState("idle");
+              setMessage("");
+            }}
+            className="text-ink-3 underline decoration-line underline-offset-4 hover:text-ink-2"
+          >
+            再传一批
+          </button>
+        </p>
+      ) : null}
+    </div>
+  );
+}
