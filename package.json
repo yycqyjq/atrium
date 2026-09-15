@@ -13,8 +13,8 @@
     "desktop:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem electron electron-app/main.js",
     "desktop:smoke": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem ATRIUM_SMOKE=1 electron electron-app/main.js",
     "desktop:prepare": "node scripts/prepare-desktop.mjs",
-    "desktop:pack": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac --dir",
-    "desktop:dist": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac",
+    "desktop:pack": "next build && node scripts/prepare-desktop.mjs && node node_modules/.pnpm/electron-builder@26.15.3_electron-builder-squirrel-windows@26.15.3/node_modules/electron-builder/cli.js --mac --dir",
+    "desktop:dist": "next build && node scripts/prepare-desktop.mjs && node node_modules/.pnpm/electron-builder@26.15.3_electron-builder-squirrel-windows@26.15.3/node_modules/electron-builder/cli.js --mac",
     "typecheck": "tsc --noEmit"
   },
   "pnpm": {
