@@ -15,7 +15,7 @@
 - **框架**：Next.js 16（App Router）+ React 19，全栈一体（原 Koa 后端的职责由 Route Handlers 承接）
 - **样式**：Tailwind CSS v4（`src/app/globals.css` 中的 `@theme` 定义了全部设计 tokens）
 - **语言**：TypeScript（严格模式）
-- **桌面端**：Electron 壳内启动本地 Next 服务（后续接入，`next.config.ts` 已开启 `standalone` 输出）
+- **桌面端**：Electron 壳内启动本地 Next 服务（已接入：`pnpm desktop:cert`；`next.config.ts` 开启 `standalone` 输出）
 
 ## 快速开始
 
@@ -26,11 +26,24 @@ pnpm build        # 构建
 pnpm start        # 生产：http://localhost:3000
 ```
 
-要求 Node.js 22+。桌面端集成前，直接用浏览器访问即可。
+要求 Node.js 22+。桌面端见下文「桌面端（Electron）」一节。
 
 （可选）`node scripts/check-markdown.mjs` 可校验 Markdown 渲染流水线（raw HTML 放行 + 危险内容过滤）。
 
 > 说明：dev 脚本内置了 `WATCHPACK_POLLING=true`（文件轮询），用于规避 macOS 上文件监视句柄受限导致的 `EMFILE` 报错；如果你的环境无此问题、想关掉轮询，去掉该环境变量即可。
+
+## 桌面端（Electron）
+
+桌面壳已就位：启动时自动拉起本地服务，窗口直接加载中庭（本地服务模式，与网页版同一套代码）。
+
+```bash
+pnpm build            # 首次或代码更新后：构建 standalone 产物
+pnpm desktop:cert     # 打开桌面窗口（本机含证书的启动方式）
+pnpm desktop:smoke    # 自检：隐藏窗口启动、验证全链路后自动退出
+```
+
+- 桌面端读取的配置与网页端一致（环境变量 / `data/config.json`）；
+- 打包分发（安装包、应用图标）将在后续接入。
 
 ## 目录结构
 
@@ -108,5 +121,6 @@ atrium/
 - [x] 静态方向样板（`design/`）
 - [x] Next.js 骨架：首页 + 四间房路由 + 内容源抽象
 - [x] 书房：列表与阅读页接通真实数据（front-matter 标题/摘要/标签，Markdown 渲染）
+- [x] Electron 壳（本地服务模式：自动拉起本地服务、窗口加载中庭）
 - [ ] 画廊 / 工具房 / 陈列廊逐间迁移
-- [ ] Electron 壳（本地服务模式）与打包
+- [ ] 桌面安装包（electron-builder 与应用图标）

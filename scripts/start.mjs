@@ -48,4 +48,11 @@ const child = spawn(process.execPath, [serverEntry], {
   env,
 });
 
+// 信号转发：父进程收到终止信号时，一并结束子进程（避免端口残留）
+for (const sig of ["SIGTERM", "SIGINT", "SIGHUP"]) {
+  process.on(sig, () => {
+    if (child.exitCode === null) child.kill(sig);
+  });
+}
+
 child.on("exit", (code) => process.exit(code ?? 0));
