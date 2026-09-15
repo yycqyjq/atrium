@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import ToolsList from "@/components/tools/ToolsList";
+import ToolsAdd from "@/components/tools/ToolsAdd";
 import { listTools } from "@/lib/tools";
+import { resolveRepoConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +12,9 @@ export const metadata: Metadata = { title: "工具房" };
 
 export default async function ToolsPage() {
   const { groups, count, reason, source } = await listTools();
+  const cfg = await resolveRepoConfig("github");
+  const canWrite = source === "local" || Boolean(cfg.token);
+  const categories = groups.map((g) => g.name);
 
   const emptyCopy =
     reason === "not-configured"
@@ -32,7 +37,10 @@ export default async function ToolsPage() {
           <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
             工具房
           </h1>
-          <p className="max-w-[34em] text-ink-2">书签与常用工具。顺手就能拿到。</p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <p className="max-w-[34em] text-ink-2">书签与常用工具。顺手就能拿到。</p>
+            {canWrite ? <ToolsAdd categories={categories} /> : null}
+          </div>
         </header>
 
         {count === 0 ? (
