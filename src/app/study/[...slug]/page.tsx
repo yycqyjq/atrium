@@ -98,6 +98,24 @@ export default async function PostPage({ params }: Props) {
                 {meta.tags.map((tag) => `#${tag}`).join("  ")}
               </span>
             ) : null}
+            <Link
+              href={`/study/write?edit=${encodeURIComponent(meta.slug)}`}
+              className="group ml-auto inline-flex items-center gap-1.5 text-accent transition-colors duration-150 hover:text-accent-hover"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="size-[13px]"
+              >
+                <path d="M4 20 H8 L19 9 C19.8 8.2 19.8 7 19 6.2 L17.8 5 C17 4.2 15.8 4.2 15 5 L4 16 Z" />
+              </svg>
+              编辑
+            </Link>
           </p>
         </header>
 

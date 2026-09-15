@@ -16,7 +16,7 @@ function hostOf(url: string) {
 }
 
 export default async function ToolsPage() {
-  const { groups, count, reason } = await listTools();
+  const { groups, count, reason, source } = await listTools();
 
   const emptyCopy =
     reason === "not-configured"
@@ -96,7 +96,10 @@ export default async function ToolsPage() {
                 </ul>
               </section>
             ))}
-            <p className="text-[12.5px] tracking-[0.05em] text-ink-3">共 {count} 个工具</p>
+            <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">
+              共 {count} 个工具
+              {source === "local" ? "（本地清单）" : ""}
+            </p>
           </>
         )}
       </div>
