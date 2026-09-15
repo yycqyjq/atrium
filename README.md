@@ -28,7 +28,9 @@ pnpm start        # 生产：http://localhost:3000
 
 要求 Node.js 22+。桌面端集成前，直接用浏览器访问即可。
 
-> macOS 提示：如 `pnpm dev` 出现 `Watchpack Error ... EMFILE` 文件监视告警且启动异常，先在终端执行 `ulimit -n 4096` 再启动。
+（可选）`node scripts/check-markdown.mjs` 可校验 Markdown 渲染流水线（raw HTML 放行 + 危险内容过滤）。
+
+> 说明：dev 脚本内置了 `WATCHPACK_POLLING=true`（文件轮询），用于规避 macOS 上文件监视句柄受限导致的 `EMFILE` 报错；如果你的环境无此问题、想关掉轮询，去掉该环境变量即可。
 
 ## 目录结构
 
@@ -57,12 +59,14 @@ atrium/
 
 ## 配置内容源
 
-读取公开仓库不需要令牌；写入（发文章、传图）需要。优先级：**环境变量 > `data/config.json`**。
+读取公开仓库可匿名访问，但额度很低（GitHub 匿名约 60 次/小时，建议配置令牌提升到 5000 次/小时）；写入（发文章、传图）必须配置令牌。优先级：**环境变量 > `data/config.json`**。
 
 | 内容源 | 环境变量 |
 | --- | --- |
 | GitHub | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN` |
 | Gitee | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN` |
+
+用 `ATRIUM_DEFAULT_PROVIDER` 可指定默认内容源（缺省 `github`），例如切到 Gitee：`ATRIUM_DEFAULT_PROVIDER=gitee`。
 
 未配置时首页显示设计好的空态；配置后自动出现最近文章。也可以直接 `POST /api/config` 写入本地配置（文件权限 0600，且不会被 git 跟踪）。
 
@@ -103,6 +107,6 @@ atrium/
 - [x] 项目命名与重构蓝图（`design/docs/`）
 - [x] 静态方向样板（`design/`）
 - [x] Next.js 骨架：首页 + 四间房路由 + 内容源抽象
-- [ ] 书房：列表与阅读页接通真实数据
+- [x] 书房：列表与阅读页接通真实数据（front-matter 标题/摘要/标签，Markdown 渲染）
 - [ ] 画廊 / 工具房 / 陈列廊逐间迁移
 - [ ] Electron 壳（本地服务模式）与打包

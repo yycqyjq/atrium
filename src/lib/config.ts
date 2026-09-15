@@ -1,6 +1,6 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { PROVIDER_KEYS, type ProviderKey } from "./providers/types";
+import { PROVIDER_KEYS, isProviderKey, type ProviderKey } from "./providers/types";
 
 export type RepoConfig = {
   owner?: string;
@@ -77,6 +77,8 @@ export async function resolveRepoConfig(key: ProviderKey): Promise<ResolvedRepoC
 }
 
 export async function defaultProviderKey(): Promise<ProviderKey> {
+  const fromEnv = process.env.ATRIUM_DEFAULT_PROVIDER;
+  if (isProviderKey(fromEnv)) return fromEnv;
   return (await readStoredConfig()).defaultProvider ?? "github";
 }
 

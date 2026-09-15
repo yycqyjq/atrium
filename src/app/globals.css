@@ -134,3 +134,131 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ---------- 文章正文排版（书房阅读页） ---------- */
+
+@layer components {
+  .md-body {
+    font-size: 15px;
+    line-height: 1.85;
+    color: var(--ink);
+  }
+  .md-body > :first-child {
+    margin-top: 0;
+  }
+  .md-body h1,
+  .md-body h2,
+  .md-body h3,
+  .md-body h4 {
+    font-family: var(--font-serif);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.35;
+    margin: 1.5em 0 0.6em;
+    max-width: 30em;
+  }
+  .md-body h1 {
+    font-size: 28px;
+  }
+  .md-body h2 {
+    font-size: 23px;
+  }
+  .md-body h3 {
+    font-size: 19px;
+  }
+  .md-body h4 {
+    font-size: 16px;
+  }
+  .md-body p {
+    margin: 0.9em 0;
+    max-width: 44em;
+  }
+  .md-body a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    transition: color 150ms ease;
+  }
+  .md-body a:hover {
+    color: var(--accent-hover);
+  }
+  .md-body strong {
+    font-weight: 600;
+  }
+  .md-body ul,
+  .md-body ol {
+    margin: 0.9em 0;
+    padding-left: 1.4em;
+    max-width: 44em;
+  }
+  .md-body ul {
+    list-style: disc;
+  }
+  .md-body ol {
+    list-style: decimal;
+  }
+  .md-body li {
+    margin: 0.35em 0;
+  }
+  .md-body li::marker {
+    color: var(--ink-3);
+  }
+  .md-body blockquote {
+    margin: 1em 0;
+    padding-left: 1em;
+    border-left: 2px solid var(--line-strong);
+    color: var(--ink-2);
+    max-width: 44em;
+  }
+  .md-body code {
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    background: var(--wash);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 0.1em 0.4em;
+  }
+  .md-body pre {
+    margin: 1em 0;
+    padding: 14px 18px;
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
+  .md-body pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .md-body img {
+    max-width: 100%;
+    height: auto;
+  }
+  .md-body hr {
+    margin: 2em 0;
+    border: 0;
+    border-top: 1px solid var(--line);
+  }
+  .md-body table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+    margin: 1em 0;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  .md-body th,
+  .md-body td {
+    border: 1px solid var(--line);
+    padding: 8px 12px;
+    text-align: left;
+  }
+  .md-body th {
+    background: var(--wash);
+    font-weight: 600;
+  }
+}

@@ -58,7 +58,7 @@ export default function RecentPosts({ items, reason, className = "" }: Props) {
           {items.map((post) => (
             <li key={post.path} className="border-b border-line last:border-0">
               <Link
-                href="/study"
+                href={`/study/${post.slug}`}
                 className="grid grid-cols-[78px_minmax(0,1fr)_auto] items-start gap-[22px] rounded-ctl py-4 pr-3 transition-colors duration-150 hover:bg-wash max-xs:block max-xs:pr-0"
               >
                 <span className="flex flex-col gap-0.5 pt-[3px] text-[12.5px] leading-[1.7] text-ink-3 tabular-nums max-xs:mb-1 max-xs:flex-row max-xs:gap-2.5 max-xs:pt-0">

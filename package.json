@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "dev:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
+    "dev": "WATCHPACK_POLLING=true next dev",
+    "dev:cert": "WATCHPACK_POLLING=true NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
     "build": "next build",
     "start": "node scripts/start.mjs",
     "start:cert": "NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem node scripts/start.mjs",
@@ -13,14 +13,21 @@
   "dependencies": {
     "next": "16.3.5",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "react-markdown": "^10.1.0",
+    "rehype-raw": "^7.0.0",
+    "rehype-sanitize": "^6.0.0",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "22.20.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
+    "remark-parse": "^11.0.0",
+    "remark-rehype": "^11.1.2",
     "tailwindcss": "4.3.3",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "unified": "^11.0.5"
   }
 }

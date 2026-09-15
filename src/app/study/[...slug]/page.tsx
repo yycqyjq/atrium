@@ -1,0 +1,118 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import Footer from "@/components/shell/Footer";
+import Markdown from "@/components/study/Markdown";
+import { IconArrowRight } from "@/components/icons";
+import { getPostBySlug } from "@/lib/content";
+
+export const dynamic = "force-dynamic";
+
+type Props = { params: Promise<{ slug: string[] }> };
+
+function fullDate(ts: number | null): string {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  try {
+    const post = await getPostBySlug(slug);
+    return { title: post ? post.meta.title : "未找到文章" };
+  } catch {
+    return { title: "文章" };
+  }
+}
+
+function PostError() {
+  return (
+    <>
+      <div className="mb-[72px] flex grow flex-col">
+        <div className="mx-auto my-auto flex max-w-[480px] flex-col items-center text-center">
+          <p className="mb-3 font-serif text-[23px] font-semibold tracking-[0.03em]">
+            这篇文章暂时打不开。
+          </p>
+          <p className="mb-7 max-w-[26em] text-sm text-ink-2">
+            内容源连不上（可能是网络或访问限额），稍后再试；也可以先回书房看看别的。
+          </p>
+          <Link
+            href="/study"
+            className="inline-flex items-center gap-2 rounded-ctl border border-line-strong px-[18px] py-[9px] text-[13px] text-ink-2 transition-colors duration-150 hover:border-ink-3 hover:bg-wash hover:text-ink"
+          >
+            <IconArrowRight className="h-3.5 w-3.5 -scale-x-100" />
+            回到书房
+          </Link>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
+}
+
+export default async function PostPage({ params }: Props) {
+  const { slug } = await params;
+
+  let post: Awaited<ReturnType<typeof getPostBySlug>> = null;
+  try {
+    post = await getPostBySlug(slug);
+  } catch {
+    return <PostError />;
+  }
+  if (!post) notFound();
+
+  const { meta, body } = post;
+
+  return (
+    <>
+      <div className="mb-[72px]">
+        <header className="pt-4 pb-9">
+          <p className="mb-3 text-[12.5px] tracking-[0.1em] text-ink-3">
+            <Link href="/" className="transition-colors duration-150 hover:text-accent">
+              中庭
+            </Link>
+            {" / "}
+            <Link href="/study" className="transition-colors duration-150 hover:text-accent">
+              书房
+            </Link>
+            {meta.category ? (
+              <>
+                {" / "}
+                <span>{meta.category}</span>
+              </>
+            ) : null}
+          </p>
+          <h1 className="mb-4 max-w-[26em] font-serif text-[clamp(28px,3.6vw,38px)] font-semibold leading-[1.22] tracking-[0.02em]">
+            {meta.title}
+          </h1>
+          <p className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12.5px] text-ink-3">
+            {meta.lastModified ? (
+              <span className="tabular-nums">{fullDate(meta.lastModified)}</span>
+            ) : null}
+            {meta.tags.length > 0 ? (
+              <span className="tracking-[0.03em]">
+                {meta.tags.map((tag) => `#${tag}`).join("  ")}
+              </span>
+            ) : null}
+          </p>
+        </header>
+
+        <article className="md-body">
+          <Markdown>{body}</Markdown>
+        </article>
+
+        <div className="mt-14 border-t border-line pt-6">
+          <Link
+            href="/study"
+            className="group inline-flex items-center gap-2 text-[13px] text-ink-3 transition-colors duration-150 hover:text-accent"
+          >
+            <IconArrowRight className="h-3.5 w-3.5 -scale-x-100 transition-transform duration-150 group-hover:-translate-x-0.5" />
+            回到书房
+          </Link>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
+}
