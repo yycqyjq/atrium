@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
+import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,10 @@ const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
  * 仅限本地服务使用；公开部署前需加鉴权。
  */
 export async function POST(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   let payload: { filename?: unknown; contentBase64?: unknown; dir?: unknown };
   try {
     payload = (await request.json()) as typeof payload;

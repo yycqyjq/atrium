@@ -39,6 +39,7 @@ if (env.NODE_EXTRA_CA_CERTS && !isAbsolute(env.NODE_EXTRA_CA_CERTS)) {
   env.NODE_EXTRA_CA_CERTS = resolve(root, env.NODE_EXTRA_CA_CERTS);
 }
 env.ATRIUM_DATA_DIR = env.ATRIUM_DATA_DIR || join(root, "data");
+env.ATRIUM_ALLOW_WRITE = env.ATRIUM_ALLOW_WRITE || "1"; // 本地服务允许写作/上传
 
 // 3) 启动服务（cwd 保持项目根，配置与数据路径稳定）
 const serverEntry = join(standaloneDir, "server.js");

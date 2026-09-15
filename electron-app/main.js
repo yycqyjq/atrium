@@ -81,6 +81,7 @@ function startServer() {
     env.ATRIUM_DATA_DIR =
       env.ATRIUM_DATA_DIR ||
       (IS_PACKAGED ? path.join(app.getPath("userData"), "data") : path.join(ROOT, "data"));
+      env.ATRIUM_ALLOW_WRITE = env.ATRIUM_ALLOW_WRITE || "1"; // 桌面端开放写作
 
     serverProc = spawn(process.execPath, [plan.entry], {
       cwd: plan.cwd,

@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
+import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -60,6 +61,10 @@ async function saveToolsData(data: ToolsData, sha?: string, message = "chore(too
 
 /** 添加书签：POST { name, url, description?, category? } */
 export async function POST(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   let payload: { name?: unknown; url?: unknown; description?: unknown; category?: unknown };
   try {
     payload = (await request.json()) as typeof payload;
@@ -97,6 +102,10 @@ export async function POST(request: Request) {
 
 /** 删除书签：DELETE ?name=<名称>&url=<完整地址>；同名不同址互不影响 */
 export async function DELETE(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const name = (searchParams.get("name") ?? "").trim();
   const url = (searchParams.get("url") ?? "").trim();
@@ -134,6 +143,10 @@ export async function DELETE(request: Request) {
  *        或 { kind: "category", oldName, name }
  */
 export async function PATCH(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   let payload: {
     kind?: unknown;
     oldName?: unknown;

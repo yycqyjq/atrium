@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
+import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 
 export const dynamic = "force-dynamic";
 
 /** 删除文章：DELETE /api/write?slug=<不含扩展名>，先取 sha 再删 */
 export async function DELETE(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   const { searchParams } = new URL(request.url);
   const slug = (searchParams.get("slug") ?? "").trim();
 
@@ -48,6 +53,10 @@ export async function DELETE(request: Request) {
  * - 更新时带上 from 服务端返回的 sha，避免覆盖别人的修改
  */
 export async function POST(request: Request) {
+  if (!isWriteEnabled()) {
+    return NextResponse.json({ error: WRITE_DISABLED_MESSAGE }, { status: 403 });
+  }
+
   let payload: {
     slug?: unknown;
     title?: unknown;
