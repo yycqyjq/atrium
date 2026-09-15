@@ -10,13 +10,22 @@ import { useRouter } from "next/navigation";
 export default function ConnectDesk({
   initial,
 }: {
-  initial: { owner: string; repo: string; branch: string; tokenSet: boolean };
+  initial: {
+    owner: string;
+    repo: string;
+    branch: string;
+    tokenSet: boolean;
+    galleryRepo?: string;
+    galleryDir?: string;
+  };
 }) {
   const router = useRouter();
   const [owner, setOwner] = useState(initial.owner);
   const [repo, setRepo] = useState(initial.repo);
   const [branch, setBranch] = useState(initial.branch || "main");
   const [token, setToken] = useState("");
+  const [galleryRepo, setGalleryRepo] = useState(initial.galleryRepo ?? "");
+  const [galleryDir, setGalleryDir] = useState(initial.galleryDir ?? "");
   const [state, setState] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -36,6 +45,10 @@ export default function ConnectDesk({
             ...(token.trim() ? { token: token.trim() } : {}),
           },
         },
+        galleryRepo: galleryRepo.trim()
+          ? { owner: owner.trim(), repo: galleryRepo.trim(), branch: branch.trim() || "main" }
+          : undefined,
+        galleryDir: galleryRepo.trim() ? galleryDir.trim() : undefined,
       };
       const res = await fetch("/api/config", {
         method: "POST",
@@ -75,6 +88,26 @@ export default function ConnectDesk({
         <div>
           <label className={label} htmlFor="conn-branch">分支</label>
           <input id="conn-branch" className={field} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-gallery">画廊仓库名（可选，独立图床）</label>
+          <input
+            id="conn-gallery"
+            className={field}
+            value={galleryRepo}
+            onChange={(e) => setGalleryRepo(e.target.value)}
+            placeholder="不填则跟随内容仓库"
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-gdir">画廊目录（可选）</label>
+          <input
+            id="conn-gdir"
+            className={field}
+            value={galleryDir}
+            onChange={(e) => setGalleryDir(e.target.value)}
+            placeholder="如 images；留空 = 仓库根"
+          />
         </div>
         <div>
           <label className={label} htmlFor="conn-token">

@@ -145,6 +145,22 @@ export async function updateConfig(input: Record<string, unknown>) {
   if (Array.isArray(input.skills)) {
     next.skills = input.skills.filter((s): s is string => typeof s === "string");
   }
+  // 画廊仓库与目录（独立图床）
+  if (input.galleryRepo && typeof input.galleryRepo === "object") {
+    const gr = input.galleryRepo as Record<string, unknown>;
+    const gal = current.galleryRepo ?? { owner: "", repo: "", branch: "main" };
+    next.galleryRepo = {
+      owner: typeof gr.owner === "string" && gr.owner ? gr.owner : gal.owner,
+      repo: typeof gr.repo === "string" && gr.repo ? gr.repo : gal.repo,
+      branch: typeof gr.branch === "string" && gr.branch ? gr.branch : gal.branch || "main",
+    };
+  } else if (input.galleryRepo === "") {
+    delete next.galleryRepo;
+  }
+  if (typeof input.galleryDir === "string") {
+    next.galleryDir = input.galleryDir;
+  }
+
   const wanted = input.defaultProvider;
   if (typeof wanted === "string" && (PROVIDER_KEYS as readonly string[]).includes(wanted)) {
     next.defaultProvider = wanted as ProviderKey;

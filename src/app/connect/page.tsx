@@ -12,6 +12,16 @@ export const metadata: Metadata = { title: "连接仓库" };
 export default async function ConnectPage() {
   const cfg = await readPublicConfig();
   const gh = cfg.repos?.github ?? { owner: "", repo: "", branch: "", tokenSet: false };
+  const full = await (async () => {
+    try {
+      const { promises: fs } = await import("node:fs");
+      const path = await import("node:path");
+      const dir = process.env.ATRIUM_DATA_DIR || path.join(process.cwd(), "data");
+      return JSON.parse(await fs.readFile(path.join(dir, "config.json"), "utf8"));
+    } catch {
+      return {};
+    }
+  })();
   const connected = Boolean(gh.tokenSet && gh.owner && gh.repo);
 
   return (
@@ -41,6 +51,8 @@ export default async function ConnectPage() {
             repo: gh.repo ?? "",
             branch: gh.branch || "main",
             tokenSet: Boolean(gh.tokenSet),
+            galleryRepo: full?.galleryRepo?.repo ?? "",
+            galleryDir: full?.galleryDir ?? "",
           }}
         />
       </div>
