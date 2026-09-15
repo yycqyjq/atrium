@@ -18,6 +18,10 @@ export type StoredConfig = {
   skills?: string[];
   defaultProvider?: ProviderKey;
   repos?: Partial<Record<ProviderKey, RepoConfig>>;
+  /** 画廊独立仓库（缺省跟随主仓库） */
+  galleryRepo?: RepoConfig;
+  /** 画廊根目录（缺省 images/；空字符串 = 仓库根） */
+  galleryDir?: string;
 };
 
 const DATA_DIR = process.env.ATRIUM_DATA_DIR || path.join(process.cwd(), "data");
@@ -80,6 +84,15 @@ export async function defaultProviderKey(): Promise<ProviderKey> {
   const fromEnv = process.env.ATRIUM_DEFAULT_PROVIDER;
   if (isProviderKey(fromEnv)) return fromEnv;
   return (await readStoredConfig()).defaultProvider ?? "github";
+}
+
+/** 画廊根目录：环境变量 > config.json > 缺省 images/；空字符串表示仓库根 */
+export async function galleryDir(): Promise<string> {
+  const fromEnv = process.env.ATRIUM_GALLERY_DIR;
+  if (fromEnv != null) return fromEnv.replace(/^\/+|\/+$/g, "");
+  const stored = (await readStoredConfig()).galleryDir;
+  if (stored != null) return stored.replace(/^\/+|\/+$/g, "");
+  return "images";
 }
 
 /** 面向客户端的安全视图：绝不返回 token 原文 */
@@ -165,18 +178,21 @@ export async function githubProfileUrl(): Promise<string> {
 
 /**
  * 画廊仓库：优先 GITHUB_GALLERY_* / GITEE_GALLERY_*（按默认内容源选择前缀），
- * 未设置时落到默认内容源的主仓库。
+ * 其次 config.json 的 galleryRepo，未设置时落到默认内容源的主仓库。
  */
 export async function resolveGalleryConfig(): Promise<{ provider: ProviderKey } & ResolvedRepoConfig> {
   const provider = await defaultProviderKey();
   const base = await resolveRepoConfig(provider);
+  const stored = await readStoredConfig();
+  const gallery = stored.galleryRepo ?? {};
   const prefix = provider === "gitee" ? "GITEE_GALLERY" : "GITHUB_GALLERY";
-  const pick = (envName: string, fallback: string) => (process.env[envName] ?? "").trim() || fallback;
+  const pick = (envName: string, storedValue?: string, fallback?: string) =>
+    (process.env[envName] ?? storedValue ?? fallback ?? "").trim();
   return {
     provider,
-    owner: pick(`${prefix}_OWNER`, base.owner),
-    repo: pick(`${prefix}_REPO`, base.repo),
-    branch: pick(`${prefix}_BRANCH`, base.branch),
-    token: base.token,
+    owner: pick(`${prefix}_OWNER`, gallery.owner, base.owner),
+    repo: pick(`${prefix}_REPO`, gallery.repo, base.repo),
+    branch: pick(`${prefix}_BRANCH`, gallery.branch, base.branch) || "main",
+    token: pick(`${prefix}_TOKEN`, gallery.token, base.token),
   };
 }

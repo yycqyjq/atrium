@@ -1,4 +1,4 @@
-import { resolveGalleryConfig } from "@/lib/config";
+import { resolveGalleryConfig, galleryDir } from "@/lib/config";
 import { getProvider } from "@/lib/providers";
 import { ProviderError } from "@/lib/providers/types";
 import type { ContentReason } from "@/lib/content";
@@ -24,7 +24,7 @@ export async function listGallery(album?: string): Promise<{
   dir: string;
   reason: ContentReason;
 }> {
-  const rootDir = (process.env.ATRIUM_GALLERY_DIR ?? "images").replace(/^\/+|\/+$/g, "");
+  const rootDir = await galleryDir();
 
   try {
     const cfg = await resolveGalleryConfig();
