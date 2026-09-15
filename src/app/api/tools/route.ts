@@ -25,11 +25,40 @@ function parseTools(raw: string): ToolsData | null {
   }
 }
 
-/**
- * 添加书签：POST { name, url, description?, category? }
- * 写入内容仓库的 admin/tools.json（与旧版 ark-admin 同格式）；
- * ATRIUM_TOOLS_FILE 为本地文件时直接写本地。仅限本地服务使用。
- */
+/** 读取清单内容与 sha（仓库或本地文件），不存在时返回空数据 */
+async function loadToolsData(): Promise<{ data: ToolsData; sha?: string }> {
+  const file = (process.env.ATRIUM_TOOLS_FILE ?? DEFAULT_FILE).trim() || DEFAULT_FILE;
+  if (isLocalPath(file)) {
+    try {
+      const raw = await fs.readFile(path.resolve(file), "utf8");
+      return { data: parseTools(raw) ?? { categories: [], items: [] } };
+    } catch {
+      return { data: { categories: [], items: [] } };
+    }
+  }
+  const provider = await getProvider();
+  if (!(await provider.isConfigured())) throw new Error("not-configured");
+  try {
+    const f = await provider.getFile(file);
+    return { data: parseTools(Buffer.from(f.content, "base64").toString("utf8")) ?? { categories: [], items: [] }, sha: f.sha || undefined };
+  } catch {
+    return { data: { categories: [], items: [] } }; // 文件不存在 → 首次创建
+  }
+}
+
+async function saveToolsData(data: ToolsData, sha?: string, message = "chore(tools): 更新清单"): Promise<void> {
+  const file = (process.env.ATRIUM_TOOLS_FILE ?? DEFAULT_FILE).trim() || DEFAULT_FILE;
+  const content = `${JSON.stringify(data, null, 2)}\n`;
+  if (isLocalPath(file)) {
+    await fs.mkdir(path.dirname(path.resolve(file)), { recursive: true });
+    await fs.writeFile(path.resolve(file), content, "utf8");
+    return;
+  }
+  const provider = await getProvider();
+  await provider.putFile(file, Buffer.from(content, "utf8").toString("base64"), message, sha);
+}
+
+/** 添加书签：POST { name, url, description?, category? } */
 export async function POST(request: Request) {
   let payload: { name?: unknown; url?: unknown; description?: unknown; category?: unknown };
   try {
@@ -41,63 +70,20 @@ export async function POST(request: Request) {
   const name = typeof payload.name === "string" ? payload.name.trim() : "";
   const url = typeof payload.url === "string" ? payload.url.trim() : "";
   const description = typeof payload.description === "string" ? payload.description.trim() : "";
-  const category = typeof payload.category === "string" ? payload.category.trim() : "未分类";
+  const category = typeof payload.category === "string" && payload.category.trim() ? payload.category.trim() : "未分类";
 
   if (!name) return NextResponse.json({ error: "缺少名称" }, { status: 400 });
   if (!/^https?:\/\//i.test(url)) return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
 
-  const file = (process.env.ATRIUM_TOOLS_FILE ?? DEFAULT_FILE).trim() || DEFAULT_FILE;
-  const local = isLocalPath(file);
-
   try {
-    let data: ToolsData = { categories: [], items: [] };
-    let sha: string | undefined;
-
-    if (local) {
-      try {
-        const raw = await fs.readFile(path.resolve(file), "utf8");
-        data = parseTools(raw) ?? data;
-      } catch {
-        data = { categories: [], items: [] };
-      }
-    } else {
-      const provider = await getProvider();
-      if (!(await provider.isConfigured())) {
-        return NextResponse.json({ error: "内容源未配置" }, { status: 400 });
-      }
-      try {
-        const f = await provider.getFile(file);
-        sha = f.sha || undefined;
-        data = parseTools(Buffer.from(f.content, "base64").toString("utf8")) ?? data;
-      } catch {
-        data = { categories: [], items: [] }; // 文件不存在 → 首次创建
-      }
-    }
-
-    // 去重：同名且同 URL 已存在则拒绝
-    const exists = data.items.some(
-      (t) => String(t.name ?? "") === name && String(t.url ?? "") === url,
-    );
+    const { data, sha } = await loadToolsData();
+    const exists = data.items.some((t) => String(t.name ?? "") === name && String(t.url ?? "") === url);
     if (exists) return NextResponse.json({ error: "同名同地址的工具已存在" }, { status: 409 });
 
     if (!data.categories.includes(category)) data.categories.push(category);
     data.items.push({ name, url, description, category });
 
-    const content = `${JSON.stringify(data, null, 2)}\n`;
-
-    if (local) {
-      await fs.mkdir(path.dirname(path.resolve(file)), { recursive: true });
-      await fs.writeFile(path.resolve(file), content, "utf8");
-    } else {
-      const provider = await getProvider();
-      await provider.putFile(
-        file,
-        Buffer.from(content, "utf8").toString("base64"),
-        `feat(tools): 添加「${name}」`,
-        sha,
-      );
-    }
-
+    await saveToolsData(data, sha, `feat(tools): 添加「${name}」`);
     return NextResponse.json({ ok: true, total: data.items.length, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -106,5 +92,39 @@ export async function POST(request: Request) {
     }
     console.warn("[tools] 添加失败：", err instanceof Error ? err.message : err);
     return NextResponse.json({ error: "添加失败，请稍后再试" }, { status: 500 });
+  }
+}
+
+/** 删除书签：DELETE ?name=<名称>&url=<完整地址>；同名不同址互不影响 */
+export async function DELETE(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const name = (searchParams.get("name") ?? "").trim();
+  const url = (searchParams.get("url") ?? "").trim();
+
+  if (!name || !url) {
+    return NextResponse.json({ error: "缺少 name 或 url 参数" }, { status: 400 });
+  }
+
+  try {
+    const { data, sha } = await loadToolsData();
+    const before = data.items.length;
+    data.items = data.items.filter((t) => !(String(t.name ?? "") === name && String(t.url ?? "") === url));
+    if (data.items.length === before) {
+      return NextResponse.json({ error: "未找到匹配的书签" }, { status: 404 });
+    }
+
+    // 清理不再使用的空分类
+    const used = new Set(data.items.map((t) => String(t.category ?? "未分类")));
+    data.categories = data.categories.filter((c) => used.has(c));
+
+    await saveToolsData(data, sha, `chore(tools): 移除「${name}」`);
+    return NextResponse.json({ ok: true, total: data.items.length });
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (status === 401 || status === 403) {
+      return NextResponse.json({ error: "令牌没有写入权限（需要 repo 权限）" }, { status: 502 });
+    }
+    console.warn("[tools] 删除失败：", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "删除失败，请稍后再试" }, { status: 500 });
   }
 }
