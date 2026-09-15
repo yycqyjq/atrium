@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
+import GalleryGrid from "@/components/gallery/GalleryGrid";
 import { listGallery, type ContentReason } from "@/lib/gallery";
 
 export const dynamic = "force-dynamic";
@@ -29,10 +30,11 @@ function emptyCopy(reason: ContentReason, dir: string) {
 export default async function GalleryPage({
   searchParams,
 }: {
-  searchParams: Promise<{ album?: string }>;
+  searchParams: Promise<{ album?: string; view?: string }>;
 }) {
-  const { album } = await searchParams;
+  const { album, view } = await searchParams;
   const { albums, images, current, dir, reason } = await listGallery(album);
+  const viewNum = view != null ? Number.parseInt(view, 10) : Number.NaN;
   const copy = emptyCopy(reason, dir);
 
   return (
@@ -87,27 +89,7 @@ export default async function GalleryPage({
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
-              {images.map((image) => (
-                <a
-                  key={image.path}
-                  href={image.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group block overflow-hidden rounded-ctl border border-line transition-colors duration-200 hover:border-line-strong"
-                  title={image.name}
-                >
-                  {/* 图片直接来自仓库原始文件（raw），按需懒加载 */}
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.url}
-                    alt={image.name}
-                    loading="lazy"
-                    className="block aspect-[4/3] w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
-                  />
-                </a>
-              ))}
-            </div>
+            <GalleryGrid images={images} initialView={Number.isInteger(viewNum) ? viewNum : undefined} />
             <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">共 {images.length} 张</p>
           </>
         )}
