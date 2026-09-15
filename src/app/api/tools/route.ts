@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
+import { ProviderError } from "@/lib/providers/types";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 
 export const dynamic = "force-dynamic";
