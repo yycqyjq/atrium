@@ -5,6 +5,9 @@ import Sidebar from "@/components/shell/Sidebar";
 export const metadata: Metadata = {
   title: { default: "中庭", template: "%s - 中庭" },
   description: "中庭，个人数字空间。文章、画廊、工具与实验，共居一室。",
+  alternates: {
+    types: { "application/rss+xml": "/rss.xml" },
+  },
 };
 
 /**
