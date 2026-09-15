@@ -28,6 +28,8 @@ pnpm start        # 生产：http://localhost:3000
 
 要求 Node.js 22+。桌面端集成前，直接用浏览器访问即可。
 
+> macOS 提示：如 `pnpm dev` 出现 `Watchpack Error ... EMFILE` 文件监视告警且启动异常，先在终端执行 `ulimit -n 4096` 再启动。
+
 ## 目录结构
 
 ```
