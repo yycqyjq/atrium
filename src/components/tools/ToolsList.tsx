@@ -19,6 +19,47 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const [editCategory, setEditCategory] = useState<string | null>(null);
+  const [categoryName, setCategoryName] = useState("");
+  const [editTool, setEditTool] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", url: "", description: "", category: "" });
+
+  async function saveEdit() {
+    const res = await fetch("/api/tools", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "tool", ...editForm }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string };
+    if (!res.ok || !data.ok) {
+      setNotice({ kind: "error", text: data.error ?? "保存失败" });
+      setTimeout(() => setNotice(null), 3000);
+      return;
+    }
+    setEditTool(null);
+    setNotice({ kind: "ok", text: `已更新「${editForm.name}」` });
+    setTimeout(() => setNotice(null), 3000);
+    router.refresh();
+  }
+
+  async function renameCategory() {
+    const oldName = editCategory ?? "";
+    const res = await fetch("/api/tools", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ kind: "category", oldName, name: categoryName.trim() }),
+    });
+    const data = (await res.json()) as { ok?: boolean; error?: string };
+    if (!res.ok || !data.ok) {
+      setNotice({ kind: "error", text: data.error ?? "重命名失败" });
+      setTimeout(() => setNotice(null), 3000);
+      return;
+    }
+    setEditCategory(null);
+    setNotice({ kind: "ok", text: `分类已重命名为「${categoryName.trim()}」` });
+    setTimeout(() => setNotice(null), 3000);
+    router.refresh();
+  }
 
   async function remove(name: string, url: string) {
     const key = `${name}|${url}`;
@@ -84,7 +125,8 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
         </div>
       ) : (
         <>
-          {filtered.map((group) => (
+          {filtered.map((group) => {
+            return (
             <section key={group.name} className="mb-10">
               <div className="mb-4 flex items-baseline justify-between border-b border-line pb-3">
                 <h2 className="font-serif text-[17px] tracking-[0.02em]">{group.name}</h2>
@@ -95,7 +137,45 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                   const key = `${tool.name}|${tool.url}`;
                   return (
                     <li key={`${tool.category}/${tool.name}`}>
-                      {confirmDelete === key ? (
+                      {editTool === key ? (
+                        <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
+                          <p className="mb-2 text-[12px] tracking-[0.08em] text-accent-ink">编辑工具</p>
+                          <input
+                            value={editForm.name}
+                            onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[13px] outline-none focus:border-accent"
+                            placeholder="名称"
+                          />
+                          <input
+                            value={editForm.url}
+                            onChange={(e) => setEditForm((f) => ({ ...f, url: e.target.value }))}
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none focus:border-accent"
+                            placeholder="地址"
+                          />
+                          <input
+                            value={editForm.description}
+                            onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none focus:border-accent"
+                            placeholder="描述"
+                          />
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={saveEdit}
+                              className="rounded-ctl bg-accent px-3 py-1.5 text-[12px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover"
+                            >
+                              保存
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setEditTool(null)}
+                              className="rounded-ctl border border-line px-3 py-1.5 text-[12px] text-ink-3 transition-colors duration-150 hover:border-line-strong"
+                            >
+                              取消
+                            </button>
+                          </div>
+                        </div>
+                      ) : confirmDelete === key ? (
                         <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
                           <p className="mb-2.5 text-[12.5px] leading-relaxed text-accent-ink">
                             从清单移除「{tool.name}」？
@@ -124,20 +204,38 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                         rel="noreferrer"
                         className="group relative block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
                       >
-                        {canWrite ? (
-                          <button
-                            type="button"
-                            aria-label={`删除 ${tool.name}`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setConfirmDelete(key);
-                            }}
-                            className="absolute right-2 top-2 rounded p-1 text-ink-3 opacity-0 transition-all duration-150 hover:bg-wash hover:text-accent group-hover:opacity-100"
-                          >
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="size-3.5">
-                              <path d="M6 6 L18 18 M18 6 L6 18" />
-                            </svg>
-                          </button>
+                        {canWrite && confirmDelete !== key ? (
+                          <span className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-all duration-150 group-hover:opacity-100">
+                            <button
+                              type="button"
+                              aria-label={`编辑 ${tool.name}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setEditForm({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
+                                setEditTool(key);
+                                setConfirmDelete(null);
+                              }}
+                              className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-3.5">
+                                <path d="M4 20 H8 L19 9 C19.8 8.2 19.8 7 19 6.2 L17.8 5 C17 4.2 15.8 4.2 15 5 L4 16 Z" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`删除 ${tool.name}`}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                setConfirmDelete(key);
+                                setEditTool(null);
+                              }}
+                              className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
+                            >
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="size-3.5">
+                                <path d="M6 6 L18 18 M18 6 L6 18" />
+                              </svg>
+                            </button>
+                          </span>
                         ) : null}
                         <span className="mb-0.5 flex items-start justify-between gap-3">
                           <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
@@ -172,7 +270,8 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                 })}
               </ul>
             </section>
-          ))}
+          );})}
+
           <p className="text-[12.5px] tracking-[0.05em] text-ink-3">
             {q ? `${total} / ${groups.reduce((n, g) => n + g.items.length, 0)} 个工具` : `共 ${total} 个工具`}
           </p>

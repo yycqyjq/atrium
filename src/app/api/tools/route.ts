@@ -128,3 +128,81 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "删除失败，请稍后再试" }, { status: 500 });
   }
 }
+
+/**
+ * 编辑：PATCH { kind: "tool", oldName, oldUrl, name?, url?, description?, category? }
+ *        或 { kind: "category", oldName, name }
+ */
+export async function PATCH(request: Request) {
+  let payload: {
+    kind?: unknown;
+    oldName?: unknown;
+    oldUrl?: unknown;
+    name?: unknown;
+    url?: unknown;
+    description?: unknown;
+    category?: unknown;
+  };
+  try {
+    payload = (await request.json()) as typeof payload;
+  } catch {
+    return NextResponse.json({ error: "请求体不是合法 JSON" }, { status: 400 });
+  }
+
+  const kind = payload.kind === "category" ? "category" : "tool";
+
+  try {
+    const { data, sha } = await loadToolsData();
+
+    if (kind === "tool") {
+      const oldName = typeof payload.oldName === "string" ? payload.oldName.trim() : "";
+      const oldUrl = typeof payload.oldUrl === "string" ? payload.oldUrl.trim() : "";
+      const name = typeof payload.name === "string" && payload.name.trim() ? payload.name.trim() : oldName;
+      const url = typeof payload.url === "string" && payload.url.trim() ? payload.url.trim() : oldUrl;
+      const description = typeof payload.description === "string" ? payload.description.trim() : "";
+      const category = typeof payload.category === "string" && payload.category.trim() ? payload.category.trim() : "未分类";
+
+      if (!oldName || !oldUrl) return NextResponse.json({ error: "缺少定位信息" }, { status: 400 });
+      if (!name) return NextResponse.json({ error: "缺少名称" }, { status: 400 });
+      if (!/^https?:\/\//i.test(url)) return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
+
+      const idx = data.items.findIndex((t) => String(t.name ?? "") === oldName && String(t.url ?? "") === oldUrl);
+      if (idx === -1) return NextResponse.json({ error: "未找到匹配的书签" }, { status: 404 });
+
+      const dup = data.items.some(
+        (t, i) => i !== idx && String(t.name ?? "") === name && String(t.url ?? "") === url,
+      );
+      if (dup) return NextResponse.json({ error: "同名同地址的工具已存在" }, { status: 409 });
+
+      const oldCategory = String(data.items[idx].category ?? "未分类");
+      data.items[idx] = { name, url, description, category };
+      if (!data.categories.includes(category)) data.categories.push(category);
+      const stillUsed = data.items.some((t) => String(t.category ?? "未分类") === oldCategory);
+      if (!stillUsed) data.categories = data.categories.filter((c) => c !== oldCategory);
+
+      await saveToolsData(data, sha, `feat(tools): 更新「${oldName}」`);
+      return NextResponse.json({ ok: true, total: data.items.length });
+    }
+
+    const oldName = typeof payload.oldName === "string" ? payload.oldName.trim() : "";
+    const newName = typeof payload.name === "string" ? payload.name.trim() : "";
+    if (!oldName || !newName) return NextResponse.json({ error: "缺少分类名" }, { status: 400 });
+    if (!data.categories.includes(oldName)) return NextResponse.json({ error: "分类不存在" }, { status: 404 });
+    if (data.categories.includes(newName)) return NextResponse.json({ error: "新分类名已存在" }, { status: 409 });
+
+    data.categories = data.categories.map((c) => (c === oldName ? newName : c));
+    for (const item of data.items) {
+      if (String(item.category ?? "") === oldName) item.category = newName;
+    }
+
+    await saveToolsData(data, sha, `feat(tools): 分类「${oldName}」重命名为「${newName}」`);
+    return NextResponse.json({ ok: true, categories: data.categories.length });
+  } catch (err) {
+    const status = (err as { status?: number }).status;
+    if (status === 401 || status === 403) {
+      return NextResponse.json({ error: "令牌没有写入权限（需要 repo 权限）" }, { status: 502 });
+    }
+    console.warn("[tools] 编辑失败：", err instanceof Error ? err.message : err);
+    return NextResponse.json({ error: "保存失败，请稍后再试" }, { status: 500 });
+  }
+}
