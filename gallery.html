@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>画廊 - 中庭</title>
+<meta name="description" content="画廊：照片与影像。存放目光的地方。">
+<script>document.documentElement.dataset.theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20x='3'%20y='3'%20width='26'%20height='26'%20fill='none'%20stroke='%23224c36'%20stroke-width='2.4'/%3E%3Crect%20x='11'%20y='11'%20width='10'%20height='10'%20fill='none'%20stroke='%23224c36'%20stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/tokens.css">
+<link rel="stylesheet" href="assets/css/site.css">
+<script src="assets/js/app.js" defer></script>
+</head>
+<body class="page page-gallery">
+
+<a class="skip-link" href="#main">跳到内容</a>
+
+<div class="shell">
+
+  <aside class="sidebar">
+    <a class="brand" href="index.html">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="4.5" y="4.5" width="23" height="23"/>
+        <rect x="13" y="13" width="6" height="6"/>
+        <path d="M16 4.5 V13 M16 19 V27.5 M4.5 16 H13 M19 16 H27.5"/>
+      </svg>
+      <span class="brand-word">中庭</span>
+    </a>
+
+    <nav class="nav" aria-label="房间导航">
+      <a class="nav-item" href="index.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3.5" y="3.5" width="17" height="17"/>
+          <rect x="9" y="9" width="6" height="6"/>
+        </svg>
+        <span class="nav-label">中庭</span>
+      </a>
+      <a class="nav-item" href="study.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 6.6 C10.2 5.3 7.4 4.9 4.5 5.5 V18.3 C7.4 17.7 10.2 18.1 12 19.4 C13.8 18.1 16.6 17.7 19.5 18.3 V5.5 C16.6 4.9 13.8 5.3 12 6.6 Z"/>
+          <path d="M12 6.6 V19.4"/>
+        </svg>
+        <span class="nav-label">书房</span>
+        <span class="nav-sub">读</span>
+      </a>
+      <a class="nav-item" href="gallery.html" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="5" width="16" height="14"/>
+          <circle cx="9.2" cy="10" r="1.6"/>
+          <path d="M4 16.6 L9.4 12.3 L13.2 15.1 L15.8 12.9 L20 16.4"/>
+        </svg>
+        <span class="nav-label">画廊</span>
+        <span class="nav-sub">看</span>
+      </a>
+      <a class="nav-item" href="tools.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="4" y="9.5" width="16" height="10"/>
+          <path d="M9.5 9.5 V7.8 C9.5 6.8 10.3 6 11.3 6 H12.7 C13.7 6 14.5 6.8 14.5 7.8 V9.5"/>
+          <path d="M4 14.5 H20"/>
+        </svg>
+        <span class="nav-label">工具房</span>
+        <span class="nav-sub">用</span>
+      </a>
+      <a class="nav-item" href="atelier.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 9.5 H20"/>
+          <path d="M5.5 9.5 V19.5 M12 9.5 V19.5 M18.5 9.5 V19.5"/>
+          <path d="M3.5 19.5 H20.5"/>
+        </svg>
+        <span class="nav-label">陈列廊</span>
+        <span class="nav-sub">造</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <span class="avatar" aria-hidden="true">Y</span>
+        <span class="user-name">yycqyjq</span>
+      </div>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false" aria-label="切换深色模式">
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M19.3 14.1 A7.5 7.5 0 1 1 9.9 4.7 A6 6 0 0 0 19.3 14.1 Z"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="3.6"/>
+          <path d="M12 4.2 V6.3 M12 17.7 V19.8 M4.2 12 H6.3 M17.7 12 H19.8 M6.5 6.5 L7.9 7.9 M16.1 16.1 L17.5 17.5 M17.5 6.5 L16.1 7.9 M7.9 16.1 L6.5 17.5"/>
+        </svg>
+      </button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+
+    <header class="room-head">
+      <p class="room-kicker"><a href="index.html">中庭</a> / 画廊</p>
+      <h1>画廊</h1>
+      <p class="room-sub">照片与影像。存放目光的地方。</p>
+    </header>
+
+    <div class="stub">
+      <div class="stub-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.7" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="5" width="16" height="14"/>
+          <circle cx="9.2" cy="10" r="1.6"/>
+          <path d="M4 16.6 L9.4 12.3 L13.2 15.1 L15.8 12.9 L20 16.4"/>
+        </svg>
+      </div>
+      <p class="stub-title">此厢仍在布置中。</p>
+      <p class="stub-text">图片流、相册与照片墙会在这里落成。先去书房坐坐，那里已经开放。</p>
+      <div class="stub-actions">
+        <a class="btn btn-primary" href="study.html">去书房
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12 H19 M13.5 6.5 L19 12 L13.5 17.5"/></svg>
+        </a>
+        <a class="btn btn-ghost" href="index.html">回到中庭</a>
+      </div>
+    </div>
+
+    <footer class="page-foot">
+      <span>中庭是个人空间，内容存放在 GitHub 仓库里。</span>
+      <span>© 2026 yycqyjq</span>
+    </footer>
+
+  </main>
+</div>
+
+</body>
+</html>
