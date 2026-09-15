@@ -1,27 +1,28 @@
-# 依赖与构建产物
-node_modules/
-.next/
-out/
-dist/
-release/
-desktop-server/
-desktop-server.old-*/
-desktop-server.bloat-*/
-.trash-desktop-server-bloat/
-desktop-server.tar.gz
 
+
+
+
+# 依赖与构建产物
+# 探针遗留（不再使用，未跟踪即不影响构建）
+# 本机证书（说明见 certs/README.md）
+# 系统与日志
 # 运行时数据与密钥（config.json 可能包含访问令牌）
-data/config.json
+*.local
+*.log
+.DS_Store
+.attic/
 .env
 .env.*
-
-# 本机证书（说明见 certs/README.md）
-certs/*.pem
-
-# 系统与日志
-.DS_Store
-*.log
-*.local
-
-# 探针遗留（不再使用，未跟踪即不影响构建）
+.next/
 .openclaw-tmp-dist-check/
+.trash-desktop-server-bloat/
+certs/*.pem
+data/config.json
+desktop-server.bloat-*/
+desktop-server.old-*/
+desktop-server.tar.gz
+desktop-server/
+dist/
+node_modules/
+out/
+release/
