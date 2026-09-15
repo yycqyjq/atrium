@@ -1,19 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
+import ToolsList from "@/components/tools/ToolsList";
 import { listTools } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "工具房" };
-
-function hostOf(url: string) {
-  try {
-    return new URL(url).hostname.replace(/^www\./, "");
-  } catch {
-    return url;
-  }
-}
 
 export default async function ToolsPage() {
   const { groups, count, reason, source } = await listTools();
@@ -48,59 +41,7 @@ export default async function ToolsPage() {
             <p className="text-[13px] text-ink-3">{emptyCopy.sub}</p>
           </div>
         ) : (
-          <>
-            {groups.map((group) => (
-              <section key={group.name} className="mb-10">
-                <div className="mb-4 flex items-baseline justify-between border-b border-line pb-3">
-                  <h2 className="font-serif text-[17px] tracking-[0.02em]">{group.name}</h2>
-                  <span className="text-[12px] text-ink-3">{group.items.length} 个</span>
-                </div>
-                <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                  {group.items.map((tool) => (
-                    <li key={`${tool.category}/${tool.name}`}>
-                      <a
-                        href={tool.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
-                      >
-                        <span className="mb-0.5 flex items-start justify-between gap-3">
-                          <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
-                            {tool.name}
-                          </span>
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                            className="size-[13px] shrink-0 text-ink-3 transition-colors duration-200 group-hover:text-accent"
-                          >
-                            <path d="M7 17 L17 7" />
-                            <path d="M9 7 H17 V15" />
-                          </svg>
-                        </span>
-                        <span className="block text-[12px] tracking-[0.03em] text-ink-3">
-                          {hostOf(tool.url)}
-                        </span>
-                        {tool.description ? (
-                          <span className="mt-1.5 line-clamp-2 block text-[13px] leading-relaxed text-ink-2">
-                            {tool.description}
-                          </span>
-                        ) : null}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ))}
-            <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">
-              共 {count} 个工具
-              {source === "local" ? "（本地清单）" : ""}
-            </p>
-          </>
+          <ToolsList groups={groups} />
         )}
       </div>
       <Footer />
