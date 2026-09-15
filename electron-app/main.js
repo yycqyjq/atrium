@@ -11,7 +11,7 @@
  *   pnpm desktop:cert     # 本机（含 Watt Toolkit 证书的启动方式）
  *   pnpm desktop:smoke    # 自检
  */
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, shell, Menu } = require("electron");
 const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -141,12 +141,64 @@ async function createWindow() {
   await win.loadURL(`http://127.0.0.1:${PORT}/`);
 }
 
+/** 应用菜单：中文语义 + 常用快捷键（Cmd+N 写作台、Cmd+1..4 切房间） */
+function buildMenu() {
+  const template = [
+    {
+      label: "中庭",
+      submenu: [
+        { label: "关于中庭", role: "about" },
+        { type: "separator" },
+        { label: "隐藏中庭", role: "hide" },
+        { label: "隐藏其他", role: "hideOthers" },
+        { label: "显示全部", role: "unhide" },
+        { type: "separator" },
+        { label: "退出中庭", role: "quit" },
+      ],
+    },
+    {
+      label: "房间",
+      submenu: [
+        { label: "中庭（首页）", accelerator: "Cmd+1", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/`) },
+        { label: "书房", accelerator: "Cmd+2", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study`) },
+        { label: "画廊", accelerator: "Cmd+3", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/gallery`) },
+        { label: "工具房", accelerator: "Cmd+4", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/tools`) },
+        { label: "陈列廊", accelerator: "Cmd+5", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/atelier`) },
+      ],
+    },
+    {
+      label: "写作",
+      submenu: [
+        { label: "新文章（写作台）", accelerator: "CmdOrCtrl+N", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study/write`) },
+      ],
+    },
+    {
+      label: "编辑",
+      submenu: [
+        { label: "撤销", role: "undo" },
+        { label: "重做", role: "redo" },
+        { type: "separator" },
+        { label: "剪切", role: "cut" },
+        { label: "拷贝", role: "copy" },
+        { label: "粘贴", role: "paste" },
+        { label: "全选", role: "selectAll" },
+      ],
+    },
+    {
+      label: "窗口",
+      submenu: [{ label: "最小化", role: "minimize" }, { label: "关闭窗口", role: "close" }],
+    },
+  ];
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+}
+
 app.whenReady().then(async () => {
   try {
     console.log(`[electron] 启动本地服务（端口 ${PORT}）…`);
     await startServer();
     console.log("[electron] 本地服务就绪，创建窗口");
     await createWindow();
+    buildMenu();
     console.log("[electron] 页面加载完成：", win.webContents.getURL());
 
     // 调试/自检用：将窗口实际渲染结果保存为截图（先等入场动画结束）
