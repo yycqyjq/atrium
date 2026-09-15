@@ -210,7 +210,7 @@ svg { display: block; }
 
 .greeting-sub { color: var(--ink-2); max-width: 32em; }
 
-.skylight { flex: none; margin-top: 6px; color: var(--motif); }
+.skylight { flex: none; margin-top: 0; color: var(--motif); }
 .skylight svg { width: 168px; height: 168px; }
 
 /* ---------- 首页 · 四扇门 ---------- */
@@ -269,7 +269,7 @@ svg { display: block; }
 .door-arrow {
   margin-top: auto;
   color: var(--accent);
-  opacity: 0.32;
+  opacity: 0.5;
   transform: translateX(0);
   transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease);
 }
