@@ -9,7 +9,11 @@ export default function Card({
   className?: string;
   children?: React.ReactNode;
 } & React.HTMLAttributes<HTMLDivElement>) {
-  const pads = { md: "p-5 md:p-6", sm: "px-5 py-4", none: "" } as const;
+  const pads = {
+    md: "p-5 md:p-6 [[data-density=compact]_&]:p-4",
+    sm: "px-5 py-4 [[data-density=compact]_&]:px-4 [[data-density=compact]_&]:py-3",
+    none: "",
+  } as const;
   return (
     <div className={`rounded-ctl border border-line ${pads[padding]} ${className}`} {...rest}>
       {children}

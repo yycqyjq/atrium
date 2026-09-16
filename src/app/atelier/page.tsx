@@ -143,7 +143,7 @@ export default function AtelierPage() {
             <div className="grid grid-cols-3 gap-3 md:grid-cols-4 xl:grid-cols-6 [[data-density=compact]_&]:gap-2">
               {swatches.map((swatch) => (
                 <div key={swatch.token} className="overflow-hidden rounded-ctl border border-line">
-                  <div className={`h-14 border-b border-line ${swatch.className}`} />
+                  <div className={`h-14 border-b border-line [[data-density=compact]_&]:h-12 ${swatch.className}`} />
                   <div className="bg-raised px-3 py-2">
                     <p className="text-[13px]">{swatch.name}</p>
                     <p className="font-mono text-[10.5px] tracking-[0.02em] text-ink-3">{swatch.token}</p>
@@ -229,7 +229,7 @@ export default function AtelierPage() {
                 href={demoTool.url}
                 target="_blank"
                 rel="noreferrer"
-                className="group block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                className="group block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong [[data-density=compact]_&]:px-3.5 [[data-density=compact]_&]:py-3"
               >
                 <ToolCardContent name={demoTool.name} url={demoTool.url} description={demoTool.description} />
               </a>
@@ -253,7 +253,7 @@ export default function AtelierPage() {
                 <p className="mb-2 text-[13px] text-ink-2">
                   行内代码 <code className="rounded bg-wash px-1.5 py-0.5 font-mono text-[12px] text-accent-ink">pnpm dev</code>
                 </p>
-                <pre className="overflow-x-auto rounded-ctl border border-line bg-raised px-3.5 py-2.5 font-mono text-[12px] leading-relaxed text-ink-2">
+                <pre className="overflow-x-auto rounded-ctl border border-line bg-raised px-3.5 py-2.5 font-mono text-[12px] leading-relaxed text-ink-2 [[data-density=compact]_&]:px-3 [[data-density=compact]_&]:py-2">
                   {"$ git add -A\ngit commit -m 'feat: ...'"}
                 </pre>
               </Card>

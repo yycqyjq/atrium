@@ -22,7 +22,7 @@ export default function PostRow({
   return (
     <Link
       href={postHref(post.slug)}
-      className="group -mx-3.5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-5 rounded-ctl border-b border-line px-3.5 py-4 transition-colors duration-150 last:border-0 hover:bg-wash max-xs:grid-cols-1 max-xs:gap-y-1"
+      className="group -mx-3.5 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-x-5 rounded-ctl border-b border-line px-3.5 py-4 transition-colors duration-150 last:border-0 hover:bg-wash [[data-density=compact]_&]:py-3 max-xs:grid-cols-1 max-xs:gap-y-1"
     >
       <span className="block min-w-0">
         <span className="block font-serif text-[16.5px] leading-normal tracking-[0.015em] text-ink transition-colors duration-150 group-hover:text-accent">
