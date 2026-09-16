@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { Input, FieldLabel } from "@/components/ui/Field";
@@ -19,6 +19,21 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
   const [category, setCategory] = useState(categories[0] ?? "");
   const [state, setState] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState<string | null>(null);
+  const toastTimer = useRef<number | null>(null);
+
+  const showToast = useCallback((text: string) => {
+    setToast(text);
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    },
+    [],
+  );
 
   const close = useCallback(() => {
     setOpen(false);
@@ -63,11 +78,12 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
         setMessage(data.error ?? "添加失败，请稍后再试");
         return;
       }
-      setState("ok");
-      setMessage(`「${name.trim()}」已加入清单。`);
+      const added = name.trim();
       setName("");
       setUrl("https://");
       setDescription("");
+      showToast(`「${added}」已加入清单。`);
+      close();
       router.refresh();
     } catch {
       setState("error");
@@ -92,14 +108,14 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
 
       {open ? (
         <div
-          className="fixed inset-0 z-[60] flex items-start justify-center overflow-y-auto bg-black/45 px-4 py-12 backdrop-blur-[2px]"
+          className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-black/45 px-4 py-8 backdrop-blur-[2px]"
           onClick={close}
         >
           <div
             role="dialog"
             aria-modal="true"
             aria-label="添加工具"
-            className="w-full max-w-[560px] animate-rise rounded-ctl border border-line bg-raised p-6 shadow-2xl"
+            className="max-h-[calc(100dvh-80px)] w-full max-w-[560px] animate-rise overflow-y-auto rounded-ctl border border-line bg-raised p-6 shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-5 flex items-center justify-between">
@@ -156,6 +172,14 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
                 关闭
               </Button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {toast ? (
+        <div className="pointer-events-none fixed inset-x-0 bottom-7 z-[70] flex justify-center">
+          <div className="animate-rise rounded-ctl border border-line bg-raised px-4 py-2.5 text-[13px] text-ink shadow-lg">
+            {toast}
           </div>
         </div>
       ) : null}
