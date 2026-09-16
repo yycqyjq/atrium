@@ -39,7 +39,8 @@ export async function GET() {
       dateLabel: post.dateLabel,
     }));
   } catch {
-    // 忽略：搜索索引尽力而为
+    // 抓取失败（抖动/限流）：沿用上次索引，避免整块消失
+    value.posts = cache?.value.posts ?? [];
   }
 
   try {
@@ -55,7 +56,7 @@ export async function GET() {
       })),
     );
   } catch {
-    // 忽略
+    value.tools = cache?.value.tools ?? [];
   }
 
   try {
@@ -70,7 +71,7 @@ export async function GET() {
       origin: item.origin,
     }));
   } catch {
-    // 忽略
+    value.exhibits = cache?.value.exhibits ?? [];
   }
 
   cache = { at: Date.now(), value };

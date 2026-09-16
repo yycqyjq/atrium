@@ -120,7 +120,7 @@ export default function GlobalSearch() {
       .slice(0, 6);
     const exhibits: Hit[] = data.exhibits
       .filter((item) =>
-        `${item.title} ${item.desc ?? ""} ${item.group ?? ""} ${item.projectName}`.toLowerCase().includes(q),
+        `${item.title} ${item.desc ?? ""} ${item.group ?? ""} ${item.projectName} ${item.origin ?? ""} ${item.id}`.toLowerCase().includes(q),
       )
       .map((item) => ({
         key: `e:${item.projectId}/${item.id}`,
