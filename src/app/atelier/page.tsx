@@ -14,6 +14,27 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { ToolCardContent } from "@/components/tools/ToolCard";
 import PostRow from "@/components/study/PostRow";
 import { SearchDemo } from "@/components/atelier/Demos";
+import {
+  IconMark,
+  IconHome,
+  IconBook,
+  IconFrame,
+  IconToolbox,
+  IconColumns,
+  IconMoon,
+  IconSun,
+  IconArrowRight,
+  IconExternal,
+  IconArrowUpRight,
+  IconPlus,
+  IconX,
+  IconPencil,
+  IconGear,
+  IconChevronLeft,
+  IconChevronRight,
+  IconSearch,
+  IconLink,
+} from "@/components/icons";
 
 export const metadata: Metadata = { title: "陈列廊" };
 
@@ -30,6 +51,28 @@ const swatches: { name: string; token: string; className: string }[] = [
   { name: "强调·淡", token: "--accent-soft", className: "bg-accent-soft" },
   { name: "强调·字", token: "--accent-ink", className: "bg-accent-ink" },
   { name: "纹样", token: "--motif", className: "bg-motif" },
+];
+
+const iconSet: { name: string; icon: React.ReactNode }[] = [
+  { name: "Mark", icon: <IconMark className="size-[18px]" /> },
+  { name: "Home", icon: <IconHome className="size-[18px]" /> },
+  { name: "Book", icon: <IconBook className="size-[18px]" /> },
+  { name: "Frame", icon: <IconFrame className="size-[18px]" /> },
+  { name: "Toolbox", icon: <IconToolbox className="size-[18px]" /> },
+  { name: "Columns", icon: <IconColumns className="size-[18px]" /> },
+  { name: "Moon", icon: <IconMoon className="size-[18px]" /> },
+  { name: "Sun", icon: <IconSun className="size-[18px]" /> },
+  { name: "ArrowRight", icon: <IconArrowRight className="size-[18px]" /> },
+  { name: "External", icon: <IconExternal className="size-[18px]" /> },
+  { name: "ArrowUpRight", icon: <IconArrowUpRight className="size-[18px]" /> },
+  { name: "Plus", icon: <IconPlus className="size-[18px]" /> },
+  { name: "X", icon: <IconX className="size-[18px]" /> },
+  { name: "Pencil", icon: <IconPencil className="size-[18px]" /> },
+  { name: "Gear", icon: <IconGear className="size-[18px]" /> },
+  { name: "ChevronLeft", icon: <IconChevronLeft className="size-[18px]" /> },
+  { name: "ChevronRight", icon: <IconChevronRight className="size-[18px]" /> },
+  { name: "Search", icon: <IconSearch className="size-[18px]" /> },
+  { name: "Link", icon: <IconLink className="size-[18px]" /> },
 ];
 
 function Section({
@@ -124,6 +167,22 @@ export default function AtelierPage() {
                 <p className="font-mono text-[13px] text-ink-2">pnpm build && pnpm desktop:cert</p>
               </Card>
             </div>
+          </Section>
+
+          <Section title="图标" note="19 枚 · 全站唯一来源">
+            <Card padding="sm">
+              <div className="grid grid-cols-5 gap-x-3 gap-y-5 sm:grid-cols-7 md:grid-cols-10">
+                {iconSet.map(({ name, icon }) => (
+                  <div key={name} className="flex flex-col items-center gap-2.5 text-ink-2">
+                    {icon}
+                    <span className="text-[10.5px] tracking-[0.02em] text-ink-3">{name}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-4 border-t border-line pt-3 text-[12px] text-ink-3">
+                全站所有图标均出自这里（改一处、处处同步）；导航、按钮、卡片上的小箭头与符号都是它们的实例。
+              </p>
+            </Card>
           </Section>
 
           <Section title="交互控件" note="真实组件 · 本页可直接操作">
