@@ -13,6 +13,35 @@ function hostOf(url: string) {
   }
 }
 
+/** 站点图标：服务端代理（/api/icon，带磁盘缓存）；失败回退首字方块 */
+function ToolIcon({ host, name }: { host: string; name: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed || !host) {
+    return (
+      <span
+        aria-hidden
+        className="flex size-5 shrink-0 items-center justify-center rounded-[5px] border border-line bg-wash font-serif text-[11px] leading-none text-ink-2"
+      >
+        {name.slice(0, 1)}
+      </span>
+    );
+  }
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/api/icon?d=${encodeURIComponent(host)}`}
+      alt=""
+      width={20}
+      height={20}
+      loading="lazy"
+      decoding="async"
+      data-tool-icon
+      onError={() => setFailed(true)}
+      className="size-5 shrink-0 rounded-[5px]"
+    />
+  );
+}
+
 /** 工具房列表 + 即时搜索 + 书签删除（可写环境下显示） */
 export default function ToolsList({ groups, canWrite = false }: { groups: ToolGroup[]; canWrite?: boolean }) {
   const router = useRouter();
@@ -237,29 +266,34 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                             </button>
                           </span>
                         ) : null}
-                        <span className="mb-0.5 flex items-start justify-between gap-3">
-                          <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
-                            {tool.name}
+                        <span className="flex items-start gap-2.5">
+                          <ToolIcon host={hostOf(tool.url)} name={tool.name} />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-start justify-between gap-3">
+                              <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
+                                {tool.name}
+                              </span>
+                              {!(canWrite) ? (
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.6"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                aria-hidden="true"
+                                className="mt-0.5 size-[13px] shrink-0 text-ink-3 transition-colors duration-200 group-hover:text-accent"
+                              >
+                                <path d="M7 17 L17 7" />
+                                <path d="M9 7 H17 V15" />
+                              </svg>
+                              ) : null}
+                            </span>
+                            <span className="mt-0.5 block text-[12px] tracking-[0.03em] text-ink-3">{hostOf(tool.url)}</span>
+                            <span className="mt-1.5 line-clamp-3 block text-[13px] leading-relaxed text-ink-2">
+                              {tool.description}
+                            </span>
                           </span>
-                          {!(canWrite) ? (
-                          <svg
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
-                            className="mt-0.5 size-[13px] shrink-0 text-ink-3 transition-colors duration-200 group-hover:text-accent"
-                          >
-                            <path d="M7 17 L17 7" />
-                            <path d="M9 7 H17 V15" />
-                          </svg>
-                          ) : null}
-                        </span>
-                        <span className="block text-[12px] tracking-[0.03em] text-ink-3">{hostOf(tool.url)}</span>
-                        <span className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">
-                          {tool.description}
                         </span>
                       </a>
                       )}
