@@ -18,8 +18,8 @@ export function fileNameFromTitle(title: string): string {
 /**
  * 书房写作台：新建 / 更新文章，直接发布到内容仓库。
  * - 文件名自动取标题（不再手填）；
- * - 新文章可选填「参考链接（每行一个）」，保存时按旧版格式附加到正文尾部；
- * - 编辑模式沿用原文，参考链接在正文中原文保留。
+ * - 新文章可选填「参考资源（每行一个）」，保存时按旧版格式附加到正文尾部；
+ * - 编辑模式沿用原文，参考资源在正文中原文保留。
  */
 export default function WriteDesk({
   initial,
@@ -44,7 +44,7 @@ export default function WriteDesk({
     setState("saving");
     setMessage("");
     try {
-      // 参考链接：新建/编辑统一——按旧版格式附加到正文尾部（清空则移除该段）
+      // 参考资源：新建/编辑统一——按旧版格式附加到正文尾部（清空则移除该段）
       const refLines = refs
         .split("\n")
         .map((l) => l.trim())
@@ -52,7 +52,7 @@ export default function WriteDesk({
       const base = body.replace(/^\s+/, "").replace(/\s+$/, "");
       const finalBody =
         refLines.length > 0
-          ? `${base}\n\n---\n\n**参考链接**：\n${refLines.map((l) => `- ${l}`).join("\n")}`
+          ? `${base}\n\n---\n\n**参考资源**：\n${refLines.map((l) => `- ${l}`).join("\n")}`
           : base;
 
       const res = await fetch("/api/write", {
@@ -153,7 +153,7 @@ export default function WriteDesk({
     <div className="rounded-ctl border border-line bg-raised p-5 md:p-6">
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
         {isEdit
-          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；参考链接已提取，可在此修改）`
+          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；参考资源已提取，可在此修改）`
           : "新文章以 Markdown 存入内容仓库，文件名自动取标题。"}
       </p>
 
@@ -188,7 +188,7 @@ export default function WriteDesk({
       </div>
 
       <div className="mb-5">
-        <label className={label} htmlFor="write-refs">参考链接（每行一个，可选）</label>
+        <label className={label} htmlFor="write-refs">参考资源（每行一个，可选）</label>
         <textarea
           id="write-refs"
           className={`${field} min-h-[84px] resize-y font-mono text-[13px] leading-relaxed`}

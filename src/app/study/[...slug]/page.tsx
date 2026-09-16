@@ -193,7 +193,7 @@ export default async function StudySlugPage({ params }: Props) {
 
           {links.length > 0 ? (
             <section className="mt-12 max-w-[44em] border-t border-line pt-6">
-              <h2 className="mb-3 font-serif text-[15px] tracking-[0.08em] text-ink-2">参考链接</h2>
+              <h2 className="mb-3 font-serif text-[15px] tracking-[0.08em] text-ink-2">参考资源</h2>
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.url} className="flex items-start gap-2.5">
