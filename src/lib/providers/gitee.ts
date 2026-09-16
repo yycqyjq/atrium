@@ -27,6 +27,7 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
         ...(init?.headers as Record<string, string> | undefined),
       },
       cache: "no-store",
+      signal: init?.signal ?? AbortSignal.timeout(20000),
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
@@ -93,6 +94,7 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
       // Gitee：创建用 POST，更新（带 sha）用 PUT
       await call(`/repos/${repoPath}/contents/${encodeURI(filePath)}`, {
         method: sha ? "PUT" : "POST",
+        signal: AbortSignal.timeout(90000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: contentBase64,
@@ -106,6 +108,7 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
     async deleteFile(filePath, message, sha) {
       await call(`/repos/${repoPath}/contents/${encodeURI(filePath)}`, {
         method: "DELETE",
+        signal: AbortSignal.timeout(90000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sha, message, branch: cfg.branch }),
       });

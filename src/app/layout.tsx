@@ -38,7 +38,7 @@ export default function RootLayout({
           <Sidebar />
           <main
             id="main"
-            className="flex min-h-dvh w-full max-w-[1120px] flex-col justify-self-center px-[clamp(26px,4.2vw,64px)] pt-[52px] pb-10 max-lg:min-h-0 max-lg:px-5 max-lg:pt-7 max-lg:pb-9"
+            className="flex min-h-dvh w-full max-w-[1120px] flex-col justify-self-center px-[clamp(26px,4.2vw,64px)] pt-[52px] pb-10 max-lg:min-h-0 max-lg:px-5 max-lg:pt-7 max-lg:pb-24"
           >
             {children}
           </main>

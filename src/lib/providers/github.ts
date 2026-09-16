@@ -21,6 +21,8 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
       ...init,
       headers: { ...headers, ...(init?.headers as Record<string, string> | undefined) },
       cache: "no-store",
+      // 硬超时：上游卡住时快速失败（由缓存回退兜底），不再拖垮页面
+      signal: init?.signal ?? AbortSignal.timeout(20000),
     });
     if (!res.ok) {
       const detail = await res.text().catch(() => "");
@@ -86,6 +88,7 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
     async putFile(filePath, contentBase64, message, sha) {
       await call(`/repos/${repoPath}/contents/${encodeURI(filePath)}`, {
         method: "PUT",
+        signal: AbortSignal.timeout(90000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message,
@@ -99,6 +102,7 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
     async deleteFile(filePath, message, sha) {
       await call(`/repos/${repoPath}/contents/${encodeURI(filePath)}`, {
         method: "DELETE",
+        signal: AbortSignal.timeout(90000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message, sha, branch: cfg.branch }),
       });

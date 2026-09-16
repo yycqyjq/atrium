@@ -117,6 +117,7 @@ export default function FloorNav() {
   }
 
   return (
+    <>
     <nav aria-label="楼层目录" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
       <ul className="flex flex-col items-end">
         {items.map((item, i) => {
@@ -172,5 +173,32 @@ export default function FloorNav() {
         })}
       </ul>
     </nav>
+
+    {/* 移动端（<xl）：底部横向楼层条，桌面右侧导轨的紧凑替代 */}
+    <nav
+      aria-label="楼层目录·移动端"
+      className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 xl:hidden"
+    >
+      <div className="flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-raised/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm">
+        {items.map((item, i) => {
+          const isCurrent = i === current;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => jump(i)}
+              className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[11.5px] tracking-[0.02em] transition-colors duration-150 ${
+                isCurrent
+                  ? "bg-accent-soft font-medium text-accent-ink"
+                  : "text-ink-3 hover:bg-wash hover:text-ink-2"
+              }`}
+            >
+              {item.title}
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+    </>
   );
 }
