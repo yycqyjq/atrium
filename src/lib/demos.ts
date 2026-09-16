@@ -10,6 +10,8 @@ export type DemoItem = {
   title: string;
   desc?: string;
   group?: string;
+  /** 来源标注（如 ark-admin），来自清单 origin 字段 */
+  origin?: string;
   /** 仓库内路径（模块入口，如 dist/exhibits/toast.js） */
   path: string;
   /** 可读源码路径（缺省跟随 path） */
@@ -97,6 +99,7 @@ function normalizeExhibit(
     title: typeof ex.title === "string" && ex.title.trim() ? ex.title.trim() : id,
     desc: typeof ex.desc === "string" && ex.desc.trim() ? ex.desc.trim() : undefined,
     group: typeof ex.group === "string" && ex.group.trim() ? ex.group.trim() : undefined,
+    origin: typeof ex.origin === "string" && ex.origin.trim() ? ex.origin.trim() : undefined,
     path: joinDir(dir, entry),
     source,
     styles,

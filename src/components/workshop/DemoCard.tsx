@@ -21,7 +21,12 @@ export function DemoCard({ item }: { item: DemoItem }) {
           {item.desc}
         </span>
       ) : null}
-      <span className="mt-2.5 flex items-center gap-2 text-[11px] tracking-[0.04em] text-ink-3">
+      <span className="mt-2.5 flex flex-wrap items-center gap-2 text-[11px] tracking-[0.04em] text-ink-3">
+        {item.origin ? (
+          <span className="rounded-[3px] border border-line px-1.5 py-px text-[10px] tracking-[0.06em]">
+            {item.origin}
+          </span>
+        ) : null}
         <span>{item.projectName}</span>
         {item.group ? <span aria-hidden>·</span> : null}
         {item.group ? <span>{item.group}</span> : null}

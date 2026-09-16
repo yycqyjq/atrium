@@ -60,7 +60,7 @@ export default async function ExhibitPage({
           moduleUrl={moduleUrl}
           styles={styleUrls}
           props={item.defaultProps}
-          meta={`${item.projectName}${item.group ? ` · ${item.group}` : ""}`}
+          meta={`${item.origin ? `${item.origin} · ` : ""}${item.projectName}${item.group ? ` · ${item.group}` : ""}`}
           source={source}
           githubUrl={githubUrl}
         />
