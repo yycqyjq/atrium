@@ -13,7 +13,7 @@ import EmptyState from "@/components/ui/EmptyState";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { ToolCardContent } from "@/components/tools/ToolCard";
 import PostRow from "@/components/study/PostRow";
-import { SearchDemo } from "@/components/atelier/Demos";
+import { SearchDemo, ComboboxDemo } from "@/components/atelier/Demos";
 import {
   IconMark,
   IconHome,
@@ -295,7 +295,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="表单与字段" note="输入框 / 文本域 / 标签 · 全站同款">
+          <Section title="表单与字段" note="输入框 / 文本域 / 标签 / 下拉 · 全站同款">
             <div className="grid gap-3 md:grid-cols-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">输入框（Input）</p>
@@ -324,6 +324,11 @@ export default function AtelierPage() {
                   items={[{ label: "中庭", href: "/" }, { label: "书房", href: "/study" }, { label: "示例目录" }]}
                 />
                 <p className="mt-3 text-[12px] text-ink-3">页面头部与文章页同款；中间段可点击，末段为当前位置。</p>
+              </Card>
+              <Card padding="sm">
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">可输入下拉（Combobox）</p>
+                <ComboboxDemo />
+                <p className="mt-3 text-[12px] text-ink-3">输入即筛选候选、也可直接输入新值；上下键与回车可选，工具房「分类」同款。</p>
               </Card>
             </div>
           </Section>

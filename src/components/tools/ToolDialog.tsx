@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { Input, FieldLabel } from "@/components/ui/Field";
+import Combobox from "@/components/ui/Combobox";
 import { IconX } from "@/components/icons";
 
 export type ToolFormValue = { name: string; url: string; description: string; category: string };
@@ -175,18 +176,13 @@ export default function ToolDialog({
               </div>
               <div>
                 <FieldLabel htmlFor="tool-cat">分类</FieldLabel>
-                <Input
+                <Combobox
                   id="tool-cat"
                   value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  list="tool-cat-list"
+                  onChange={setCategory}
+                  options={categories}
                   placeholder="输入或选择分类"
                 />
-                <datalist id="tool-cat-list">
-                  {categories.map((c) => (
-                    <option key={c} value={c} />
-                  ))}
-                </datalist>
               </div>
             </div>
 

@@ -166,6 +166,22 @@ export function IconChevronRight(props: IconProps) {
   );
 }
 
+export function IconChevronDown(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path d="M6 9.5 L12 15.5 L18 9.5" />
+    </svg>
+  );
+}
+
+export function IconCheck(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path d="M5 12.5 L10 17.5 L19 6.5" />
+    </svg>
+  );
+}
+
 export function IconSearch(props: IconProps) {
   return (
     <svg viewBox="0 0 24 24" {...base} {...props}>
