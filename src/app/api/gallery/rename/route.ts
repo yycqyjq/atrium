@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig, galleryDir } from "@/lib/config";
+import { bustGalleryCache } from "@/lib/gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
     }
 
     await provider.renameFile(rel, newRel, `chore(gallery): 重命名 ${oldName} → ${newName}`);
+    bustGalleryCache();
     return NextResponse.json({ ok: true, path: newRel, name: newName });
   } catch (err) {
     const status = (err as { status?: number }).status;

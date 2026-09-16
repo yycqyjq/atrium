@@ -278,8 +278,17 @@ let cache: { at: number; key: string; posts: PostMeta[]; folders: StudyFolder[] 
 async function loadRepo(providerKey?: string) {
   const cacheKey = providerKey ?? "default";
   if (!cache || cache.key !== cacheKey || Date.now() - cache.at > CACHE_TTL) {
-    const { posts, folders } = await collectRepo(providerKey);
-    cache = { at: Date.now(), key: cacheKey, posts, folders };
+    try {
+      const { posts, folders } = await collectRepo(providerKey);
+      cache = { at: Date.now(), key: cacheKey, posts, folders };
+    } catch (err) {
+      // 抖动 / 临时限流：沿用上次成功的数据，避免整页报错（下个请求会再试）
+      if (cache && cache.key === cacheKey) {
+        console.warn("[content] 刷新失败，沿用缓存：", err instanceof Error ? err.message : err);
+        return cache;
+      }
+      throw err;
+    }
   }
   return cache;
 }

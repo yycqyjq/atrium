@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig, galleryDir } from "@/lib/config";
+import { bustGalleryCache } from "@/lib/gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
     const file = await provider.getFile(rel);
     const name = rel.split("/").pop() ?? rel;
     await provider.deleteFile(rel, `chore(gallery): 移除图片 ${name}`, file.sha);
+    bustGalleryCache();
     return NextResponse.json({ ok: true, path: rel, name });
   } catch (err) {
     const status = (err as { status?: number }).status;

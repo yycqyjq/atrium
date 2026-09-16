@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig } from "@/lib/config";
+import { bustGalleryCache } from "@/lib/gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
       `chore(gallery): 上传图片 ${filePath.split("/").pop()}`,
     );
 
+    bustGalleryCache();
     return NextResponse.json({ ok: true, path: filePath, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;

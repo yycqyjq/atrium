@@ -41,6 +41,7 @@ export default function ToolDialog({
   // 粘贴网址自动解析：回填名称/描述
   const [parsing, setParsing] = useState(false);
   const [parseNote, setParseNote] = useState("");
+  const [parsedHost, setParsedHost] = useState("");
   const lastAutoName = useRef<string | null>(null);
 
   // 打开时按模式初始化表单
@@ -53,7 +54,7 @@ export default function ToolDialog({
       setCategory(initial.category);
     } else {
       setName("");
-      setUrl("https://");
+      setUrl("");
       setDescription("");
       setCategory(categories[0] ?? "");
     }
@@ -61,6 +62,7 @@ export default function ToolDialog({
     setMessage("");
     setParsing(false);
     setParseNote("");
+    setParsedHost("");
     lastAutoName.current = null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode]);
@@ -86,18 +88,21 @@ export default function ToolDialog({
   const parseSite = async (target: string) => {
     setParsing(true);
     setParseNote("");
+    setParsedHost("");
     try {
       const res = await fetch(`/api/site-info?url=${encodeURIComponent(target)}`);
       const data = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         title?: string;
         description?: string;
+        host?: string;
         error?: string;
       };
       if (!res.ok || !data.ok) {
         setParseNote(data.error ?? "解析失败，可手动填写");
         return;
       }
+      if (data.host) setParsedHost(data.host);
       const filled: string[] = [];
       if (data.title && (!name.trim() || name === lastAutoName.current)) {
         setName(data.title);
@@ -187,8 +192,25 @@ export default function ToolDialog({
                 <Loading size="sm" label="正在解析站点信息…" />
               </div>
             ) : parseNote ? (
-              <p className="mt-2 text-[12px] text-ink-3">{parseNote}</p>
-            ) : null}
+              <p className="mt-2 flex items-center gap-1.5 text-[12px] text-ink-3">
+                {parsedHost ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={`/api/icon?d=${encodeURIComponent(parsedHost)}`}
+                    alt=""
+                    width={16}
+                    height={16}
+                    className="size-4 shrink-0 rounded-[4px]"
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : null}
+                {parseNote}
+              </p>
+            ) : (
+              <p className="mt-2 text-[12px] text-ink-3">粘贴网址后自动解析标题与描述，并带上站点图标。</p>
+            )}
           </div>
           <div>
             <FieldLabel htmlFor="tool-desc">描述</FieldLabel>

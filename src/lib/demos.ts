@@ -32,8 +32,8 @@ export type DemosResult = {
 };
 
 const MANIFEST = "atrium.json";
-const LIST_TTL = 60_000;
-const COMMIT_TTL = 10 * 60_000;
+const LIST_TTL = 5 * 60_000;
+const COMMIT_TTL = 30 * 60_000;
 const FILE_TTL = 60_000;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
@@ -239,7 +239,17 @@ export async function listDemos(opts: { fresh?: boolean } = {}): Promise<DemosRe
     try {
       items.push(...(await listRepoItems(project)));
     } catch (err) {
-      errors.push(`「${project.name}」读取失败：${(err as Error).message}`);
+      // 抖动 / 临时限流：优先沿用该项目的上次成功数据
+      const stale =
+        listCache && listCache.key === key
+          ? listCache.value.items.filter((item) => item.projectId === project.id)
+          : [];
+      if (stale.length > 0) {
+        console.warn(`[demos] 「${project.name}」刷新失败，沿用缓存：`, (err as Error).message);
+        items.push(...stale);
+      } else {
+        errors.push(`「${project.name}」读取失败：${(err as Error).message}`);
+      }
     }
   }
   const value: DemosResult = { projects, items, errors };
