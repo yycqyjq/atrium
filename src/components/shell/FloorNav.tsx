@@ -139,14 +139,14 @@ export default function FloorNav() {
                 <span
                   aria-hidden
                   data-floor-label
-                  className={`absolute right-0 flex h-7 items-center whitespace-nowrap rounded-[6px] px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
+                  className={`absolute right-0 flex h-7 items-center whitespace-nowrap px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
                     isHovered ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
                   } ${
                     isCurrent
-                      ? "bg-accent-soft font-medium text-accent-ink"
+                      ? "font-semibold text-accent"
                       : isAncestor
-                        ? "bg-surface/90 text-accent/55"
-                        : "bg-surface/90 text-ink-2"
+                        ? "font-medium text-accent/60"
+                        : "font-semibold text-ink"
                   }`}
                 >
                   {item.title}
