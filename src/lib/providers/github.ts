@@ -104,6 +104,64 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
       });
     },
 
+    async renameFile(oldPath, newPath, message) {
+      // Git 数据 API：复用原 blob（内容不搬运），一次提交完成「新路径 + 删除旧路径」。
+      // 分支指针若在期间前进（并发写），自动重试。
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const headRes = await call(`/repos/${repoPath}/git/ref/heads/${ref}`);
+        const head = (await headRes.json()) as { object?: { sha?: string } };
+        const headSha = head.object?.sha;
+        if (!headSha) throw new ProviderError(500, "拿不到分支指针");
+        const commitRes = await call(`/repos/${repoPath}/git/commits/${headSha}`);
+        const commit = (await commitRes.json()) as { tree?: { sha?: string } };
+        const treeSha = commit.tree?.sha;
+        if (!treeSha) throw new ProviderError(500, "拿不到目录树");
+
+        const fileRes = await call(`/repos/${repoPath}/contents/${encodeURI(oldPath)}?ref=${ref}`);
+        const fileData = (await fileRes.json()) as { sha?: string; type?: string };
+        if (fileData.type === "dir" || !fileData.sha) {
+          throw new ProviderError(404, `不是文件：${oldPath}`);
+        }
+
+        const treeRes = await call(`/repos/${repoPath}/git/trees`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            base_tree: treeSha,
+            tree: [
+              { path: newPath, mode: "100644", type: "blob", sha: fileData.sha },
+              { path: oldPath, mode: "100644", type: "blob", sha: null },
+            ],
+          }),
+        });
+        const newTree = (await treeRes.json()) as { sha?: string };
+        if (!newTree.sha) throw new ProviderError(500, "创建目录树失败");
+
+        const commitCreate = await call(`/repos/${repoPath}/git/commits`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, tree: newTree.sha, parents: [headSha] }),
+        });
+        const newCommit = (await commitCreate.json()) as { sha?: string };
+        if (!newCommit.sha) throw new ProviderError(500, "创建提交失败");
+
+        try {
+          await call(`/repos/${repoPath}/git/refs/heads/${ref}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sha: newCommit.sha, force: false }),
+          });
+          return;
+        } catch (err) {
+          if (err instanceof ProviderError && (err.status === 409 || err.status === 422)) {
+            continue; // 分支在期间前进，重来
+          }
+          throw err;
+        }
+      }
+      throw new ProviderError(409, "仓库更新频繁，请稍后重试");
+    },
+
     async lastCommitDate(filePath) {
       try {
         const res = await call(

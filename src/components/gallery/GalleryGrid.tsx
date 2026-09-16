@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { GalleryImage } from "@/lib/gallery";
 import { IconX, IconChevronLeft, IconChevronRight } from "@/components/icons";
 
@@ -67,29 +68,50 @@ function SmartImage({
  * 点击打开大图，Esc / 点击背景关闭，← → 或滑动翻页，可查看原图。
  * initialView 用于深链（?album=&view=N）直接打开本相册第 N 张。
  * contextImages/contextStart：传入全局图序（跨相册），灯箱翻页可连续跨相册。
+ * canEdit：有写入令牌时开放灯箱内「重命名」。
  */
 export default function GalleryGrid({
   images,
   initialView,
   contextImages,
   contextStart = 0,
+  canEdit = false,
 }: {
   images: GalleryImage[];
   initialView?: number;
   contextImages?: GalleryImage[];
   contextStart?: number;
+  canEdit?: boolean;
 }) {
-  const list = contextImages ?? images;
+  const router = useRouter();
+  const rawList = contextImages ?? images;
+  // 改名成功、服务端数据刷新前沿用本地补丁，即时显示新名字
+  const [patches, setPatches] = useState<Record<string, GalleryImage>>({});
+  const list = useMemo(
+    () => rawList.map((image) => patches[image.path] ?? image),
+    [rawList, patches],
+  );
   const base = contextImages ? contextStart : 0;
   const [current, setCurrent] = useState<number | null>(
     initialView != null && Number.isInteger(initialView) && initialView >= 0 && initialView < images.length
       ? base + initialView
       : null,
   );
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const pendingFocusPath = useRef<string | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const touchX = useRef<number | null>(null);
 
-  const close = useCallback(() => setCurrent(null), []);
+  const active = current != null ? list[current] : null;
+
+  const close = useCallback(() => {
+    setEditing(false);
+    setRenameError(null);
+    setCurrent(null);
+  }, []);
   const step = useCallback(
     (delta: number) =>
       setCurrent((c) => (c == null ? c : (c + delta + list.length) % list.length)),
@@ -100,6 +122,13 @@ export default function GalleryGrid({
   useEffect(() => {
     if (current == null) return;
     const onKey = (e: KeyboardEvent) => {
+      if (editing) {
+        if (e.key === "Escape") {
+          setEditing(false);
+          setRenameError(null);
+        }
+        return;
+      }
       if (e.key === "Escape") close();
       else if (e.key === "ArrowLeft") step(-1);
       else if (e.key === "ArrowRight") step(1);
@@ -112,7 +141,7 @@ export default function GalleryGrid({
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prevOverflow;
     };
-  }, [current, close, step]);
+  }, [current, close, step, editing]);
 
   // 预加载相邻两张（含备用源链），翻页更顺
   useEffect(() => {
@@ -126,6 +155,19 @@ export default function GalleryGrid({
     }
   }, [current, list]);
 
+  // 改名成功后：等服务端数据刷新落地，再把视野跟到新文件名所在位置
+  const lastImages = useRef(images);
+  useEffect(() => {
+    if (lastImages.current === images) return;
+    lastImages.current = images;
+    const target = pendingFocusPath.current;
+    if (!target) return;
+    const idx = list.findIndex((image) => image.path === target);
+    if (idx >= 0) setCurrent(idx);
+    pendingFocusPath.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images]);
+
   const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchX.current = e.touches[0]?.clientX ?? null;
   };
@@ -136,28 +178,105 @@ export default function GalleryGrid({
     touchX.current = null;
   };
 
-  const active = current != null ? list[current] : null;
+  const startRename = () => {
+    if (!active) return;
+    setDraft(active.name);
+    setRenameError(null);
+    setEditing(true);
+  };
+
+  const confirmRename = async () => {
+    if (!active || saving) return;
+    const next = draft.trim();
+    if (!next) {
+      setRenameError("名字不能为空");
+      return;
+    }
+    if (next === active.name) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    setRenameError(null);
+    const origin = active;
+    try {
+      const res = await fetch("/api/gallery/rename", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ path: origin.path, name: next }),
+      });
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        path?: string;
+        name?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.ok || !data.path || !data.name) {
+        throw new Error(data.error || "改名失败，请稍后再试");
+      }
+      const newPath = data.path;
+      const newName = data.name;
+      // URL 里同步替换文件名段（改名后到刷新前，主源仍沿用缓存副本）
+      const swap = (u: string) => {
+        const fromC = encodeURIComponent(origin.name);
+        const toC = encodeURIComponent(newName);
+        if (u.includes(fromC)) return u.replace(fromC, toC);
+        const fromE = encodeURI(origin.name);
+        const toE = encodeURI(newName);
+        return u.includes(fromE) ? u.replace(fromE, toE) : u;
+      };
+      const patched: GalleryImage = {
+        name: newName,
+        path: newPath,
+        url: swap(origin.url),
+        fallbackUrls: origin.fallbackUrls.map(swap),
+      };
+      setPatches((prev) => {
+        const nextPatches: Record<string, GalleryImage> = { ...prev };
+        nextPatches[origin.path] = patched;
+        nextPatches[newPath] = patched;
+        // 连续改名的链条：把指向旧路径的历史补丁一并更新
+        for (const [key, value] of Object.entries(nextPatches)) {
+          if (value.path === origin.path) nextPatches[key] = patched;
+        }
+        return nextPatches;
+      });
+      pendingFocusPath.current = newPath;
+      setEditing(false);
+      setSaving(false);
+      router.refresh();
+    } catch (err) {
+      setSaving(false);
+      setRenameError(err instanceof Error ? err.message : "改名失败，请稍后再试");
+    }
+  };
 
   return (
     <>
       <div className="columns-2 gap-3 md:columns-3 xl:columns-4">
-        {images.map((image, i) => (
-          <button
-            key={image.path}
-            type="button"
-            onClick={() => setCurrent(base + i)}
-            className="group mb-3 block w-full break-inside-avoid cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
-            title={image.name}
-          >
-            {/* 图片直接来自仓库原始文件（raw），按需懒加载 */}
-            <SmartImage
-              src={image.url}
-              fallbacks={image.fallbackUrls}
-              alt={image.name}
-              className="block w-full transition-opacity duration-200 group-hover:opacity-90"
-            />
-          </button>
-        ))}
+        {images.map((image, i) => {
+          const view = patches[image.path] ?? image;
+          return (
+            <button
+              key={image.path}
+              type="button"
+              onClick={() => setCurrent(base + i)}
+              className="group mb-3 block w-full break-inside-avoid cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
+              title={view.name}
+            >
+              {/* 图片直接来自仓库原始文件，按需懒加载 */}
+              <SmartImage
+                src={view.url}
+                fallbacks={view.fallbackUrls}
+                alt={view.name}
+                className="block w-full transition-opacity duration-200 group-hover:opacity-90"
+              />
+              <p className="truncate px-2.5 pb-2 pt-1.5 text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
+                {view.name}
+              </p>
+            </button>
+          );
+        })}
       </div>
 
       {active ? (
@@ -170,11 +289,64 @@ export default function GalleryGrid({
           onTouchEnd={onTouchEnd}
         >
           <div className="flex items-center justify-between gap-3 px-5 py-3.5 text-white">
-            <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">{active.name}</p>
+            {editing ? (
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void confirmRename();
+                    }
+                    if (e.key === "Escape") {
+                      e.stopPropagation();
+                      setEditing(false);
+                      setRenameError(null);
+                    }
+                  }}
+                  autoFocus
+                  aria-label="新文件名"
+                  className="w-full max-w-[380px] min-w-0 rounded-ctl border border-white/30 bg-white/10 px-2.5 py-1.5 text-[12.5px] text-white placeholder:text-white/40 focus:border-white/60 focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() => void confirmRename()}
+                  disabled={saving}
+                  className="shrink-0 text-[12px] text-white underline decoration-white/40 underline-offset-4 transition-colors duration-150 hover:text-white disabled:opacity-50"
+                >
+                  {saving ? "保存中…" : "保存"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditing(false);
+                    setRenameError(null);
+                  }}
+                  className="shrink-0 text-[12px] text-white/70 underline decoration-white/25 underline-offset-4 transition-colors duration-150 hover:text-white"
+                >
+                  取消
+                </button>
+                {renameError ? (
+                  <span className="min-w-0 shrink truncate text-[12px] text-red-300">{renameError}</span>
+                ) : null}
+              </div>
+            ) : (
+              <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">{active.name}</p>
+            )}
             <div className="flex shrink-0 items-center gap-4">
               <span className="text-[12px] tabular-nums">
                 {current! + 1} / {list.length}
               </span>
+              {canEdit && !editing ? (
+                <button
+                  type="button"
+                  onClick={startRename}
+                  className="text-[12px] text-white/85 underline decoration-white/40 underline-offset-4 transition-colors duration-150 hover:text-white"
+                >
+                  重命名
+                </button>
+              ) : null}
               <a
                 href={active.fallbackUrls[active.fallbackUrls.length - 1] ?? active.url}
                 target="_blank"

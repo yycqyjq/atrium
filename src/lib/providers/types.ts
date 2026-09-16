@@ -58,6 +58,8 @@ export interface RepoProvider {
   putFile(filePath: string, contentBase64: string, message: string, sha?: string): Promise<void>;
   /** 删除文件 */
   deleteFile(filePath: string, message: string, sha: string): Promise<void>;
+  /** 重命名文件（同一目录内改名；实现侧保证不搬迁内容或最小代价） */
+  renameFile(oldPath: string, newPath: string, message: string): Promise<void>;
 
   /** 文件最后一次提交时间（毫秒），失败返回 null */
   lastCommitDate(filePath: string): Promise<number | null>;

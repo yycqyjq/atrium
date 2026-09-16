@@ -81,6 +81,7 @@ export default async function GalleryPage({
                     contextImages={flat}
                     contextStart={contextStart}
                     initialView={album === section.name && Number.isInteger(viewNum) ? viewNum : undefined}
+                    canEdit={canUpload}
                   />
                 </section>
               );

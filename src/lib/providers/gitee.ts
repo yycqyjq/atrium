@@ -111,6 +111,25 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
       });
     },
 
+    async renameFile(oldPath, newPath, message) {
+      // Gitee 无搬运接口：读旧内容 → 建新路径 → 删旧路径
+      const res = await call(`/repos/${repoPath}/contents/${encodeURI(oldPath)}?ref=${ref}`);
+      const data = (await res.json()) as { content?: string; sha?: string; type?: string };
+      if (data.type === "dir" || !data.sha) throw new ProviderError(404, `不是文件：${oldPath}`);
+      if (!data.content) throw new ProviderError(500, "文件过大，暂不支持改名");
+      const content = String(data.content).replace(/\n/g, "");
+      await call(`/repos/${repoPath}/contents/${encodeURI(newPath)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content, message, branch: cfg.branch }),
+      });
+      await call(`/repos/${repoPath}/contents/${encodeURI(oldPath)}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sha: data.sha, message, branch: cfg.branch }),
+      });
+    },
+
     async lastCommitDate(filePath) {
       try {
         const res = await call(
