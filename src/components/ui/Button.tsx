@@ -24,11 +24,11 @@ export function buttonClasses(variant: Variant = "primary", size: Size = "md", e
       : "text-[12.5px]";
   const variants: Record<Variant, string> = {
     primary: "bg-accent font-medium text-on-accent hover:bg-accent-hover",
-    secondary: "border border-line text-ink-2 hover:border-line-strong",
+    secondary: "border border-line text-ink-2 hover:border-line-strong hover:text-ink",
     danger:
       "border border-accent bg-accent-soft font-medium text-accent-ink hover:bg-accent hover:text-on-accent",
-    text: "text-accent hover:text-accent-hover",
-    quiet: "text-ink-3 hover:text-ink-2",
+    text: "text-accent hover:text-accent-hover hover:underline underline-offset-4",
+    quiet: "text-ink-3 hover:text-ink-2 hover:underline underline-offset-4",
   };
   return `${base} ${sizeCls} ${variants[variant]} ${extra}`.trim();
 }

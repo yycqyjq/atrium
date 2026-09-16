@@ -30,7 +30,7 @@ export default function ConnectDesk({
   const [state, setState] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
 
-  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 focus:border-accent";
+  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent";
   const label = "mb-1.5 block text-[11.5px] tracking-[0.1em] text-ink-3";
 
   async function save() {

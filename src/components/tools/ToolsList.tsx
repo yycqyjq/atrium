@@ -137,19 +137,19 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                           <input
                             value={editForm.name}
                             onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[13px] outline-none focus:border-accent"
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[13px] outline-none hover:border-line-strong focus:border-accent"
                             placeholder="名称"
                           />
                           <input
                             value={editForm.url}
                             onChange={(e) => setEditForm((f) => ({ ...f, url: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none focus:border-accent"
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none hover:border-line-strong focus:border-accent"
                             placeholder="地址"
                           />
                           <input
                             value={editForm.description}
                             onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none focus:border-accent"
+                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none hover:border-line-strong focus:border-accent"
                             placeholder="描述"
                           />
                           <div className="flex items-center gap-2">

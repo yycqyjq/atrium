@@ -63,7 +63,7 @@ export function SearchInput({
         onFocus={onFocus}
         onBlur={onBlur}
         placeholder={placeholder}
-        className="w-full rounded-ctl border border-line bg-raised py-2.5 pl-10 pr-16 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 focus:border-accent"
+        className="w-full rounded-ctl border border-line bg-raised py-2.5 pl-10 pr-16 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent"
       />
       <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3 md:block">
         ⌘K

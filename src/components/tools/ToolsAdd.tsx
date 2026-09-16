@@ -71,7 +71,7 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
     );
   }
 
-  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2 text-[13px] outline-none transition-colors duration-150 placeholder:text-ink-3 focus:border-accent";
+  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2 text-[13px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent";
   const label = "mb-1 block text-[11px] tracking-[0.1em] text-ink-3";
 
   return (
