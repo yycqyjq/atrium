@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import Combobox from "@/components/ui/Combobox";
 
 /**
  * 画廊上传：选择本地图片 → 直传图床仓库（GitHub Contents API）。
@@ -13,7 +14,8 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
   const router = useRouter();
   const [state, setState] = useState<"idle" | "uploading" | "done" | "error">("idle");
   const [message, setMessage] = useState("");
-  const [target, setTarget] = useState(dir || "");
+  const ROOT = "仓库根";
+  const [target, setTarget] = useState(dir || ROOT);
   const [dragOver, setDragOver] = useState(false);
 
   async function uploadFiles(files: FileList | null) {
@@ -50,7 +52,7 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
           body: JSON.stringify({
             filename: file.name,
             contentBase64,
-            dir: target,
+            dir: target === ROOT ? "" : target.trim(),
           }),
         });
         const data = (await res.json()) as { ok?: boolean; path?: string; error?: string };
@@ -67,7 +69,7 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
 
     if (ok > 0 && failed.length === 0) {
       setState("done");
-      setMessage(`已上传 ${ok} 张到 ${target || "仓库根"}。图床仓库刷新后即可在画廊看到。`);
+      setMessage(`已上传 ${ok} 张到 ${target === ROOT ? "仓库根" : target}。图床仓库刷新后即可在画廊看到。`);
       router.refresh();
     } else if (ok > 0) {
       setState("done");
@@ -116,22 +118,20 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
               </label>
               直传图床仓库
             </p>
-            <p className="text-[12px] text-ink-3">
-              支持多选，单张不超过 20MB；存入
-              <select
+            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-2 text-[12px] text-ink-3">
+              <span>支持多选，单张不超过 20MB；文件名冲突自动加时间戳。存入</span>
+              <Combobox
+                id="upload-dir"
+                size="sm"
                 value={target}
-                onChange={(e) => setTarget(e.target.value)}
-                className="mx-1.5 rounded border border-line bg-raised px-1.5 py-0.5 text-[12px] text-ink-2 outline-none"
-              >
-                <option value="">仓库根</option>
-                {albums.map((album) => (
-                  <option key={album} value={album}>
-                    {album}/
-                  </option>
-                ))}
-              </select>
-              目录，文件名冲突自动加时间戳
-            </p>
+                onChange={setTarget}
+                options={[ROOT, ...albums]}
+                placeholder="选择或输入相册"
+                customHint={(input: string) => `新建相册「${input}」`}
+                className="w-[190px]"
+              />
+              <span>目录</span>
+            </div>
           </>
         )}
       </div>

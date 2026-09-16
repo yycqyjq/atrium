@@ -20,6 +20,8 @@ export default function Combobox({
   options,
   placeholder,
   className = "",
+  size = "md",
+  customHint,
 }: {
   id?: string;
   value: string;
@@ -27,6 +29,10 @@ export default function Combobox({
   options: string[];
   placeholder?: string;
   className?: string;
+  /** 尺寸档位：md 与输入框同高；sm 用于行内小控件 */
+  size?: "md" | "sm";
+  /** 「候选之外」行的文案生成器（默认「使用新分类」） */
+  customHint?: (input: string) => string;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -174,7 +180,7 @@ export default function Combobox({
                 <span className="flex size-3.5 shrink-0 items-center justify-center">
                   <IconPlus className="size-3.5" />
                 </span>
-                <span className="truncate">使用新分类「{value.trim()}」</span>
+                <span className="truncate">{(customHint ?? ((input: string) => `使用新分类「${input}」`))(value.trim())}</span>
               </button>
             ) : null}
             {rows.length === 0 ? (
@@ -209,16 +215,18 @@ export default function Combobox({
         }}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className={`${fieldClasses({ extra: "pr-9" })}`}
+        className={`${fieldClasses({ size, extra: size === "sm" ? "pr-8" : "pr-9" })}`}
       />
       <button
         type="button"
         aria-label="展开选项"
         tabIndex={-1}
         onClick={() => (open ? setOpen(false) : openDropdown())}
-        className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-ink-3 transition-colors duration-150 hover:text-ink-2"
+        className={`absolute top-1/2 -translate-y-1/2 rounded text-ink-3 transition-colors duration-150 hover:text-ink-2 ${
+          size === "sm" ? "right-1.5 p-0.5" : "right-2 p-1"
+        }`}
       >
-        <IconChevronDown className={`size-4 transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <IconChevronDown className={`${size === "sm" ? "size-3.5" : "size-4"} transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
       </button>
       {panel}
     </div>

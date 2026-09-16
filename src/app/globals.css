@@ -96,6 +96,14 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* 可点击元素统一手型光标（浏览器对 button 默认是箭头） */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+
   ::selection {
     background: var(--accent-soft);
     color: var(--accent-ink);
