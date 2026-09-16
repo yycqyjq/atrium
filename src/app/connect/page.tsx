@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
 import ConnectDesk from "@/components/shell/ConnectDesk";
+import DemoProjectsEditor from "@/components/workshop/DemoProjectsEditor";
 import PageHeader from "@/components/ui/PageHeader";
-import { readPublicConfig } from "@/lib/config";
+import { readPublicConfig, sanitizeDemoProjects } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
@@ -47,6 +48,10 @@ export default async function ConnectPage() {
             galleryBranch: full?.galleryRepo?.branch ?? "main",
           }}
         />
+
+        <div className="mt-10">
+          <DemoProjectsEditor initial={sanitizeDemoProjects(full?.demoProjects ?? [])} />
+        </div>
       </div>
       <Footer />
     </>

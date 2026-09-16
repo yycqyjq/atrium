@@ -5,6 +5,7 @@ const doors = [
   { href: "/study", plate: "读", name: "书房", desc: "文章与长文。慢慢读，慢慢写。" },
   { href: "/gallery", plate: "看", name: "画廊", desc: "照片与影像。存放目光的地方。" },
   { href: "/tools", plate: "用", name: "工具房", desc: "书签与常用工具。顺手就能拿到。" },
+  { href: "/workshop", plate: "试", name: "工坊", desc: "自留的组件与用法。取件现场装配。" },
   { href: "/atelier", plate: "造", name: "陈列廊", desc: "组件与实验。作品的小展台。" },
 ];
 
@@ -12,7 +13,7 @@ export default function DoorBand({ className = "" }: { className?: string }) {
   return (
     <section
       aria-label="房间入口"
-      className={`grid grid-cols-[1.28fr_1fr_1fr_0.88fr] border-y border-line-strong max-xs:grid-cols-1 ${className}`}
+      className={`grid grid-cols-[1.24fr_1fr_1fr_1fr_0.88fr] border-y border-line-strong max-xs:grid-cols-1 ${className}`}
     >
       {doors.map((door, i) => (
         <Link

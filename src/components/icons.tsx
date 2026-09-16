@@ -183,3 +183,11 @@ export function IconLink(props: IconProps) {
     </svg>
   );
 }
+
+export function IconCraft(props: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" {...base} {...props}>
+      <path d="M6 6.5 H18 M12 6.5 V17.5 M7.5 17.5 H16.5" />
+    </svg>
+  );
+}

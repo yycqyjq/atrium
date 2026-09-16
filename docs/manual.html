@@ -103,7 +103,7 @@
     </div>
     <p class="kicker">ATRIUM · 使用手册</p>
     <h1>中庭使用手册</h1>
-    <p class="lede">一个中心，四间房：书房读、画廊看、工具房用、陈列廊造。数据存你自己的 GitHub 仓库，桌面与网页同一份内容。这本手册讲怎么日常使用、怎么配置、出了问题去哪查。</p>
+    <p class="lede">一个中心，五间房：书房读、画廊看、工具房用、工坊试、陈列廊造。数据存你自己的 GitHub 仓库，桌面与网页同一份内容。这本手册讲怎么日常使用、怎么配置、出了问题去哪查。</p>
     <p class="meta">v1.0 · 2026-09-15 · 适用 release/mac-arm64 与后续版本</p>
   </header>
 
@@ -111,7 +111,7 @@
     <p class="toc-title">目 录</p>
     <ol>
       <li><span class="n">01</span><a href="#s1">开始使用</a><span class="dots"></span></li>
-      <li><span class="n">02</span><a href="#s2">四间房</a><span class="dots"></span></li>
+      <li><span class="n">02</span><a href="#s2">五间房</a><span class="dots"></span></li>
       <li><span class="n">03</span><a href="#s3">写作：从一句话到一篇文章</a><span class="dots"></span></li>
       <li><span class="n">04</span><a href="#s4">图片：直传图床</a><span class="dots"></span></li>
       <li><span class="n">05</span><a href="#s5">连接仓库（登录）</a><span class="dots"></span></li>
@@ -135,7 +135,7 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
   </section>
 
   <section id="s2">
-    <div class="sec-head"><span class="sec-n">02</span><h2>四间房</h2></div>
+    <div class="sec-head"><span class="sec-n">02</span><h2>五间房</h2></div>
     <div class="rooms">
       <div class="room">
         <p class="r-tag">读 · READ</p>
@@ -151,6 +151,11 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
         <p class="r-tag">用 · USE</p>
         <p class="r-name">工具房</p>
         <p>书签墙，按分类分组，即时搜索。有令牌时可添加、编辑、删除书签，也能重命名分类——全部与旧版 tools.json 格式兼容。</p>
+      </div>
+      <div class="room">
+        <p class="r-tag">试 · TRY</p>
+        <p class="r-name">工坊</p>
+        <p>接入你自己的组件仓库（可多个），取件后在页面内现场渲染；每件展品带用法、属性与源码视图。也能挂线上站点。在设置页「组件项目」里增删。</p>
       </div>
       <div class="room">
         <p class="r-tag">造 · MAKE</p>
@@ -184,7 +189,7 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
       <li><span class="no">1</span><span class="tx">点击左下角用户条（或其旁的齿轮图标），进入设置页。</span></li>
       <li><span class="no">2</span><span class="tx">填写 GitHub 用户名、内容仓库名（文章与书签所在）、分支，以及访问令牌（生成入口见页内链接，勾选 repo 权限即可）。</span></li>
       <li><span class="no">3</span><span class="tx">可选：填画廊仓库名与目录（独立图床时）。不填则画廊跟随内容仓库。</span></li>
-      <li><span class="no">4</span><span class="tx">点「保存并连接」，书房、画廊、工具房、写作台立即点亮。</span></li>
+      <li><span class="no">4</span><span class="tx">点「保存并连接」，书房、画廊、工具房、写作台与工坊立即点亮。</span></li>
     </ol>
     <div class="note"><b>安全</b>：令牌只保存在本机配置文件（权限 600），页面里只写不显；线上部署的站点对访客默认只读。</div>
   </section>
@@ -197,6 +202,7 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
       <tr><td>内容仓库</td><td><code>GITHUB_OWNER</code> <code>GITHUB_REPO</code> <code>GITHUB_BRANCH</code> <code>GITHUB_TOKEN</code></td></tr>
       <tr><td>画廊仓库</td><td><code>galleryRepo</code> 字段或 <code>GITHUB_GALLERY_*</code> 变量（缺省跟随主仓库）</td></tr>
       <tr><td>画廊目录</td><td><code>galleryDir</code> 字段或 <code>ATRIUM_GALLERY_DIR</code>（空串 = 仓库根）</td></tr>
+      <tr><td>组件项目</td><td><code>demoProjects</code> 字段或 <code>ATRIUM_DEMO_PROJECTS</code>（JSON 数组；仓库读 atrium.json 清单，取件渲染）</td></tr>
       <tr><td>工具清单</td><td><code>ATRIUM_TOOLS_FILE</code>（缺省 admin/tools.json；/ 或 ./ 开头读本地文件）</td></tr>
       <tr><td>备选内容源</td><td><code>GITEE_*</code> 同款四件套 + <code>ATRIUM_DEFAULT_PROVIDER=gitee</code></td></tr>
       <tr><td>站点域名</td><td><code>NEXT_PUBLIC_SITE_URL</code>（部署时设，RSS/sitemap 用）</td></tr>
@@ -207,7 +213,10 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
   "defaultProvider": "github",
   "repos": { "github": { "owner": "yycqyjq", "repo": "ark-notes", "branch": "main", "token": "…" } },
   "galleryRepo": { "owner": "yycqyjq", "repo": "ark-images", "branch": "main" },
-  "galleryDir": ""
+  "galleryDir": "",
+  "demoProjects": [
+    { "id": "bricks", "name": "砖瓦", "kind": "repo", "repo": "yycqyjq/bricks", "branch": "main" }
+  ]
 }</code></pre>
   </section>
 

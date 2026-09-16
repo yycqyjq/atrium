@@ -7,6 +7,7 @@ import ThemeToggle from "./ThemeToggle";
 import {
   IconBook,
   IconColumns,
+  IconCraft,
   IconFrame,
   IconGear,
   IconHome,
@@ -20,6 +21,7 @@ const rooms = [
   { key: "gallery", href: "/gallery", label: "画廊", sub: "看", icon: IconFrame },
   { key: "tools", href: "/tools", label: "工具房", sub: "用", icon: IconToolbox },
   { key: "atelier", href: "/atelier", label: "陈列廊", sub: "造", icon: IconColumns },
+  { key: "workshop", href: "/workshop", label: "工坊", sub: "试", icon: IconCraft },
 ];
 
 function activeKey(pathname: string): string {

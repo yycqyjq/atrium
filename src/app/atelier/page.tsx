@@ -21,6 +21,7 @@ import {
   IconFrame,
   IconToolbox,
   IconColumns,
+  IconCraft,
   IconMoon,
   IconSun,
   IconArrowRight,
@@ -60,6 +61,7 @@ const iconSet: { name: string; icon: React.ReactNode }[] = [
   { name: "Frame", icon: <IconFrame className="size-[18px]" /> },
   { name: "Toolbox", icon: <IconToolbox className="size-[18px]" /> },
   { name: "Columns", icon: <IconColumns className="size-[18px]" /> },
+  { name: "Craft", icon: <IconCraft className="size-[18px]" /> },
   { name: "Moon", icon: <IconMoon className="size-[18px]" /> },
   { name: "Sun", icon: <IconSun className="size-[18px]" /> },
   { name: "ArrowRight", icon: <IconArrowRight className="size-[18px]" /> },
@@ -169,7 +171,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="图标" note="19 枚 · 全站唯一来源">
+          <Section title="图标" note="20 枚 · 全站唯一来源">
             <Card padding="sm">
               <div className="grid grid-cols-5 gap-x-3 gap-y-5 sm:grid-cols-7 md:grid-cols-10">
                 {iconSet.map(({ name, icon }) => (
