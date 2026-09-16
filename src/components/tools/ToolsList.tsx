@@ -7,10 +7,9 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import EmptyState from "@/components/ui/EmptyState";
 import { ToolCardContent } from "./ToolCard";
 import Button from "@/components/ui/Button";
-import { Input } from "@/components/ui/Field";
-import Card from "@/components/ui/Card";
 import Alert from "@/components/ui/Alert";
 import CardActions from "@/components/ui/CardActions";
+import ToolDialog, { type ToolFormValue } from "./ToolDialog";
 import { IconPencil, IconX } from "@/components/icons";
 import type { ToolGroup } from "@/lib/tools";
 
@@ -20,48 +19,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
-  const [editCategory, setEditCategory] = useState<string | null>(null);
-  const [categoryName, setCategoryName] = useState("");
-  const [editTool, setEditTool] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", url: "", description: "", category: "" });
-  const [editOrigin, setEditOrigin] = useState({ name: "", url: "" });
-
-  async function saveEdit() {
-    const res = await fetch("/api/tools", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "tool", oldName: editOrigin.name, oldUrl: editOrigin.url, ...editForm }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string };
-    if (!res.ok || !data.ok) {
-      setNotice({ kind: "error", text: data.error ?? "保存失败" });
-      setTimeout(() => setNotice(null), 3000);
-      return;
-    }
-    setEditTool(null);
-    setNotice({ kind: "ok", text: `已更新「${editForm.name}」` });
-    setTimeout(() => setNotice(null), 3000);
-    router.refresh();
-  }
-
-  async function renameCategory() {
-    const oldName = editCategory ?? "";
-    const res = await fetch("/api/tools", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "category", oldName, name: categoryName.trim() }),
-    });
-    const data = (await res.json()) as { ok?: boolean; error?: string };
-    if (!res.ok || !data.ok) {
-      setNotice({ kind: "error", text: data.error ?? "重命名失败" });
-      setTimeout(() => setNotice(null), 3000);
-      return;
-    }
-    setEditCategory(null);
-    setNotice({ kind: "ok", text: `分类已重命名为「${categoryName.trim()}」` });
-    setTimeout(() => setNotice(null), 3000);
-    router.refresh();
-  }
+  const [editTarget, setEditTarget] = useState<ToolFormValue | null>(null);
 
   async function remove(name: string, url: string) {
     const key = `${name}|${url}`;
@@ -103,6 +61,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   }, [groups, q]);
 
   const total = filtered.reduce((n, group) => n + group.items.length, 0);
+  const categories = useMemo(() => groups.map((group) => group.name), [groups]);
 
   return (
     <>
@@ -131,94 +90,59 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                   const key = `${tool.name}|${tool.url}`;
                   return (
                     <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
-                      {editTool === key ? (
-                        <Card padding="none" className="border-accent bg-accent-soft px-4 py-3.5">
-                          <p className="mb-2 text-[12px] tracking-[0.08em] text-accent-ink">编辑工具</p>
-                          <Input
-                            size="sm"
-                            value={editForm.name}
-                            onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                            className="mb-2"
-                            placeholder="名称"
-                          />
-                          <Input
-                            size="sm"
-                            value={editForm.url}
-                            onChange={(e) => setEditForm((f) => ({ ...f, url: e.target.value }))}
-                            className="mb-2"
-                            placeholder="地址"
-                          />
-                          <Input
-                            size="sm"
-                            value={editForm.description}
-                            onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                            className="mb-2"
-                            placeholder="描述"
-                          />
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={saveEdit}>
-                              保存
-                            </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setEditTool(null)}>
-                              取消
-                            </Button>
-                          </div>
-                        </Card>
-                      ) : confirmDelete === key ? (
-                        <Card padding="none" className="border-accent bg-accent-soft px-4 py-3.5">
-                          <p className="mb-2.5 text-[12.5px] leading-relaxed text-accent-ink">
-                            从清单移除「{tool.name}」？
-                          </p>
-                          <div className="flex items-center gap-2">
-                            <Button size="sm" onClick={() => remove(tool.name, tool.url)}>
-                              确认移除
-                            </Button>
-                            <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>
-                              取消
-                            </Button>
-                          </div>
-                        </Card>
-                      ) : (
-                      <a
-                        href={tool.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group relative block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
-                      >
-                        {canWrite && confirmDelete !== key ? (
-                          <CardActions
-                            actions={[
-                              {
-                                key: "edit",
-                                label: `编辑 ${tool.name}`,
-                                icon: <IconPencil className="size-3.5" />,
-                                onClick: () => {
-                                  setEditForm({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
-                                  setEditOrigin({ name: tool.name, url: tool.url });
-                                  setEditTool(key);
-                                  setConfirmDelete(null);
+                      <div className="group relative">
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                        >
+                          {canWrite ? (
+                            <CardActions
+                              actions={[
+                                {
+                                  key: "edit",
+                                  label: `编辑 ${tool.name}`,
+                                  icon: <IconPencil className="size-3.5" />,
+                                  onClick: () => {
+                                    setEditTarget({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
+                                    setConfirmDelete(null);
+                                  },
                                 },
-                              },
-                              {
-                                key: "remove",
-                                label: `移除 ${tool.name}`,
-                                icon: <IconX className="size-3.5" />,
-                                onClick: () => {
-                                  setConfirmDelete(key);
-                                  setEditTool(null);
+                                {
+                                  key: "remove",
+                                  label: `移除 ${tool.name}`,
+                                  icon: <IconX className="size-3.5" />,
+                                  onClick: () => {
+                                    setConfirmDelete(key);
+                                  },
                                 },
-                              },
-                            ]}
+                              ]}
+                            />
+                          ) : null}
+                          <ToolCardContent
+                            name={tool.name}
+                            url={tool.url}
+                            description={tool.description}
+                            showArrow={!canWrite}
                           />
+                        </a>
+                        {confirmDelete === key ? (
+                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 rounded-ctl border border-line-strong bg-raised/95 px-4 text-center backdrop-blur-[1px]">
+                            <p className="text-[12.5px] leading-relaxed text-ink-2">
+                              从清单移除「{tool.name}」？
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" onClick={() => remove(tool.name, tool.url)}>
+                                确认移除
+                              </Button>
+                              <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>
+                                取消
+                              </Button>
+                            </div>
+                          </div>
                         ) : null}
-                        <ToolCardContent
-                          name={tool.name}
-                          url={tool.url}
-                          description={tool.description}
-                          showArrow={!canWrite}
-                        />
-                      </a>
-                      )}
+                      </div>
                     </li>
                   );
                 })}
@@ -231,6 +155,14 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
           </p>
         </>
       )}
+
+      <ToolDialog
+        open={editTarget != null}
+        mode="edit"
+        categories={categories}
+        initial={editTarget}
+        onClose={() => setEditTarget(null)}
+      />
     </>
   );
 }
