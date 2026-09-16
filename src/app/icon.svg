@@ -1,1 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect x="3.5" y="3.5" width="25" height="25" fill="none" stroke="#224c36" stroke-width="2.6"/><rect x="11.5" y="11.5" width="9" height="9" fill="none" stroke="#224c36" stroke-width="2.6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 中庭 favicon：暖纸圆角底 + 回字标志（与应用图标同气质，小尺寸可读） -->
+  <rect width="32" height="32" rx="7" fill="#f6f4ee"/>
+  <g stroke="#224c36" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <rect x="5.6" y="5.6" width="20.8" height="20.8" stroke-width="2.4"/>
+    <rect x="12.7" y="12.7" width="6.6" height="6.6" stroke-width="2.4"/>
+    <path d="M16 5.6 V12.7 M16 19.3 V26.4 M5.6 16 H12.7 M19.3 16 H26.4" stroke-width="1.5"/>
+  </g>
+</svg>
