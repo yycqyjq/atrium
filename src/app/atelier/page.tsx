@@ -15,6 +15,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { ToolCardContent } from "@/components/tools/ToolCard";
 import PostRow from "@/components/study/PostRow";
 import { SearchDemo, ComboboxDemo } from "@/components/atelier/Demos";
+import DensityToggle from "@/components/atelier/DensityToggle";
 import {
   IconMark,
   IconHome,
@@ -88,8 +89,8 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="mb-12">
-      <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-line pb-3">
+    <section className="mb-12 [[data-density=compact]_&]:mb-8">
+      <div className="mb-5 flex items-baseline justify-between gap-4 border-b border-line pb-3 [[data-density=compact]_&]:mb-4">
         <h2 className="font-serif text-[17px] tracking-[0.02em]">{title}</h2>
         {note ? <span className="text-right text-[12px] text-ink-3">{note}</span> : null}
       </div>
@@ -130,11 +131,12 @@ export default function AtelierPage() {
           crumbs={[{ label: "中庭", href: "/" }, { label: "陈列廊" }]}
           title="陈列廊"
           subtitle="组件与实验。本页即组件库实物：下列部件均直接引用应用内公共组件（改一处、处处同步），新组件先在这里亮相。"
+          extra={<DensityToggle />}
         />
 
-        <div data-floor-nav>
+        <div id="atelier-root" data-density="default" data-floor-nav>
           <Section title="色板" note="双主题 · 随系统或手动切换">
-            <div className="grid grid-cols-3 gap-3 md:grid-cols-4 xl:grid-cols-6">
+            <div className="grid grid-cols-3 gap-3 md:grid-cols-4 xl:grid-cols-6 [[data-density=compact]_&]:gap-2">
               {swatches.map((swatch) => (
                 <div key={swatch.token} className="overflow-hidden rounded-ctl border border-line">
                   <div className={`h-14 border-b border-line ${swatch.className}`} />
@@ -148,7 +150,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="排印" note="宋体标题 · 黑体正文 · 等宽代码">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">标题 · 宋　34 / 600</p>
                 <p className="font-serif text-[34px] font-semibold leading-tight tracking-[0.03em]">中庭</p>
@@ -189,7 +191,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="交互控件" note="真实组件 · 本页可直接操作">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">按钮</p>
                 <div className="flex flex-wrap items-center gap-2.5">
@@ -218,7 +220,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="内容单元" note="工具卡片 / 文章行 · 与房间共用">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <a
                 href={demoTool.url}
                 target="_blank"
@@ -235,7 +237,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="文本与标记" note="引用 / 代码 / 链接">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">引用</p>
                 <blockquote className="border-l-2 border-accent bg-accent-soft/50 px-4 py-2.5 text-[13.5px] leading-relaxed text-ink-2">
@@ -265,7 +267,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="结构与导航" note="分组标题 / 楼层目录">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm" data-floor-skip>
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">分组标题（SectionHeading）</p>
                 <SectionHeading title="示例分组" count="12 篇" href="#structure" />
@@ -282,7 +284,7 @@ export default function AtelierPage() {
           </Section>
 
           <Section title="状态与提示" note="空态 / 提示条 / 载入态">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="none">
                 <EmptyState title="房间级空态。" sub="衬线标题 + 副文案（EmptyState 组件）。" />
               </Card>
@@ -290,17 +292,17 @@ export default function AtelierPage() {
                 <EmptyState variant="search" title="没有找到「示例词」。" sub="搜索无结果的轻量空态。" />
               </Card>
             </div>
-            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-ctl border border-line py-8">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-ctl border border-line py-8 [[data-density=compact]_&]:py-6">
               <Alert size="sm" tone="error">提示条：强调底色，用于错误与警告（Alert · error）。</Alert>
               <Alert size="sm" tone="ok">提示条：描边浅面，用于常规告知（Alert · ok）。</Alert>
             </div>
-            <div className="mt-3 flex items-center justify-center rounded-ctl border border-line py-8">
+            <div className="mt-3 flex items-center justify-center rounded-ctl border border-line py-8 [[data-density=compact]_&]:py-6">
               <Loading label="载入中…（路由切换与等待时同款）" />
             </div>
           </Section>
 
           <Section title="表单与字段" note="输入框 / 文本域 / 标签 / 下拉 · 全站同款">
-            <div className="grid gap-3 md:grid-cols-2">
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">输入框（Input）</p>
                 <FieldLabel htmlFor="demo-input">示例标签（FieldLabel）</FieldLabel>
