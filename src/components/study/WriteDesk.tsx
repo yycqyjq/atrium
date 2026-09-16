@@ -24,12 +24,12 @@ export function fileNameFromTitle(title: string): string {
 export default function WriteDesk({
   initial,
 }: {
-  initial?: { slug: string; title: string; body: string };
+  initial?: { slug: string; title: string; body: string; refs?: string };
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
-  const [refs, setRefs] = useState("");
+  const [refs, setRefs] = useState(initial?.refs ?? "");
   const [state, setState] = useState<WriteState>("edit");
   const [message, setMessage] = useState("");
   const [savedSlug, setSavedSlug] = useState("");
@@ -44,15 +44,16 @@ export default function WriteDesk({
     setState("saving");
     setMessage("");
     try {
-      // 参考链接：仅新建时附加（旧版格式），编辑模式沿用原文
-      let finalBody = body;
+      // 参考链接：新建/编辑统一——按旧版格式附加到正文尾部（清空则移除该段）
       const refLines = refs
         .split("\n")
         .map((l) => l.trim())
         .filter(Boolean);
-      if (!isEdit && refLines.length > 0) {
-        finalBody = `${body.replace(/\s+$/, "")}\n\n---\n\n**参考链接**：\n${refLines.map((l) => `- ${l}`).join("\n")}`;
-      }
+      const base = body.replace(/^\s+/, "").replace(/\s+$/, "");
+      const finalBody =
+        refLines.length > 0
+          ? `${base}\n\n---\n\n**参考链接**：\n${refLines.map((l) => `- ${l}`).join("\n")}`
+          : base;
 
       const res = await fetch("/api/write", {
         method: "POST",
@@ -152,8 +153,8 @@ export default function WriteDesk({
     <div className="rounded-ctl border border-line bg-raised p-5 md:p-6">
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
         {isEdit
-          ? `正在编辑：${initial?.slug}.md`
-          : "新文章以 Markdown 存入内容仓库根目录，文件名自动取标题。"}
+          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；参考链接已提取，可在此修改）`
+          : "新文章以 Markdown 存入内容仓库，文件名自动取标题。"}
       </p>
 
       <div className="mb-4">
@@ -166,7 +167,12 @@ export default function WriteDesk({
           placeholder="文章标题"
         />
         <p className="mt-1.5 text-[11.5px] tracking-[0.03em] text-ink-3">
-          文件名：{autoSlug ? `${autoSlug}.md` : "（随标题自动生成）"}
+          文件名：
+          {isEdit
+            ? `${autoSlug.split("/").pop() ?? autoSlug}.md（保持原文件名）`
+            : autoSlug
+              ? `${autoSlug}.md`
+              : "（随标题自动生成）"}
         </p>
       </div>
 
@@ -181,20 +187,16 @@ export default function WriteDesk({
         />
       </div>
 
-      {!isEdit ? (
-        <div className="mb-5">
-          <label className={label} htmlFor="write-refs">参考链接（每行一个，可选）</label>
-          <textarea
-            id="write-refs"
-            className={`${field} min-h-[84px] resize-y font-mono text-[13px] leading-relaxed`}
-            value={refs}
-            onChange={(e) => setRefs(e.target.value)}
-            placeholder={"https://example.com\n[标题](https://example.com)"}
-          />
-        </div>
-      ) : (
-        <div className="mb-5" />
-      )}
+      <div className="mb-5">
+        <label className={label} htmlFor="write-refs">参考链接（每行一个，可选）</label>
+        <textarea
+          id="write-refs"
+          className={`${field} min-h-[84px] resize-y font-mono text-[13px] leading-relaxed`}
+          value={refs}
+          onChange={(e) => setRefs(e.target.value)}
+          placeholder={"https://example.com\n[标题](https://example.com)"}
+        />
+      </div>
 
       {state === "error" ? (
         <p className="mb-4 rounded-ctl border border-accent bg-accent-soft px-4 py-2.5 text-[13px] text-accent-ink">{message}</p>

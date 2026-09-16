@@ -88,14 +88,15 @@ export async function POST(request: Request) {
   const body = typeof payload.body === "string" ? payload.body : "";
   const sha = typeof payload.sha === "string" && payload.sha ? payload.sha : undefined;
 
-  // 文件名从标题自动生成：只禁止路径不安全字符，兼容中文标点（：+、 等）
+  // 文件名从标题自动生成（也能编辑子目录文章）：只禁止路径不安全形态，兼容中文标点（：+、 等）
+  const segments = slug.split("/");
   if (
     !slug ||
-    slug.startsWith(".") ||
-    slug.includes("/") ||
+    slug.startsWith("/") ||
     slug.includes("\\") ||
     slug.includes("..") ||
-    /[\u0000-\u001f:*?"<>|]/.test(slug)
+    /[\u0000-\u001f:*?"<>|]/.test(slug) ||
+    segments.some((seg) => !seg || seg.startsWith("."))
   ) {
     return NextResponse.json({ error: "文件名包含不可用字符" }, { status: 400 });
   }
