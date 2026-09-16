@@ -52,7 +52,7 @@ export default async function ConnectPage() {
             branch: gh.branch || "main",
             tokenSet: Boolean(gh.tokenSet),
             galleryRepo: full?.galleryRepo?.repo ?? "",
-            galleryDir: full?.galleryDir ?? "",
+            galleryBranch: full?.galleryRepo?.branch ?? "main",
           }}
         />
       </div>

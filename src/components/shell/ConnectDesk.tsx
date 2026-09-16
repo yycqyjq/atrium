@@ -16,7 +16,7 @@ export default function ConnectDesk({
     branch: string;
     tokenSet: boolean;
     galleryRepo?: string;
-    galleryDir?: string;
+    galleryBranch?: string;
   };
 }) {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function ConnectDesk({
   const [branch, setBranch] = useState(initial.branch || "main");
   const [token, setToken] = useState("");
   const [galleryRepo, setGalleryRepo] = useState(initial.galleryRepo ?? "");
-  const [galleryDir, setGalleryDir] = useState(initial.galleryDir ?? "");
+  const [galleryBranch, setGalleryBranch] = useState(initial.galleryBranch ?? "main");
   const [state, setState] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -46,9 +46,8 @@ export default function ConnectDesk({
           },
         },
         galleryRepo: galleryRepo.trim()
-          ? { owner: owner.trim(), repo: galleryRepo.trim(), branch: branch.trim() || "main" }
-          : undefined,
-        galleryDir: galleryRepo.trim() ? galleryDir.trim() : undefined,
+          ? { owner: owner.trim(), repo: galleryRepo.trim(), branch: galleryBranch.trim() || "main" }
+          : "",
       };
       const res = await fetch("/api/config", {
         method: "POST",
@@ -82,34 +81,6 @@ export default function ConnectDesk({
           <input id="conn-owner" className={field} value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="yycqyjq" />
         </div>
         <div>
-          <label className={label} htmlFor="conn-repo">内容仓库名</label>
-          <input id="conn-repo" className={field} value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="ark-notes" />
-        </div>
-        <div>
-          <label className={label} htmlFor="conn-branch">分支</label>
-          <input id="conn-branch" className={field} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
-        </div>
-        <div>
-          <label className={label} htmlFor="conn-gallery">画廊仓库名（可选，独立图床）</label>
-          <input
-            id="conn-gallery"
-            className={field}
-            value={galleryRepo}
-            onChange={(e) => setGalleryRepo(e.target.value)}
-            placeholder="不填则跟随内容仓库"
-          />
-        </div>
-        <div>
-          <label className={label} htmlFor="conn-gdir">画廊目录（可选）</label>
-          <input
-            id="conn-gdir"
-            className={field}
-            value={galleryDir}
-            onChange={(e) => setGalleryDir(e.target.value)}
-            placeholder="如 images；留空 = 仓库根"
-          />
-        </div>
-        <div>
           <label className={label} htmlFor="conn-token">
             访问令牌 {initial.tokenSet ? "（已设置，留空则保持不变）" : ""}
           </label>
@@ -121,6 +92,34 @@ export default function ConnectDesk({
             onChange={(e) => setToken(e.target.value)}
             placeholder={initial.tokenSet ? "••••••••••••" : "ghp_… 或 gho_…"}
             autoComplete="off"
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-repo">内容仓库名</label>
+          <input id="conn-repo" className={field} value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="ark-notes" />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-branch">分支</label>
+          <input id="conn-branch" className={field} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-gallery">画廊仓库名（可选）</label>
+          <input
+            id="conn-gallery"
+            className={field}
+            value={galleryRepo}
+            onChange={(e) => setGalleryRepo(e.target.value)}
+            placeholder="不填则跟随内容仓库"
+          />
+        </div>
+        <div>
+          <label className={label} htmlFor="conn-gbranch">画廊分支</label>
+          <input
+            id="conn-gbranch"
+            className={field}
+            value={galleryBranch}
+            onChange={(e) => setGalleryBranch(e.target.value)}
+            placeholder="main"
           />
         </div>
       </div>
