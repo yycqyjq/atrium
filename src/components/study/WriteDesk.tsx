@@ -1,8 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { useState } from "react";
+import Button, { ButtonLink } from "@/components/ui/Button";
 
 type WriteState = "edit" | "saving" | "saved" | "error";
 
@@ -120,30 +120,19 @@ export default function WriteDesk({
         <p className="mb-6 text-[13px] text-ink-2">{message}</p>
         <div className="flex items-center justify-center gap-3">
           {savedSlug ? (
-            <Link
-              href={`/study/${encodeURIComponent(savedSlug)}`}
-              className="rounded-ctl bg-accent px-4 py-2 text-[13.5px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover"
-            >
-              去书房看这篇
-            </Link>
+            <ButtonLink href={`/study/${encodeURIComponent(savedSlug)}`}>去书房看这篇</ButtonLink>
           ) : (
-            <Link
-              href="/study"
-              className="rounded-ctl bg-accent px-4 py-2 text-[13.5px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover"
-            >
-              回到书房
-            </Link>
+            <ButtonLink href="/study">回到书房</ButtonLink>
           )}
-          <button
-            type="button"
+          <Button
+            variant="secondary"
             onClick={() => {
               setState("edit");
               setSavedSlug("");
             }}
-            className="rounded-ctl border border-line px-4 py-2 text-[13.5px] text-ink-2 transition-colors duration-150 hover:border-line-strong"
           >
             继续写
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -203,44 +192,31 @@ export default function WriteDesk({
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={save}
-          disabled={!canSave}
-          className="rounded-ctl bg-accent px-5 py-2.5 text-[13.5px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-        >
+        <Button onClick={save} disabled={!canSave}>
           {state === "saving" ? "发布中…" : "发布到仓库"}
-        </button>
+        </Button>
         <span className="text-[12px] text-ink-3">以你的名义提交到 GitHub，可在仓库历史里回溯</span>
 
         {isEdit ? (
           confirmDelete ? (
             <span className="ml-auto inline-flex items-center gap-2">
               <span className="text-[12px] text-ink-2">确定删除这篇？此操作会从仓库移除文件。</span>
-              <button
-                type="button"
-                onClick={remove}
-                disabled={deleting}
-                className="rounded-ctl border border-accent bg-accent-soft px-3.5 py-1.5 text-[12.5px] font-medium text-accent-ink transition-colors duration-150 hover:bg-accent hover:text-on-accent disabled:opacity-40"
-              >
+              <Button variant="danger" size="sm" onClick={remove} disabled={deleting}>
                 {deleting ? "删除中…" : "确认删除"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-                className="rounded-ctl border border-line px-3.5 py-1.5 text-[12.5px] text-ink-3 transition-colors duration-150 hover:border-line-strong"
-              >
+              </Button>
+              <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(false)}>
                 取消
-              </button>
+              </Button>
             </span>
           ) : (
-            <button
-              type="button"
+            <Button
+              variant="quiet"
+              size="sm"
+              className="ml-auto underline decoration-line underline-offset-4 hover:text-accent hover:decoration-accent/50"
               onClick={() => setConfirmDelete(true)}
-              className="ml-auto text-[12px] text-ink-3 underline decoration-line underline-offset-4 transition-colors duration-150 hover:text-accent hover:decoration-accent/50"
             >
               删除这篇文章
-            </button>
+            </Button>
           )
         ) : null}
       </div>

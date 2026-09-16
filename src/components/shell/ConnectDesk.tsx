@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 /**
  * 连接仓库表单：读写 config.json 的 repos.github（token 只写不显）。
@@ -149,14 +150,9 @@ export default function ConnectDesk({
         </p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={save}
-        disabled={state === "saving" || !owner.trim() || !repo.trim()}
-        className="rounded-ctl bg-accent px-5 py-2.5 text-[13.5px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button onClick={save} disabled={state === "saving" || !owner.trim() || !repo.trim()}>
         {state === "saving" ? "连接中…" : "保存并连接"}
-      </button>
+      </Button>
     </div>
   );
 }

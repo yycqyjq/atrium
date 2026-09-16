@@ -6,6 +6,7 @@ import { SearchInput } from "@/components/search/SearchBox";
 import SectionHeading from "@/components/ui/SectionHeading";
 import EmptyState from "@/components/ui/EmptyState";
 import { ToolCardContent } from "./ToolCard";
+import Button from "@/components/ui/Button";
 import type { ToolGroup } from "@/lib/tools";
 
 /** 工具房列表 + 即时搜索 + 书签删除（可写环境下显示） */
@@ -152,20 +153,12 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                             placeholder="描述"
                           />
                           <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={saveEdit}
-                              className="rounded-ctl bg-accent px-3 py-1.5 text-[12px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover"
-                            >
+                            <Button size="sm" onClick={saveEdit}>
                               保存
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditTool(null)}
-                              className="rounded-ctl border border-line px-3 py-1.5 text-[12px] text-ink-3 transition-colors duration-150 hover:border-line-strong"
-                            >
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setEditTool(null)}>
                               取消
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       ) : confirmDelete === key ? (
@@ -174,20 +167,12 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                             从清单移除「{tool.name}」？
                           </p>
                           <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => remove(tool.name, tool.url)}
-                              className="rounded-ctl bg-accent px-3 py-1.5 text-[12px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover"
-                            >
+                            <Button size="sm" onClick={() => remove(tool.name, tool.url)}>
                               确认移除
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setConfirmDelete(null)}
-                              className="rounded-ctl border border-line px-3 py-1.5 text-[12px] text-ink-3 transition-colors duration-150 hover:border-line-strong"
-                            >
+                            </Button>
+                            <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>
                               取消
-                            </button>
+                            </Button>
                           </div>
                         </div>
                       ) : (

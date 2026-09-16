@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import FloorNav from "@/components/shell/FloorNav";
+import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
 import SectionHeading from "@/components/ui/SectionHeading";
@@ -135,15 +136,12 @@ export default function AtelierPage() {
               <div className="rounded-ctl border border-line px-5 py-4">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">按钮</p>
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-ctl bg-accent px-4 py-2 text-[13.5px] font-medium tracking-[0.02em] text-on-accent">
-                    主要操作
-                  </span>
-                  <span className="rounded-ctl border border-line px-4 py-2 text-[13.5px] text-ink-2">
-                    次要操作
-                  </span>
-                  <span className="cursor-not-allowed rounded-ctl bg-accent px-4 py-2 text-[13.5px] font-medium tracking-[0.02em] text-on-accent opacity-40">
-                    禁用状态
-                  </span>
+                  <Button>主要操作</Button>
+                  <Button variant="secondary">次要操作</Button>
+                  <Button variant="danger" size="sm">危险确认</Button>
+                  <Button disabled>禁用状态</Button>
+                  <Button variant="text">文字按钮</Button>
+                  <Button variant="quiet" size="sm">静默按钮</Button>
                 </div>
               </div>
               <div className="rounded-ctl border border-line px-5 py-4">

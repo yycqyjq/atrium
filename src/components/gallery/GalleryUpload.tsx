@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 /**
  * 画廊上传：选择本地图片 → 直传图床仓库（GitHub Contents API）。
@@ -143,16 +144,16 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
           {message}
           {state === "error" ? " " : ""}
           {state === "done" ? " " : ""}
-          <button
-            type="button"
+          <Button
+            variant="quiet"
+            className="underline decoration-line underline-offset-4"
             onClick={() => {
               setState("idle");
               setMessage("");
             }}
-            className="text-ink-3 underline decoration-line underline-offset-4 hover:text-ink-2"
           >
             再传一批
-          </button>
+          </Button>
         </p>
       ) : null}
     </div>

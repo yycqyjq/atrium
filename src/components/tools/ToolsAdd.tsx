@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from "@/components/ui/Button";
 
 /**
  * 添加工具：内联表单，提交后写入仓库 admin/tools.json。
@@ -53,11 +54,7 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="group inline-flex items-center gap-1.5 text-[12.5px] tracking-[0.03em] text-accent transition-colors duration-150 hover:text-accent-hover"
-      >
+      <Button variant="text" className="group" onClick={() => setOpen(true)}>
         添加工具
         <svg
           viewBox="0 0 24 24"
@@ -70,7 +67,7 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
         >
           <path d="M12 5 V19 M5 12 H19" />
         </svg>
-      </button>
+      </Button>
     );
   }
 
@@ -81,17 +78,17 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
     <div className="mb-8 rounded-ctl border border-line bg-raised p-5">
       <div className="mb-4 flex items-center justify-between">
         <p className="font-serif text-[15px] tracking-[0.02em]">添加工具</p>
-        <button
-          type="button"
+        <Button
+          variant="quiet"
+          size="sm"
           onClick={() => {
             setOpen(false);
             setState("idle");
             setMessage("");
           }}
-          className="text-[12px] text-ink-3 transition-colors duration-150 hover:text-ink-2"
         >
           收起
-        </button>
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -129,14 +126,9 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
         <p className={`mt-3 text-[12.5px] ${state === "error" ? "text-accent-ink" : "text-ink-2"}`}>{message}</p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={save}
-        disabled={!canSave}
-        className="mt-4 rounded-ctl bg-accent px-4 py-2 text-[13px] font-medium text-on-accent transition-colors duration-150 hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-40"
-      >
+      <Button className="mt-4" onClick={save} disabled={!canSave}>
         {state === "saving" ? "保存中…" : "保存到清单"}
-      </button>
+      </Button>
     </div>
   );
 }

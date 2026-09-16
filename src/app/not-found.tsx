@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { ButtonLink } from "@/components/ui/Button";
 import Footer from "@/components/shell/Footer";
 
 export default function NotFound() {
@@ -12,12 +12,9 @@ export default function NotFound() {
           <p className="mb-7 max-w-[26em] text-sm text-ink-2">
             你要找的页面没有找到，回中庭看看吧。
           </p>
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 rounded-ctl bg-accent px-[18px] py-[9px] text-[13px] tracking-[0.02em] text-on-accent transition-colors duration-150 hover:bg-accent-hover active:translate-y-px"
-          >
+          <ButtonLink href="/" className="active:translate-y-px">
             回到中庭
-          </Link>
+          </ButtonLink>
         </div>
       </div>
       <Footer />
