@@ -63,8 +63,8 @@ export default function DemoProjectsEditor({ initial }: { initial: DemoProject[]
       if (!row.name.trim()) {
         return fail(`第 ${i + 1} 个项目缺少名称。`);
       }
-      if (row.kind === "repo" && !/^[^\s/]+\/[^\s/]+$/.test(row.repo.trim())) {
-        return fail(`「${label}」的仓库应填写 owner/名字。`);
+      if (row.kind === "repo" && !/^[^\s/]+(\/[^\s/]+)?$/.test(row.repo.trim())) {
+        return fail(`「${label}」的仓库填仓库名即可（如 bricks），也可以写 owner/名字。`);
       }
       if (row.kind === "url" && !/^https?:\/\//i.test(row.url.trim())) {
         return fail(`「${label}」的地址需以 http(s):// 开头。`);
@@ -113,7 +113,7 @@ export default function DemoProjectsEditor({ initial }: { initial: DemoProject[]
       </div>
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
         「工坊」会读取组件仓库里的 atrium.json 展品清单，取件并在页面内现场渲染；也可以挂线上站点（新窗口打开）。
-        可添加多个项目。
+        可添加多个项目。仓库一栏直接填仓库名即可（自动使用当前连接的 GitHub 账号），也可以写 owner/名字。
       </p>
 
       {rows.length === 0 ? (
@@ -162,7 +162,7 @@ export default function DemoProjectsEditor({ initial }: { initial: DemoProject[]
                         id={`dp-repo-${i}`}
                         value={row.repo}
                         onChange={(e) => update(i, { repo: e.target.value })}
-                        placeholder="owner/仓库名"
+                        placeholder="仓库名（如 bricks）"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-3">

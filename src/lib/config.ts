@@ -152,7 +152,7 @@ export function sanitizeDemoProjects(input: unknown): DemoProject[] {
       if (!/^https?:\/\//i.test(url)) continue;
       out.push({ id: unique, name, kind, url, ...(desc ? { desc } : {}) });
     } else {
-      if (!/^[\w.-]+\/[\w.-]+$/.test(repo)) continue;
+      if (!/^[\w.-]+(\/[\w.-]+)?$/.test(repo)) continue; // 允许只填仓库名
       const branch =
         typeof item.branch === "string" && item.branch.trim() ? item.branch.trim() : "main";
       const dir =
@@ -175,14 +175,29 @@ export function sanitizeDemoProjects(input: unknown): DemoProject[] {
 /** 组件项目解析：环境变量 ATRIUM_DEMO_PROJECTS（JSON 数组）优先于 data/config.json */
 export async function resolveDemoProjects(): Promise<DemoProject[]> {
   const env = process.env.ATRIUM_DEMO_PROJECTS;
+  let projects: DemoProject[] = [];
   if (env) {
     try {
-      return sanitizeDemoProjects(JSON.parse(env));
+      projects = sanitizeDemoProjects(JSON.parse(env));
     } catch {
       // 坏环境变量：落回配置文件
+      projects = [];
     }
   }
-  return sanitizeDemoProjects((await readStoredConfig()).demoProjects ?? []);
+  if (projects.length === 0) {
+    projects = sanitizeDemoProjects((await readStoredConfig()).demoProjects ?? []);
+  }
+  return withDefaultOwner(projects);
+}
+
+/** 仓库一栏允许只填仓库名：自动补上当前连接的 GitHub 账号（owner/名字 原样保留） */
+async function withDefaultOwner(projects: DemoProject[]): Promise<DemoProject[]> {
+  if (!projects.some((p) => p.kind === "repo" && p.repo && !p.repo.includes("/"))) return projects;
+  const owner = (await resolveRepoConfig("github")).owner;
+  if (!owner) return projects;
+  return projects.map((p) =>
+    p.kind === "repo" && p.repo && !p.repo.includes("/") ? { ...p, repo: `${owner}/${p.repo}` } : p,
+  );
 }
 
 /** 面向客户端的安全视图：绝不返回 token 原文 */
