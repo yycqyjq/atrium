@@ -5,6 +5,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import BackLink from "@/components/ui/BackLink";
 import ExhibitStage from "@/components/workshop/ExhibitStage";
 import { fetchDemoText, listDemos } from "@/lib/demos";
+import { formatUpdated } from "@/components/workshop/DemoCard";
 import type { DemoProject } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -60,7 +61,9 @@ export default async function ExhibitPage({
           moduleUrl={moduleUrl}
           styles={styleUrls}
           props={item.defaultProps}
-          meta={`${item.origin ? `${item.origin} · ` : ""}${item.projectName}${item.group ? ` · ${item.group}` : ""}`}
+          meta={`${item.origin ? `${item.origin} · ` : ""}${item.projectName}${item.group ? ` · ${item.group}` : ""}${
+            item.updatedAt ? ` · ${formatUpdated(item.updatedAt)}` : ""
+          }`}
           source={source}
           githubUrl={githubUrl}
         />

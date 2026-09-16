@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
 import ConnectDesk from "@/components/shell/ConnectDesk";
 import DemoProjectsEditor from "@/components/workshop/DemoProjectsEditor";
+import SiteInfoEditor from "@/components/shell/SiteInfoEditor";
 import PageHeader from "@/components/ui/PageHeader";
 import { readPublicConfig, sanitizeDemoProjects } from "@/lib/config";
 
@@ -48,6 +49,16 @@ export default async function ConnectPage() {
             galleryBranch: full?.galleryRepo?.branch ?? "main",
           }}
         />
+
+        <div className="mt-10">
+          <SiteInfoEditor
+            initial={{
+              siteName: full?.siteName ?? "",
+              siteSubtitle: full?.siteSubtitle ?? "",
+              footerText: full?.footerText ?? "",
+            }}
+          />
+        </div>
 
         <div className="mt-10">
           <DemoProjectsEditor initial={sanitizeDemoProjects(full?.demoProjects ?? [])} />

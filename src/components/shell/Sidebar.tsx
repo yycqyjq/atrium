@@ -12,6 +12,7 @@ import {
   IconGear,
   IconHome,
   IconMark,
+  IconSearch,
   IconToolbox,
 } from "@/components/icons";
 
@@ -58,6 +59,18 @@ export default function Sidebar() {
           中庭
         </span>
       </Link>
+
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event("atrium:search"))}
+        className="mb-3 flex items-center gap-2.5 rounded-ctl px-2.5 py-2 text-[13px] tracking-[0.02em] text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-ink max-lg:mb-0 max-lg:shrink-0"
+      >
+        <IconSearch className="h-[15px] w-[15px] shrink-0" />
+        <span>搜索</span>
+        <span className="ml-auto rounded border border-line px-1.5 py-px text-[10.5px] max-lg:hidden">
+          ⌘K
+        </span>
+      </button>
 
       <nav
         aria-label="房间导航"

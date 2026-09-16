@@ -5,21 +5,14 @@ import PageHeader from "@/components/ui/PageHeader";
 import Alert from "@/components/ui/Alert";
 import EmptyState from "@/components/ui/EmptyState";
 import { ButtonLink } from "@/components/ui/Button";
-import SectionHeading from "@/components/ui/SectionHeading";
-import { DemoCard, LinkProjectCard } from "@/components/workshop/DemoCard";
+import WorkshopList from "@/components/workshop/WorkshopList";
 import { listDemos, type DemoItem } from "@/lib/demos";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = { title: "工坊" };
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/[^\w\u4e00-\u9fa5-]+/g, "-")
-    .replace(/^-+|-+$/g, "") || "group";
-
-/** 工坊：接入的组件项目与展品陈列（按「项目 × 分组」分区，楼层目录导航） */
+/** 工坊：接入的组件项目与展品陈列（分区 + 即时搜索 + 楼层目录） */
 export default async function WorkshopPage() {
   const { projects, items, errors } = await listDemos();
   const multi = projects.length > 1;
@@ -78,47 +71,7 @@ export default async function WorkshopPage() {
                 sub="往接入的仓库里放组件，或检查展品清单。"
               />
             ) : (
-              <div data-floor-nav>
-                {sections.map((section) => (
-                  <section key={section.key} className="mb-10">
-                    <SectionHeading
-                      id={`grp-${slugify(section.title)}`}
-                      title={section.title}
-                      count={`${section.items.length} 件`}
-                      className="mb-4"
-                    />
-                    <ul className="gap-3 md:columns-2 xl:columns-3">
-                      {section.items.map((item) => (
-                        <li key={`${item.projectId}/${item.id}`} className="mb-3 break-inside-avoid">
-                          <DemoCard item={item} />
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ))}
-
-                {urlProjects.length > 0 ? (
-                  <section className="mb-10">
-                    <SectionHeading
-                      id="grp-external"
-                      title="线上站点"
-                      count={`${urlProjects.length} 件`}
-                      className="mb-4"
-                    />
-                    <ul className="gap-3 md:columns-2 xl:columns-3">
-                      {urlProjects.map((project) => (
-                        <li key={project.id} className="mb-3 break-inside-avoid">
-                          <LinkProjectCard project={project} />
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
-                ) : null}
-
-                <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">
-                  共 {total} 件展品
-                </p>
-              </div>
+              <WorkshopList sections={sections} urlProjects={urlProjects} />
             )}
           </>
         )}

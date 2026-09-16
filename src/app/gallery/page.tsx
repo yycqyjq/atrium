@@ -45,6 +45,8 @@ export default async function GalleryPage({
   const galleryCfg = await resolveGalleryConfig();
   const canUpload = Boolean(galleryCfg.token);
   const total = sections.reduce((n, section) => n + section.images.length, 0);
+  const flat = sections.flatMap((section) => section.images);
+  let cursor = 0;
 
   return (
     <>
@@ -63,20 +65,26 @@ export default async function GalleryPage({
           <EmptyState title={copy.title} sub={copy.sub} />
         ) : (
           <div data-floor-nav>
-            {sections.map((section) => (
-              <section key={section.key} className="mb-10">
-                <SectionHeading
-                  id={`album-${section.slug}`}
-                  title={section.name}
-                  count={`${section.images.length} 张`}
-                  className="mb-4"
-                />
-                <GalleryGrid
-                  images={section.images}
-                  initialView={album === section.name && Number.isInteger(viewNum) ? viewNum : undefined}
-                />
-              </section>
-            ))}
+            {sections.map((section) => {
+              const contextStart = cursor;
+              cursor += section.images.length;
+              return (
+                <section key={section.key} className="mb-10">
+                  <SectionHeading
+                    id={`album-${section.slug}`}
+                    title={section.name}
+                    count={`${section.images.length} 张`}
+                    className="mb-4"
+                  />
+                  <GalleryGrid
+                    images={section.images}
+                    contextImages={flat}
+                    contextStart={contextStart}
+                    initialView={album === section.name && Number.isInteger(viewNum) ? viewNum : undefined}
+                  />
+                </section>
+              );
+            })}
             <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">共 {total} 张</p>
           </div>
         )}

@@ -12,6 +12,8 @@ export type DemoItem = {
   group?: string;
   /** 来源标注（如 ark-admin），来自清单 origin 字段 */
   origin?: string;
+  /** 展品入口文件最后一次提交时间（毫秒） */
+  updatedAt?: number;
   /** 仓库内路径（模块入口，如 dist/exhibits/toast.js） */
   path: string;
   /** 可读源码路径（缺省跟随 path） */
@@ -31,6 +33,7 @@ export type DemosResult = {
 
 const MANIFEST = "atrium.json";
 const LIST_TTL = 60_000;
+const COMMIT_TTL = 10 * 60_000;
 const FILE_TTL = 60_000;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
@@ -55,7 +58,11 @@ function ghHeaders(token: string): Record<string, string> {
 }
 
 async function ghJson(url: string, token: string): Promise<unknown> {
-  const res = await fetch(url, { headers: ghHeaders(token), cache: "no-store" });
+  const res = await fetch(url, {
+    headers: ghHeaders(token),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10000),
+  });
   if (!res.ok) throw new Error(`GitHub ${res.status}`);
   return res.json();
 }
@@ -112,6 +119,41 @@ function normalizeExhibit(
   };
 }
 
+const commitCache = new Map<string, { at: number; value: number | null }>();
+
+/** 展品入口文件最后一次提交时间（10 分钟缓存，失败返回 null） */
+async function lastCommitDate(project: DemoProject, path: string): Promise<number | null> {
+  const parts = repoParts(project);
+  if (!parts) return null;
+  const key = `${parts.owner}/${parts.repo}@${parts.branch}:${path}`;
+  const hit = commitCache.get(key);
+  if (hit && Date.now() - hit.at < COMMIT_TTL) return hit.value;
+  try {
+    const token = await ghToken();
+    const url = `https://api.github.com/repos/${parts.owner}/${parts.repo}/commits?path=${encodeURIComponent(
+      path,
+    )}&sha=${encodeURIComponent(parts.branch)}&per_page=1`;
+    const res = await fetch(url, {
+      headers: ghHeaders(token),
+      cache: "no-store",
+      signal: AbortSignal.timeout(8000),
+    });
+    let value: number | null = null;
+    if (res.ok) {
+      const arr = (await res.json()) as Array<{
+        commit?: { committer?: { date?: string }; author?: { date?: string } };
+      }>;
+      const date = arr[0]?.commit?.committer?.date ?? arr[0]?.commit?.author?.date;
+      if (date) value = Date.parse(date);
+    }
+    if (commitCache.size > 400) commitCache.clear();
+    commitCache.set(key, { at: Date.now(), value });
+    return value;
+  } catch {
+    return null;
+  }
+}
+
 /** 读展品清单（atrium.json）；没有清单时按目录扫描 .js 降级 */
 async function listRepoItems(project: DemoProject): Promise<DemoItem[]> {
   const parts = repoParts(project);
@@ -135,7 +177,16 @@ async function listRepoItems(project: DemoProject): Promise<DemoItem[]> {
       const items = (json.exhibits ?? [])
         .map((ex) => normalizeExhibit(project, dir, ex))
         .filter((x): x is DemoItem => x !== null);
-      if (items.length > 0) return items;
+      if (items.length > 0) {
+        // 补「最近更新」：并行取各入口文件的最后提交时间
+        const withDates = await Promise.all(
+          items.map(async (item) => ({
+            ...item,
+            updatedAt: (await lastCommitDate(project, item.path)) ?? undefined,
+          })),
+        );
+        return withDates;
+      }
     }
   } catch {
     // 读不到清单：落回扫描
@@ -232,7 +283,10 @@ export function isSafeRelPath(rel: string): boolean {
   return rel.split("/").every((seg) => seg && seg !== "." && seg !== ".." && !seg.startsWith("."));
 }
 
-/** 经 GitHub API 读文件：不受 CDN 边缘缓存影响（刷新时优先用，立即拿到最新提交） */
+/**
+ * 经 GitHub API 直读文件（首选通道：可靠、即时，不受 CDN 抖动影响）。
+ * 小文件走 contents；超过 1MB 的走 git blobs（用 contents 返回的 sha）。
+ */
 async function fetchViaApi(
   owner: string,
   repo: string,
@@ -241,17 +295,38 @@ async function fetchViaApi(
   token: string,
 ): Promise<Uint8Array | null> {
   if (!token) return null;
+  const encoded = rel.split("/").map(encodeURIComponent).join("/");
   try {
-    const encoded = rel.split("/").map(encodeURIComponent).join("/");
-    const res = await fetch(
+    const metaRes = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/contents/${encoded}?ref=${encodeURIComponent(branch)}`,
-      { headers: ghHeaders(token), cache: "no-store" },
+      { headers: ghHeaders(token), cache: "no-store", signal: AbortSignal.timeout(10000) },
     );
-    if (!res.ok) return null;
-    const data = (await res.json()) as { content?: string; encoding?: string; size?: number };
-    if (!data.content || data.encoding !== "base64") return null;
-    if ((data.size ?? 0) > MAX_FILE_BYTES) return null;
-    return new Uint8Array(Buffer.from(data.content, "base64"));
+    if (!metaRes.ok) return null;
+    const meta = (await metaRes.json()) as {
+      content?: string;
+      encoding?: string;
+      size?: number;
+      sha?: string;
+    };
+    if (meta.content && meta.encoding === "base64") {
+      const buf = Buffer.from(meta.content, "base64");
+      if (buf.byteLength <= MAX_FILE_BYTES) return new Uint8Array(buf);
+      return null;
+    }
+    // 大文件：contents 不带内容，用 blob 读
+    if (meta.sha) {
+      const blobRes = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/git/blobs/${meta.sha}`,
+        { headers: ghHeaders(token), cache: "no-store", signal: AbortSignal.timeout(20000) },
+      );
+      if (!blobRes.ok) return null;
+      const blob = (await blobRes.json()) as { content?: string; encoding?: string };
+      if (!blob.content || blob.encoding !== "base64") return null;
+      const buf = Buffer.from(blob.content, "base64");
+      if (buf.byteLength > MAX_FILE_BYTES) return null;
+      return new Uint8Array(buf);
+    }
+    return null;
   } catch {
     return null;
   }
@@ -272,8 +347,8 @@ export async function fetchDemoFile(
   const hit = fileCache.get(key);
   if (!fresh && hit && Date.now() - hit.at < FILE_TTL) return { buf: hit.buf, type: hit.type };
 
-  // 刷新请求：优先走 API 直读（绕过 CDN 滞后），失败再落回常规通道
-  if (fresh) {
+  // 首选：API 直读（可靠、即时；配合 ?fresh=1 天然绕过一切缓存）
+  if (token) {
     const viaApi = await fetchViaApi(owner, repo, branch, rel, token);
     if (viaApi) {
       const type = contentTypeOf(rel);
@@ -282,15 +357,18 @@ export async function fetchDemoFile(
     }
   }
 
+  // 兜底：raw（短超时，防卡死）/ jsDelivr（公开仓库）
   const encoded = rel.split("/").map(encodeURIComponent).join("/");
-  const candidates: Array<{ url: string; auth: boolean }> = [
+  const candidates: Array<{ url: string; auth: boolean; timeout: number }> = [
     {
       url: `https://raw.githubusercontent.com/${owner}/${repo}/${encodeURIComponent(branch)}/${encoded}`,
       auth: true,
+      timeout: 6000,
     },
     {
       url: `https://cdn.jsdelivr.net/gh/${owner}/${repo}@${encodeURIComponent(branch)}/${encoded}`,
       auth: false,
+      timeout: 10000,
     },
   ];
 
@@ -298,7 +376,11 @@ export async function fetchDemoFile(
     try {
       const headers: Record<string, string> = { "User-Agent": "atrium" };
       if (candidate.auth && token) headers.Authorization = `Bearer ${token}`;
-      const res = await fetch(candidate.url, { headers, cache: "no-store" });
+      const res = await fetch(candidate.url, {
+        headers,
+        cache: "no-store",
+        signal: AbortSignal.timeout(candidate.timeout),
+      });
       if (!res.ok) continue;
       const ab = await res.arrayBuffer();
       if (ab.byteLength > MAX_FILE_BYTES) return null;

@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { IconArrowRight, IconExternal } from "@/components/icons";
+
+/** 更新时间的轻量展示：今天显示「今日更新」，否则「X月X日更新」 */
+export function formatUpdated(ts: number): string {
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) return "今日更新";
+  return `${d.getMonth() + 1}月${d.getDate()}日更新`;
+}
 import type { DemoProject } from "@/lib/config";
 import type { DemoItem } from "@/lib/demos";
 
@@ -30,6 +38,12 @@ export function DemoCard({ item }: { item: DemoItem }) {
         <span>{item.projectName}</span>
         {item.group ? <span aria-hidden>·</span> : null}
         {item.group ? <span>{item.group}</span> : null}
+        {item.updatedAt ? (
+          <>
+            <span aria-hidden>·</span>
+            <span className="text-accent/80">{formatUpdated(item.updatedAt)}</span>
+          </>
+        ) : null}
       </span>
     </Link>
   );

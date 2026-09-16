@@ -127,11 +127,12 @@
     <p><strong>本机开发模式</strong>（改代码时用）：</p>
     <pre><code>pnpm build        # 构建 standalone 产物
 pnpm desktop:cert # 打开桌面窗口（含证书注入）
-pnpm desktop:smoke # 自检：全链路验证后自动退出</code></pre>
+pnpm desktop:smoke # 自检：全链路验证后自动退出
+pnpm smoke        # 冒烟巡检：六房 + 接口逐项体检</code></pre>
     <p><strong>重新打包</strong>（改完代码想要新 App）：</p>
     <pre><code>pnpm desktop:pack # 打包 .app
 pnpm desktop:dist # 额外产出 dmg</code></pre>
-    <div class="note"><b>快捷键</b>：⌘1–5 切换五个房间；⌘N 直达写作台；书房与工具房的搜索框支持 / 或 ⌘K 聚焦。</div>
+    <div class="note"><b>快捷键</b>：⌘1–5 切换五个房间；⌘N 直达写作台；⌘K（或侧边栏「搜索」）唤起全局搜索，一搜直达文章、展品与书签；房间内的搜索框按 / 聚焦。</div>
   </section>
 
   <section id="s2">
@@ -145,17 +146,17 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
       <div class="room">
         <p class="r-tag">看 · VIEW</p>
         <p class="r-name">画廊</p>
-        <p>图片按相册（子目录）组织。点缩略图开灯箱：← → 翻页、Esc 关闭、可分享单张深链（/gallery?album=ark&amp;view=3）。有令牌时可拖拽直传图片。</p>
+        <p>图片按相册（子目录）逐卷铺开，右侧楼层目录可跳转；图片随滚动懒加载。点缩略图开灯箱：← → 可跨相册连续翻页、Esc 关闭、可分享单张深链（/gallery?album=ark&amp;view=3）。有令牌时可拖拽直传图片。</p>
       </div>
       <div class="room">
         <p class="r-tag">用 · USE</p>
         <p class="r-name">工具房</p>
-        <p>书签墙，按分类分组，即时搜索。有令牌时可添加、编辑、删除书签，也能重命名分类——全部与旧版 tools.json 格式兼容。</p>
+        <p>书签墙，按分类分组，即时搜索；站点图标随滚动懒加载。有令牌时可添加、编辑、删除书签，也能重命名分类——全部与旧版 tools.json 格式兼容。</p>
       </div>
       <div class="room">
         <p class="r-tag">试 · TRY</p>
         <p class="r-name">工坊</p>
-        <p>接入你自己的组件仓库（可多个），取件后在页面内现场渲染；每件展品带用法、属性与源码视图。也能挂线上站点。在设置页「组件项目」里增删。</p>
+        <p>接入你自己的组件仓库（可多个），取件后在页面内现场渲染；按分组分区 + 楼层目录 + 即时搜索，卡片带来源与「最近更新」徽标。每件展品带用法、属性与源码视图，深色主题自动适配。也能挂线上站点。在设置页「组件项目」里增删。</p>
       </div>
       <div class="room">
         <p class="r-tag">造 · MAKE</p>

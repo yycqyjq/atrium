@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Sidebar from "@/components/shell/Sidebar";
+import GlobalSearch from "@/components/search/GlobalSearch";
+import { readPublicConfig } from "@/lib/config";
 
-export const metadata: Metadata = {
-  title: { default: "中庭", template: "%s - 中庭" },
-  description: "中庭，个人数字空间。文章、画廊、工具与实验，共居一室。",
-  alternates: {
-    types: { "application/rss+xml": "/rss.xml" },
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const cfg = await readPublicConfig();
+  const name = cfg.siteName?.trim() || "中庭";
+  return {
+    title: { default: name, template: `%s - ${name}` },
+    description: "中庭，个人数字空间。文章、画廊、工具与实验，共居一室。",
+    alternates: {
+      types: { "application/rss+xml": "/rss.xml" },
+    },
+  };
+}
 
 /**
  * 首帧前决定主题，避免闪烁：
@@ -37,6 +43,7 @@ export default function RootLayout({
             {children}
           </main>
         </div>
+        <GlobalSearch />
       </body>
     </html>
   );

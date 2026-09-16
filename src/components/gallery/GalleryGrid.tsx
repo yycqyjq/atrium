@@ -65,18 +65,25 @@ function SmartImage({
 /**
  * 画廊图片墙 + 灯箱：
  * 点击打开大图，Esc / 点击背景关闭，← → 或滑动翻页，可查看原图。
- * initialView 用于深链（?view=N）直接打开第 N 张。
+ * initialView 用于深链（?album=&view=N）直接打开本相册第 N 张。
+ * contextImages/contextStart：传入全局图序（跨相册），灯箱翻页可连续跨相册。
  */
 export default function GalleryGrid({
   images,
   initialView,
+  contextImages,
+  contextStart = 0,
 }: {
   images: GalleryImage[];
   initialView?: number;
+  contextImages?: GalleryImage[];
+  contextStart?: number;
 }) {
+  const list = contextImages ?? images;
+  const base = contextImages ? contextStart : 0;
   const [current, setCurrent] = useState<number | null>(
     initialView != null && Number.isInteger(initialView) && initialView >= 0 && initialView < images.length
-      ? initialView
+      ? base + initialView
       : null,
   );
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -85,8 +92,8 @@ export default function GalleryGrid({
   const close = useCallback(() => setCurrent(null), []);
   const step = useCallback(
     (delta: number) =>
-      setCurrent((c) => (c == null ? c : (c + delta + images.length) % images.length)),
-    [images.length],
+      setCurrent((c) => (c == null ? c : (c + delta + list.length) % list.length)),
+    [list.length],
   );
 
   // 灯箱打开时：键盘导航 + 锁定页面滚动 + 聚焦关闭按钮
@@ -111,13 +118,13 @@ export default function GalleryGrid({
   useEffect(() => {
     if (current == null) return;
     for (const d of [-1, 1]) {
-      const next = images[(current + d + images.length) % images.length];
+      const next = list[(current + d + list.length) % list.length];
       for (const url of [next.url, ...next.fallbackUrls]) {
         const probe = new window.Image();
         probe.src = url;
       }
     }
-  }, [current, images]);
+  }, [current, list]);
 
   const onTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
     touchX.current = e.touches[0]?.clientX ?? null;
@@ -129,7 +136,7 @@ export default function GalleryGrid({
     touchX.current = null;
   };
 
-  const active = current != null ? images[current] : null;
+  const active = current != null ? list[current] : null;
 
   return (
     <>
@@ -138,7 +145,7 @@ export default function GalleryGrid({
           <button
             key={image.path}
             type="button"
-            onClick={() => setCurrent(i)}
+            onClick={() => setCurrent(base + i)}
             className="group mb-3 block w-full break-inside-avoid cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
             title={image.name}
           >
@@ -166,7 +173,7 @@ export default function GalleryGrid({
             <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">{active.name}</p>
             <div className="flex shrink-0 items-center gap-4">
               <span className="text-[12px] tabular-nums">
-                {current! + 1} / {images.length}
+                {current! + 1} / {list.length}
               </span>
               <a
                 href={active.fallbackUrls[active.fallbackUrls.length - 1] ?? active.url}
@@ -202,7 +209,7 @@ export default function GalleryGrid({
               eager
               className="max-h-full max-w-full rounded-ctl object-contain shadow-2xl"
             />
-            {images.length > 1 ? (
+            {list.length > 1 ? (
               <>
                 <button
                   type="button"

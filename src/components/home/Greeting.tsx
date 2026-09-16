@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function Greeting() {
+export default function Greeting({ subtitle }: { subtitle?: string }) {
   const [greet, setGreet] = useState("你好。");
   const [date, setDate] = useState("");
 
@@ -29,7 +29,7 @@ export default function Greeting() {
         {greet}
       </h1>
       <p className="max-w-[32em] text-ink-2">
-        欢迎回到中庭。骨架已经立好，内容会一间一间搬进来。
+        {subtitle?.trim() || "慢慢看，慢慢写。"}
       </p>
     </div>
   );
