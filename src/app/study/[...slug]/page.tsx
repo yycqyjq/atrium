@@ -6,7 +6,11 @@ import Markdown from "@/components/study/Markdown";
 import Toc from "@/components/study/Toc";
 import StudyBrowser, { type BrowserSection } from "@/components/study/StudyBrowser";
 import FloorNav from "@/components/shell/FloorNav";
-import { IconArrowRight } from "@/components/icons";
+import PageHeader from "@/components/ui/PageHeader";
+import Breadcrumb, { type Crumb } from "@/components/ui/Breadcrumb";
+import BackLink from "@/components/ui/BackLink";
+import { ButtonLink } from "@/components/ui/Button";
+import { IconArrowRight, IconPencil, IconLink } from "@/components/icons";
 import { getPostBySlug, getStudyDir, type PostMeta } from "@/lib/content";
 import { splitReferenceLinks } from "@/lib/reference-links";
 import { extractToc } from "@/lib/toc";
@@ -71,13 +75,10 @@ function PostError() {
           <p className="mb-7 max-w-[26em] text-sm text-ink-2">
             内容源连不上（可能是网络或访问限额），稍后再试；也可以先回书房看看别的。
           </p>
-          <Link
-            href="/study"
-            className="inline-flex items-center gap-2 rounded-ctl border border-line-strong px-[18px] py-[9px] text-[13px] text-ink-2 transition-colors duration-150 hover:border-ink-3 hover:bg-wash hover:text-ink"
-          >
+          <ButtonLink href="/study" variant="secondary">
             <IconArrowRight className="h-3.5 w-3.5 -scale-x-100" />
             回到书房
-          </Link>
+          </ButtonLink>
         </div>
       </div>
       <Footer />
@@ -85,38 +86,22 @@ function PostError() {
   );
 }
 
-/** 面包屑：中庭 / 书房 / 段1 / 段2 …（各段可点击，最后一段为当前位置） */
-function Breadcrumb({ segments }: { segments: string[] }) {
-  return (
-    <p className="mb-3 flex flex-wrap items-center gap-x-1 text-[12.5px] tracking-[0.1em] text-ink-3">
-      <Link href="/" className="transition-colors duration-150 hover:text-accent">
-        中庭
-      </Link>
-      <span> / </span>
-      <Link href="/study" className="transition-colors duration-150 hover:text-accent">
-        书房
-      </Link>
-      {segments.map((segment, i) => {
-        const href = `/study/${segments
-          .slice(0, i + 1)
-          .map(encodeURIComponent)
-          .join("/")}`;
-        const isLast = i === segments.length - 1;
-        return (
-          <span key={href} className="inline-flex items-center gap-x-1">
-            <span> / </span>
-            {isLast ? (
-              <span className="text-ink-2">{segment}</span>
-            ) : (
-              <Link href={href} className="transition-colors duration-150 hover:text-accent">
-                {segment}
-              </Link>
-            )}
-          </span>
-        );
-      })}
-    </p>
-  );
+/** 书房面包屑：中庭 / 书房 / 段1 / 段2 …（中间段可点击） */
+function studyCrumbs(segments: string[]): Crumb[] {
+  return [
+    { label: "中庭", href: "/" },
+    { label: "书房", href: "/study" },
+    ...segments.map((segment, i) => ({
+      label: segment,
+      href:
+        i < segments.length - 1
+          ? `/study/${segments
+              .slice(0, i + 1)
+              .map(encodeURIComponent)
+              .join("/")}`
+          : undefined,
+    })),
+  ];
 }
 
 export default async function StudySlugPage({ params }: Props) {
@@ -140,7 +125,7 @@ export default async function StudySlugPage({ params }: Props) {
       <>
         <div className="mb-[72px]">
           <header className="pt-4 pb-9">
-            <Breadcrumb segments={folderSegments} />
+            <Breadcrumb items={studyCrumbs(folderSegments)} className="mb-3" />
             <h1 className="mb-4 max-w-[26em] font-serif text-[clamp(28px,3.6vw,38px)] font-semibold leading-[1.22] tracking-[0.02em]">
               {meta.title}
             </h1>
@@ -157,18 +142,7 @@ export default async function StudySlugPage({ params }: Props) {
                 href={`/study/write?edit=${encodeURIComponent(meta.slug)}`}
                 className="group ml-auto inline-flex items-center gap-1.5 text-accent transition-colors duration-150 hover:text-accent-hover"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  className="size-[13px]"
-                >
-                  <path d="M4 20 H8 L19 9 C19.8 8.2 19.8 7 19 6.2 L17.8 5 C17 4.2 15.8 4.2 15 5 L4 16 Z" />
-                </svg>
+                <IconPencil className="size-[13px]" />
                 编辑
               </Link>
             </p>
@@ -197,20 +171,7 @@ export default async function StudySlugPage({ params }: Props) {
               <ul className="space-y-2">
                 {links.map((link) => (
                   <li key={link.url} className="flex items-start gap-2.5">
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                      className="mt-[3.5px] size-[13px] shrink-0 text-accent"
-                    >
-                      <path d="M10.5 13.5 L13.5 10.5" />
-                      <path d="M9 7 L11 5 C12.4 3.6 14.6 3.6 16 5 L19 8 C20.4 9.4 20.4 11.6 19 13 L17 15" />
-                      <path d="M15 17 L13 19 C11.6 20.4 9.4 20.4 8 19 L5 16 C3.6 14.6 3.6 12.4 5 11 L7 9" />
-                    </svg>
+                    <IconLink className="mt-[3.5px] size-[13px] shrink-0 text-accent" />
                     <a
                       href={link.url}
                       target="_blank"
@@ -226,13 +187,7 @@ export default async function StudySlugPage({ params }: Props) {
           ) : null}
 
           <div className="mt-14 border-t border-line pt-6">
-            <Link
-              href="/study"
-              className="group inline-flex items-center gap-2 text-[13px] text-ink-3 transition-colors duration-150 hover:text-accent"
-            >
-              <IconArrowRight className="h-3.5 w-3.5 -scale-x-100 transition-transform duration-150 group-hover:-translate-x-0.5" />
-              回到书房
-            </Link>
+            <BackLink href="/study">回到书房</BackLink>
           </div>
         </div>
         <Footer />
@@ -268,17 +223,13 @@ export default async function StudySlugPage({ params }: Props) {
   return (
     <>
       <div className="mb-[72px]">
-        <header className="pt-4 pb-[26px]">
-          <Breadcrumb segments={segments} />
-          <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
-            {name}
-          </h1>
-          <p className="max-w-[34em] text-ink-2">
-            {dir.folders.length > 0 ? `${dir.folders.length} 个子文件夹 · ` : ""}
-            共 {total} 篇
-            {directPosts.length > 0 ? `（本层 ${directPosts.length} 篇）` : ""}
-          </p>
-        </header>
+        <PageHeader
+          crumbs={studyCrumbs(segments)}
+          title={name}
+          subtitle={`${dir.folders.length > 0 ? `${dir.folders.length} 个子文件夹 · ` : ""}共 ${total} 篇${
+            directPosts.length > 0 ? `（本层 ${directPosts.length} 篇）` : ""
+          }`}
+        />
 
         <div data-floor-nav>
           <StudyBrowser

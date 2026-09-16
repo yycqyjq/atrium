@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { IconArrowRight } from "@/components/icons";
 
 /**
  * 分组标题：衬线标题 + 细线 + 计数（+ 可选下钻链接）。
@@ -53,19 +54,7 @@ export default function SectionHeading({
             className="group inline-flex shrink-0 items-center gap-1.5 text-[12px] text-ink-3 transition-colors duration-150 hover:text-accent"
           >
             进入
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5"
-            >
-              <path d="M5 12 H19" />
-              <path d="M13.5 6.5 L19 12 L13.5 17.5" />
-            </svg>
+            <IconArrowRight className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5" />
           </Link>
         </>
       ) : (

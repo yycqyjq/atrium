@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IconArrowUpRight } from "@/components/icons";
 
 /** 域名提取（去 www） */
 export function hostOf(url: string) {
@@ -61,19 +62,7 @@ export function ToolCardContent({
             {name}
           </span>
           {showArrow ? (
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.6"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="mt-0.5 size-[13px] shrink-0 text-ink-3 transition-colors duration-200 group-hover:text-accent"
-            >
-              <path d="M7 17 L17 7" />
-              <path d="M9 7 H17 V15" />
-            </svg>
+            <IconArrowUpRight className="mt-0.5 size-[13px] shrink-0 text-ink-3 transition-colors duration-200 group-hover:text-accent" />
           ) : null}
         </span>
         <span className="mt-0.5 block text-[12px] tracking-[0.03em] text-ink-3">{hostOf(url)}</span>

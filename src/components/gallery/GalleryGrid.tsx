@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryImage } from "@/lib/gallery";
+import { IconX, IconChevronLeft, IconChevronRight } from "@/components/icons";
 
 /** 带备用源降级的图片：主源加载失败时自动依次切换 fallbackUrls */
 function SmartImage({
@@ -154,17 +155,7 @@ export default function GalleryGrid({
                 aria-label="关闭"
                 className="rounded-full p-1.5 text-white ring-1 ring-white/40 transition-colors duration-150 hover:bg-white/10 hover:text-white"
               >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                  className="size-[18px]"
-                >
-                  <path d="M6 6 L18 18 M18 6 L6 18" />
-                </svg>
+                <IconX strokeWidth={1.8} className="size-[18px]" />
               </button>
             </div>
           </div>
@@ -190,18 +181,7 @@ export default function GalleryGrid({
                   aria-label="上一张"
                   className="absolute left-2 rounded-full bg-white/10 p-2.5 text-white/75 transition-colors duration-150 hover:bg-white/20 hover:text-white md:left-4"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="size-5"
-                  >
-                    <path d="M14.5 5.5 L8 12 L14.5 18.5" />
-                  </svg>
+                  <IconChevronLeft strokeWidth={1.8} className="size-5" />
                 </button>
                 <button
                   type="button"
@@ -209,18 +189,7 @@ export default function GalleryGrid({
                   aria-label="下一张"
                   className="absolute right-2 rounded-full bg-white/10 p-2.5 text-white/75 transition-colors duration-150 hover:bg-white/20 hover:text-white md:right-4"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                    className="size-5"
-                  >
-                    <path d="M9.5 5.5 L16 12 L9.5 18.5" />
-                  </svg>
+                  <IconChevronRight strokeWidth={1.8} className="size-5" />
                 </button>
               </>
             ) : null}

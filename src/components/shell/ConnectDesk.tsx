@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import { Input, FieldLabel } from "@/components/ui/Field";
+import Card from "@/components/ui/Card";
+import Alert from "@/components/ui/Alert";
 
 /**
  * 连接仓库表单：读写 config.json 的 repos.github（token 只写不显）。
@@ -29,9 +32,6 @@ export default function ConnectDesk({
   const [galleryBranch, setGalleryBranch] = useState(initial.galleryBranch ?? "main");
   const [state, setState] = useState<"idle" | "saving" | "ok" | "error">("idle");
   const [message, setMessage] = useState("");
-
-  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent";
-  const label = "mb-1.5 block text-[11.5px] tracking-[0.1em] text-ink-3";
 
   async function save() {
     setState("saving");
@@ -75,20 +75,19 @@ export default function ConnectDesk({
   }
 
   return (
-    <div className="rounded-ctl border border-line bg-raised p-5 md:p-6">
+    <Card className="bg-raised">
       <div className="mb-4 grid gap-4 md:grid-cols-2">
         <div>
-          <label className={label} htmlFor="conn-owner">GitHub 用户名</label>
-          <input id="conn-owner" className={field} value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="yycqyjq" />
+          <FieldLabel htmlFor="conn-owner">GitHub 用户名</FieldLabel>
+          <Input id="conn-owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="yycqyjq" />
         </div>
         <div>
-          <label className={label} htmlFor="conn-token">
+          <FieldLabel htmlFor="conn-token">
             访问令牌 {initial.tokenSet ? "（已设置，留空则保持不变）" : ""}
-          </label>
-          <input
+          </FieldLabel>
+          <Input
             id="conn-token"
             type="password"
-            className={field}
             value={token}
             onChange={(e) => setToken(e.target.value)}
             placeholder={initial.tokenSet ? "••••••••••••" : "ghp_… 或 gho_…"}
@@ -96,28 +95,26 @@ export default function ConnectDesk({
           />
         </div>
         <div>
-          <label className={label} htmlFor="conn-repo">内容仓库名</label>
-          <input id="conn-repo" className={field} value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="ark-notes" />
+          <FieldLabel htmlFor="conn-repo">内容仓库名</FieldLabel>
+          <Input id="conn-repo" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="ark-notes" />
         </div>
         <div>
-          <label className={label} htmlFor="conn-branch">分支</label>
-          <input id="conn-branch" className={field} value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
+          <FieldLabel htmlFor="conn-branch">分支</FieldLabel>
+          <Input id="conn-branch" value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
         </div>
         <div>
-          <label className={label} htmlFor="conn-gallery">画廊仓库名（可选）</label>
-          <input
+          <FieldLabel htmlFor="conn-gallery">画廊仓库名（可选）</FieldLabel>
+          <Input
             id="conn-gallery"
-            className={field}
             value={galleryRepo}
             onChange={(e) => setGalleryRepo(e.target.value)}
             placeholder="不填则跟随内容仓库"
           />
         </div>
         <div>
-          <label className={label} htmlFor="conn-gbranch">画廊分支</label>
-          <input
+          <FieldLabel htmlFor="conn-gbranch">画廊分支</FieldLabel>
+          <Input
             id="conn-gbranch"
-            className={field}
             value={galleryBranch}
             onChange={(e) => setGalleryBranch(e.target.value)}
             placeholder="main"
@@ -139,20 +136,12 @@ export default function ConnectDesk({
       </p>
 
       {state === "error" || state === "ok" ? (
-        <p
-          className={`mb-4 rounded-ctl border px-4 py-2.5 text-[13px] ${
-            state === "error"
-              ? "border-accent bg-accent-soft text-accent-ink"
-              : "border-line bg-surface text-ink-2"
-          }`}
-        >
-          {message}
-        </p>
+        <Alert tone={state === "error" ? "error" : "ok"} className="mb-4">{message}</Alert>
       ) : null}
 
       <Button onClick={save} disabled={state === "saving" || !owner.trim() || !repo.trim()}>
         {state === "saving" ? "连接中…" : "保存并连接"}
       </Button>
-    </div>
+    </Card>
   );
 }

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import ToolsList from "@/components/tools/ToolsList";
 import FloorNav from "@/components/shell/FloorNav";
+import PageHeader from "@/components/ui/PageHeader";
 import EmptyState from "@/components/ui/EmptyState";
 import ToolsAdd from "@/components/tools/ToolsAdd";
 import { listTools } from "@/lib/tools";
@@ -28,22 +28,12 @@ export default async function ToolsPage() {
   return (
     <>
       <div className="mb-[72px]">
-        <header className="pt-4 pb-[26px]">
-          <p className="mb-3 text-[12.5px] tracking-[0.1em] text-ink-3">
-            <Link href="/" className="transition-colors duration-150 hover:text-accent">
-              中庭
-            </Link>
-            {" / "}
-            <span className="text-ink-2">工具房</span>
-          </p>
-          <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
-            工具房
-          </h1>
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <p className="max-w-[34em] text-ink-2">书签与常用工具。顺手就能拿到。</p>
-            {canWrite ? <ToolsAdd categories={categories} /> : null}
-          </div>
-        </header>
+        <PageHeader
+          crumbs={[{ label: "中庭", href: "/" }, { label: "工具房" }]}
+          title="工具房"
+          subtitle="书签与常用工具。顺手就能拿到。"
+          extra={canWrite ? <ToolsAdd categories={categories} /> : null}
+        />
 
         {count === 0 ? (
           <EmptyState title={emptyCopy.title} sub={emptyCopy.sub} />

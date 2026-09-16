@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import GalleryGrid from "@/components/gallery/GalleryGrid";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
 import EmptyState from "@/components/ui/EmptyState";
 import Chip from "@/components/ui/Chip";
+import PageHeader from "@/components/ui/PageHeader";
 import { listGallery, type ContentReason } from "@/lib/gallery";
 import { resolveGalleryConfig } from "@/lib/config";
 
@@ -46,19 +46,11 @@ export default async function GalleryPage({
   return (
     <>
       <div className="mb-[72px]">
-        <header className="pt-4 pb-[26px]">
-          <p className="mb-3 text-[12.5px] tracking-[0.1em] text-ink-3">
-            <Link href="/" className="transition-colors duration-150 hover:text-accent">
-              中庭
-            </Link>
-            {" / "}
-            <span className="text-ink-2">画廊</span>
-          </p>
-          <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
-            画廊
-          </h1>
-          <p className="max-w-[34em] text-ink-2">照片与影像。存放目光的地方。</p>
-        </header>
+        <PageHeader
+          crumbs={[{ label: "中庭", href: "/" }, { label: "画廊" }]}
+          title="画廊"
+          subtitle="照片与影像。存放目光的地方。"
+        />
 
         {canUpload ? <GalleryUpload dir={current ?? ""} albums={albums.map((a) => a.name)} /> : null}
 

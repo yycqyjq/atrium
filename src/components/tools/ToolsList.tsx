@@ -7,6 +7,10 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import EmptyState from "@/components/ui/EmptyState";
 import { ToolCardContent } from "./ToolCard";
 import Button from "@/components/ui/Button";
+import { Input } from "@/components/ui/Field";
+import Card from "@/components/ui/Card";
+import Alert from "@/components/ui/Alert";
+import { IconPencil, IconX } from "@/components/icons";
 import type { ToolGroup } from "@/lib/tools";
 
 /** 工具房列表 + 即时搜索 + 书签删除（可写环境下显示） */
@@ -103,15 +107,9 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
       <SearchInput value={query} onChange={setQuery} placeholder="搜索工具、描述、域名…" />
 
       {notice ? (
-        <p
-          className={`mb-4 rounded-ctl border px-4 py-2 text-[12.5px] ${
-            notice.kind === "error"
-              ? "border-accent bg-accent-soft text-accent-ink"
-              : "border-line bg-raised text-ink-2"
-          }`}
-        >
+        <Alert tone={notice.kind === "error" ? "error" : "ok"} size="sm" className="mb-4">
           {notice.text}
-        </p>
+        </Alert>
       ) : null}
 
       {total === 0 ? (
@@ -132,24 +130,27 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                   return (
                     <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
                       {editTool === key ? (
-                        <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
+                        <Card padding="none" className="border-accent bg-accent-soft px-4 py-3.5">
                           <p className="mb-2 text-[12px] tracking-[0.08em] text-accent-ink">编辑工具</p>
-                          <input
+                          <Input
+                            size="sm"
                             value={editForm.name}
                             onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[13px] outline-none hover:border-line-strong focus:border-accent"
+                            className="mb-2"
                             placeholder="名称"
                           />
-                          <input
+                          <Input
+                            size="sm"
                             value={editForm.url}
                             onChange={(e) => setEditForm((f) => ({ ...f, url: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none hover:border-line-strong focus:border-accent"
+                            className="mb-2"
                             placeholder="地址"
                           />
-                          <input
+                          <Input
+                            size="sm"
                             value={editForm.description}
                             onChange={(e) => setEditForm((f) => ({ ...f, description: e.target.value }))}
-                            className="mb-2 w-full rounded-ctl border border-line bg-raised px-3 py-1.5 text-[12.5px] outline-none hover:border-line-strong focus:border-accent"
+                            className="mb-2"
                             placeholder="描述"
                           />
                           <div className="flex items-center gap-2">
@@ -160,9 +161,9 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                               取消
                             </Button>
                           </div>
-                        </div>
+                        </Card>
                       ) : confirmDelete === key ? (
-                        <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
+                        <Card padding="none" className="border-accent bg-accent-soft px-4 py-3.5">
                           <p className="mb-2.5 text-[12.5px] leading-relaxed text-accent-ink">
                             从清单移除「{tool.name}」？
                           </p>
@@ -174,7 +175,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                               取消
                             </Button>
                           </div>
-                        </div>
+                        </Card>
                       ) : (
                       <a
                         href={tool.url}
@@ -195,9 +196,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                               }}
                               className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
                             >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="size-3.5">
-                                <path d="M4 20 H8 L19 9 C19.8 8.2 19.8 7 19 6.2 L17.8 5 C17 4.2 15.8 4.2 15 5 L4 16 Z" />
-                              </svg>
+                              <IconPencil className="size-3.5" />
                             </button>
                             <button
                               type="button"
@@ -209,9 +208,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                               }}
                               className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
                             >
-                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true" className="size-3.5">
-                                <path d="M6 6 L18 18 M18 6 L6 18" />
-                              </svg>
+                              <IconX className="size-3.5" />
                             </button>
                           </span>
                         ) : null}

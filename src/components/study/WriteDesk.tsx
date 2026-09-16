@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button, { ButtonLink } from "@/components/ui/Button";
+import { Input, Textarea, FieldLabel } from "@/components/ui/Field";
+import Card from "@/components/ui/Card";
+import Alert from "@/components/ui/Alert";
 
 type WriteState = "edit" | "saving" | "saved" | "error";
 
@@ -107,10 +110,6 @@ export default function WriteDesk({
     }
   }
 
-  const field =
-    "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent";
-  const label = "mb-1.5 block text-[11.5px] tracking-[0.1em] text-ink-3";
-
   if (state === "saved") {
     return (
       <div className="rounded-ctl border border-accent bg-accent-soft px-6 py-10 text-center">
@@ -139,7 +138,7 @@ export default function WriteDesk({
   }
 
   return (
-    <div className="rounded-ctl border border-line bg-raised p-5 md:p-6">
+    <Card className="bg-raised">
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
         {isEdit
           ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；参考资源已提取，可在此修改）`
@@ -147,10 +146,9 @@ export default function WriteDesk({
       </p>
 
       <div className="mb-4">
-        <label className={label} htmlFor="write-title">标题 *</label>
-        <input
+        <FieldLabel htmlFor="write-title">标题 *</FieldLabel>
+        <Input
           id="write-title"
-          className={field}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="文章标题"
@@ -166,10 +164,11 @@ export default function WriteDesk({
       </div>
 
       <div className="mb-4">
-        <label className={label} htmlFor="write-body">正文（Markdown）*</label>
-        <textarea
+        <FieldLabel htmlFor="write-body">正文（Markdown）*</FieldLabel>
+        <Textarea
           id="write-body"
-          className={`${field} min-h-[380px] resize-y font-mono text-[13px] leading-relaxed`}
+          mono
+          className="min-h-[380px] resize-y"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder={"## 小标题\n\n正文…"}
@@ -177,10 +176,11 @@ export default function WriteDesk({
       </div>
 
       <div className="mb-5">
-        <label className={label} htmlFor="write-refs">参考资源（每行一个，可选）</label>
-        <textarea
+        <FieldLabel htmlFor="write-refs">参考资源（每行一个，可选）</FieldLabel>
+        <Textarea
           id="write-refs"
-          className={`${field} min-h-[84px] resize-y font-mono text-[13px] leading-relaxed`}
+          mono
+          className="min-h-[84px] resize-y"
           value={refs}
           onChange={(e) => setRefs(e.target.value)}
           placeholder={"https://example.com\n[标题](https://example.com)"}
@@ -188,7 +188,7 @@ export default function WriteDesk({
       </div>
 
       {state === "error" ? (
-        <p className="mb-4 rounded-ctl border border-accent bg-accent-soft px-4 py-2.5 text-[13px] text-accent-ink">{message}</p>
+        <Alert tone="error" className="mb-4">{message}</Alert>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
@@ -220,6 +220,6 @@ export default function WriteDesk({
           )
         ) : null}
       </div>
-    </div>
+    </Card>
   );
 }

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
+import { Input, FieldLabel } from "@/components/ui/Field";
+import { IconPlus } from "@/components/icons";
 
 /**
  * 添加工具：内联表单，提交后写入仓库 admin/tools.json。
@@ -56,23 +58,10 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
     return (
       <Button variant="text" className="group" onClick={() => setOpen(true)}>
         添加工具
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.6"
-          strokeLinecap="round"
-          aria-hidden="true"
-          className="size-[13px] transition-transform duration-200 group-hover:rotate-90"
-        >
-          <path d="M12 5 V19 M5 12 H19" />
-        </svg>
+        <IconPlus className="size-[13px] transition-transform duration-200 group-hover:rotate-90" />
       </Button>
     );
   }
-
-  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2 text-[13px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent";
-  const label = "mb-1 block text-[11px] tracking-[0.1em] text-ink-3";
 
   return (
     <div className="mb-8 rounded-ctl border border-line bg-raised p-5">
@@ -93,22 +82,21 @@ export default function ToolsAdd({ categories }: { categories: string[] }) {
 
       <div className="grid gap-4 md:grid-cols-2">
         <div>
-          <label className={label} htmlFor="tool-name">名称 *</label>
-          <input id="tool-name" className={field} value={name} onChange={(e) => setName(e.target.value)} placeholder="工具名称" />
+          <FieldLabel htmlFor="tool-name">名称 *</FieldLabel>
+          <Input id="tool-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="工具名称" />
         </div>
         <div>
-          <label className={label} htmlFor="tool-url">地址 *</label>
-          <input id="tool-url" className={field} value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
+          <FieldLabel htmlFor="tool-url">地址 *</FieldLabel>
+          <Input id="tool-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
         </div>
         <div>
-          <label className={label} htmlFor="tool-desc">描述</label>
-          <input id="tool-desc" className={field} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="一句话说明（可选）" />
+          <FieldLabel htmlFor="tool-desc">描述</FieldLabel>
+          <Input id="tool-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="一句话说明（可选）" />
         </div>
         <div>
-          <label className={label} htmlFor="tool-cat">分类</label>
-          <input
+          <FieldLabel htmlFor="tool-cat">分类</FieldLabel>
+          <Input
             id="tool-cat"
-            className={field}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             list="tool-cat-list"

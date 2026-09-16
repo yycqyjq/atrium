@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { IconSearch } from "@/components/icons";
 
 type Props = {
   value: string;
@@ -43,18 +44,7 @@ export function SearchInput({
 
   return (
     <div className="relative mb-5">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        aria-hidden="true"
-        className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-3"
-      >
-        <circle cx="11" cy="11" r="6.5" />
-        <path d="M16 16 L20 20" />
-      </svg>
+      <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
       <input
         ref={ref}
         type="text"

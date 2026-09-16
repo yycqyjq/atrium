@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import WriteDesk from "@/components/study/WriteDesk";
+import PageHeader from "@/components/ui/PageHeader";
 import { getProvider } from "@/lib/providers";
 import { splitReferenceLinks } from "@/lib/reference-links";
 
@@ -45,23 +45,11 @@ export default async function WritePage({
   return (
     <>
       <div className="mb-[72px]">
-        <header className="pt-4 pb-[26px]">
-          <p className="mb-3 text-[12.5px] tracking-[0.1em] text-ink-3">
-            <Link href="/" className="transition-colors duration-150 hover:text-accent">
-              中庭
-            </Link>
-            {" / "}
-            <Link href="/study" className="transition-colors duration-150 hover:text-accent">
-              书房
-            </Link>
-            {" / "}
-            <span className="text-ink-2">写作台</span>
-          </p>
-          <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
-            写作台
-          </h1>
-          <p className="max-w-[34em] text-ink-2">写完直接存回仓库。没有中间商。</p>
-        </header>
+        <PageHeader
+          crumbs={[{ label: "中庭", href: "/" }, { label: "书房", href: "/study" }, { label: "写作台" }]}
+          title="写作台"
+          subtitle="写完直接存回仓库。没有中间商。"
+        />
 
         <WriteDesk initial={initial} />
       </div>
