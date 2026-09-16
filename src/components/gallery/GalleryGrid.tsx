@@ -103,13 +103,13 @@ export default function GalleryGrid({
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+      <div className="columns-2 gap-3 md:columns-3 xl:columns-4">
         {images.map((image, i) => (
           <button
             key={image.path}
             type="button"
             onClick={() => setCurrent(i)}
-            className="group block cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
+            className="group mb-3 block w-full break-inside-avoid cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
             title={image.name}
           >
             {/* 图片直接来自仓库原始文件（raw），按需懒加载 */}
@@ -118,7 +118,7 @@ export default function GalleryGrid({
               fallbacks={image.fallbackUrls}
               alt={image.name}
               loading="lazy"
-              className="block aspect-[4/3] w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
+              className="block w-full transition-opacity duration-200 group-hover:opacity-90"
             />
           </button>
         ))}

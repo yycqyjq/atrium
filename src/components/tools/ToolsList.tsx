@@ -132,13 +132,13 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                 <h2 className="font-serif text-[17px] tracking-[0.02em]">{group.name}</h2>
                 <span className="text-[12px] text-ink-3">{group.items.length} 个</span>
               </div>
-              <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+              <ul className="gap-3 md:columns-2 xl:columns-3">
                 {group.items.map((tool) => {
                   const key = `${tool.name}|${tool.url}`;
                   return (
-                    <li key={`${tool.category}/${tool.name}`} className="h-full">
+                    <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
                       {editTool === key ? (
-                        <div className="flex h-full flex-col rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
+                        <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
                           <p className="mb-2 text-[12px] tracking-[0.08em] text-accent-ink">编辑工具</p>
                           <input
                             value={editForm.name}
@@ -176,7 +176,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                           </div>
                         </div>
                       ) : confirmDelete === key ? (
-                        <div className="flex h-full flex-col rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
+                        <div className="rounded-ctl border border-accent bg-accent-soft px-4 py-3.5">
                           <p className="mb-2.5 text-[12.5px] leading-relaxed text-accent-ink">
                             从清单移除「{tool.name}」？
                           </p>
@@ -202,7 +202,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                         href={tool.url}
                         target="_blank"
                         rel="noreferrer"
-                        className="group relative flex h-full flex-col rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                        className="group relative block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
                       >
                         {canWrite && confirmDelete !== key ? (
                           <span className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-all duration-150 group-hover:opacity-100">
@@ -238,7 +238,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                           </span>
                         ) : null}
                         <span className="mb-0.5 flex items-start justify-between gap-3">
-                          <span className="line-clamp-2 min-h-[2.75em] font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
+                          <span className="line-clamp-2 font-medium leading-snug tracking-[0.01em] transition-colors duration-200 group-hover:text-accent">
                             {tool.name}
                           </span>
                           {!(canWrite) ? (
@@ -258,7 +258,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                           ) : null}
                         </span>
                         <span className="block text-[12px] tracking-[0.03em] text-ink-3">{hostOf(tool.url)}</span>
-                        <span className="mt-1.5 line-clamp-2 min-h-[42px] text-[13px] leading-relaxed text-ink-2">
+                        <span className="mt-1.5 line-clamp-3 text-[13px] leading-relaxed text-ink-2">
                           {tool.description}
                         </span>
                       </a>
