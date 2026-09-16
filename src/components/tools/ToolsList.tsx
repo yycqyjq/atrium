@@ -129,7 +129,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
             return (
             <section key={group.name} className="mb-10">
               <div className="mb-4 flex items-baseline justify-between border-b border-line pb-3">
-                <h2 className="font-serif text-[17px] tracking-[0.02em]">{group.name}</h2>
+                <h2 id={`cat-${group.name}`} className="scroll-mt-8 font-serif text-[17px] tracking-[0.02em]">{group.name}</h2>
                 <span className="text-[12px] text-ink-3">{group.items.length} 个</span>
               </div>
               <ul className="gap-3 md:columns-2 xl:columns-3">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import ToolsList from "@/components/tools/ToolsList";
+import FloorNav from "@/components/shell/FloorNav";
 import ToolsAdd from "@/components/tools/ToolsAdd";
 import { listTools } from "@/lib/tools";
 import { resolveRepoConfig } from "@/lib/config";
@@ -49,9 +50,12 @@ export default async function ToolsPage() {
             <p className="text-[13px] text-ink-3">{emptyCopy.sub}</p>
           </div>
         ) : (
-          <ToolsList groups={groups} />
+          <div data-floor-nav>
+            <ToolsList groups={groups} />
+          </div>
         )}
       </div>
+      <FloorNav />
       <Footer />
     </>
   );
