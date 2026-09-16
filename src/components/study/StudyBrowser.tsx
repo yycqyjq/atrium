@@ -102,7 +102,11 @@ export default function StudyBrowser({
             return (
               <section key={key} className="mt-8 first:mt-3">
                 {section.folder ? (
-                  <div className="mb-1 flex items-baseline justify-between gap-4 border-b border-line pb-2">
+                  <h2
+                    id={`dir-${section.folder.path}`}
+                    data-floor-title={section.folder.name}
+                    className="mb-1 flex scroll-mt-8 items-baseline justify-between gap-4 border-b border-line pb-2"
+                  >
                     <Link
                       href={`/study/${encodeURIComponent(section.folder.path)}`}
                       className="group inline-flex items-baseline gap-2.5"
@@ -125,7 +129,7 @@ export default function StudyBrowser({
                         <path d="M13.5 6.5 L19 12 L13.5 17.5" />
                       </svg>
                     </Link>
-                  </div>
+                  </h2>
                 ) : index === 0 && showRootHeading ? (
                   <div className="mb-1 flex items-baseline gap-2.5 border-b border-line pb-2">
                     <span className="font-serif text-[17px] tracking-[0.02em] text-ink-2">根目录</span>

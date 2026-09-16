@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import StudyBrowser, { type BrowserPost, type BrowserSection } from "@/components/study/StudyBrowser";
+import FloorNav from "@/components/shell/FloorNav";
 import { studyIndex, type ContentReason, type PostMeta } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
@@ -81,13 +82,16 @@ export default async function StudyPage() {
             <p className="text-[13px] text-ink-3">{copy.sub}</p>
           </div>
         ) : (
-          <StudyBrowser
-            sections={sections}
-            allPosts={posts.map(toBrowserPost)}
-            placeholder="全量搜索文章（标题、摘要、标签、目录）…"
-          />
+          <div data-floor-nav>
+            <StudyBrowser
+              sections={sections}
+              allPosts={posts.map(toBrowserPost)}
+              placeholder="全量搜索文章（标题、摘要、标签、目录）…"
+            />
+          </div>
         )}
       </div>
+      <FloorNav />
       <Footer />
     </>
   );

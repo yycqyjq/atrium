@@ -32,7 +32,7 @@ export default function FloorNav() {
     setItems(
       els.map((el, i) => ({
         id: el.id || `floor-${i}`,
-        title: (el.textContent ?? "").trim(),
+        title: (el.dataset.floorTitle ?? el.textContent ?? "").trim(),
         level: el.tagName === "H2" ? 1 : el.tagName === "H3" ? 2 : 3,
         el,
       })),

@@ -5,6 +5,7 @@ import Footer from "@/components/shell/Footer";
 import Markdown from "@/components/study/Markdown";
 import Toc from "@/components/study/Toc";
 import StudyBrowser, { type BrowserSection } from "@/components/study/StudyBrowser";
+import FloorNav from "@/components/shell/FloorNav";
 import { IconArrowRight } from "@/components/icons";
 import { getPostBySlug, getStudyDir, type PostMeta } from "@/lib/content";
 import { extractToc } from "@/lib/toc";
@@ -243,12 +244,15 @@ export default async function StudySlugPage({ params }: Props) {
           </p>
         </header>
 
-        <StudyBrowser
-          sections={sections}
-          allPosts={dir.allPosts.map(toBrowserPost)}
-          placeholder="全量搜索文章（标题、摘要、标签、目录）…"
-        />
+        <div data-floor-nav>
+          <StudyBrowser
+            sections={sections}
+            allPosts={dir.allPosts.map(toBrowserPost)}
+            placeholder="全量搜索文章（标题、摘要、标签、目录）…"
+          />
+        </div>
       </div>
+      <FloorNav />
       <Footer />
     </>
   );
