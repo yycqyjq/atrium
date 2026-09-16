@@ -15,15 +15,16 @@ export function buttonClasses(variant: Variant = "primary", size: Size = "md", e
   const base =
     "inline-flex items-center justify-center gap-1.5 rounded-ctl tracking-[0.02em] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-40";
   const boxed = variant === "primary" || variant === "secondary" || variant === "danger";
+  // 盒式按钮与输入框同规格：md = 输入框 md（px-3.5 py-2.5），sm = 输入框 sm（px-3 py-1.5）
   const sizeCls = boxed
     ? size === "sm"
-      ? "px-3.5 py-1.5 text-[12.5px]"
-      : "px-4 py-2 text-[13.5px]"
+      ? "px-3 py-1.5 text-[12.5px]"
+      : "px-3.5 py-2.5 text-[13.5px]"
     : size === "sm"
       ? "text-[12px]"
       : "text-[12.5px]";
   const variants: Record<Variant, string> = {
-    primary: "bg-accent font-medium text-on-accent hover:bg-accent-hover",
+    primary: "border border-transparent bg-accent font-medium text-on-accent hover:bg-accent-hover",
     secondary: "border border-line text-ink-2 hover:border-line-strong hover:text-ink",
     danger:
       "border border-accent bg-accent-soft font-medium text-accent-ink hover:bg-accent hover:text-on-accent",
