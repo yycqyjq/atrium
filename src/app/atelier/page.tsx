@@ -131,7 +131,11 @@ export default function AtelierPage() {
           crumbs={[{ label: "中庭", href: "/" }, { label: "陈列廊" }]}
           title="陈列廊"
           subtitle="组件与实验。本页即组件库实物：下列部件均直接引用应用内公共组件（改一处、处处同步），新组件先在这里亮相。"
-          extra={<DensityToggle />}
+          extra={
+            <div className="ml-auto">
+              <DensityToggle />
+            </div>
+          }
         />
 
         <div id="atelier-root" data-density="default" data-floor-nav>
