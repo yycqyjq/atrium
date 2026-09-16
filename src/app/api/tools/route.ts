@@ -5,6 +5,7 @@ import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
 import { ProviderError } from "@/lib/providers/types";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
+import { bustToolsCache } from "@/lib/tools";
 
 export const dynamic = "force-dynamic";
 
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
     data.items.push({ name, url, description, category });
 
     await saveToolsData(data, sha, `feat(tools): 添加「${name}」`);
+    bustToolsCache();
     return NextResponse.json({ ok: true, total: data.items.length, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -128,6 +130,7 @@ export async function DELETE(request: Request) {
     data.categories = data.categories.filter((c) => used.has(c));
 
     await saveToolsData(data, sha, `chore(tools): 移除「${name}」`);
+    bustToolsCache();
     return NextResponse.json({ ok: true, total: data.items.length });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -195,6 +198,7 @@ export async function PATCH(request: Request) {
       if (!stillUsed) data.categories = data.categories.filter((c) => c !== oldCategory);
 
       await saveToolsData(data, sha, `feat(tools): 更新「${oldName}」`);
+      bustToolsCache();
       return NextResponse.json({ ok: true, total: data.items.length });
     }
 
@@ -210,6 +214,7 @@ export async function PATCH(request: Request) {
     }
 
     await saveToolsData(data, sha, `feat(tools): 分类「${oldName}」重命名为「${newName}」`);
+    bustToolsCache();
     return NextResponse.json({ ok: true, categories: data.categories.length });
   } catch (err) {
     const status = (err as { status?: number }).status;

@@ -1,4 +1,5 @@
 import { getProvider } from "@/lib/providers";
+import { cacheThrough, invalidateCachePrefix } from "@/lib/cache";
 import { ProviderError, type RepoEntry, type RepoProvider } from "@/lib/providers/types";
 
 export type PostMeta = {
@@ -32,7 +33,6 @@ const DIR_CAP = 120;
 const MAX_DEPTH = 6;
 /** 无 front-matter 日期时回退查询提交时间的文件数上限 */
 const DATE_FALLBACK_CAP = 12;
-const CACHE_TTL = 60_000;
 
 class NotConfiguredError extends Error {}
 
@@ -186,7 +186,8 @@ async function walkRepo(
     let entries: RepoEntry[];
     try {
       entries = await provider.listDir(path);
-    } catch {
+    } catch (err) {
+      if (path === "") throw err; // 根目录读取失败 = 整体失败（交给上层回退/报错）
       continue; // 子目录读取失败忽略
     }
     let direct = 0;
@@ -272,25 +273,22 @@ async function collectRepo(
   };
 }
 
-let cache: { at: number; key: string; posts: PostMeta[]; folders: StudyFolder[] } | null = null;
+const CONTENT_TTL = 10 * 60_000;
 
-/** 读取仓库（含文件夹索引），60s 内存缓存 */
+/** 写操作（发布 / 编辑 / 删除文章）后调用，让书房即刻反映最新内容 */
+export function bustContentCache() {
+  void invalidateCachePrefix("content-");
+}
+
+/** 读取仓库（含文件夹索引）：两级缓存（内存 + 磁盘），失败回退旧数据 */
 async function loadRepo(providerKey?: string) {
-  const cacheKey = providerKey ?? "default";
-  if (!cache || cache.key !== cacheKey || Date.now() - cache.at > CACHE_TTL) {
-    try {
-      const { posts, folders } = await collectRepo(providerKey);
-      cache = { at: Date.now(), key: cacheKey, posts, folders };
-    } catch (err) {
-      // 抖动 / 临时限流：沿用上次成功的数据，避免整页报错（下个请求会再试）
-      if (cache && cache.key === cacheKey) {
-        console.warn("[content] 刷新失败，沿用缓存：", err instanceof Error ? err.message : err);
-        return cache;
-      }
-      throw err;
-    }
-  }
-  return cache;
+  const cacheKey = `content-${providerKey ?? "default"}`;
+  const { value, stale } = await cacheThrough(cacheKey, CONTENT_TTL, () => collectRepo(providerKey), {
+    hardError: (err) => err instanceof NotConfiguredError,
+    suspicious: (next, prev) => next.posts.length === 0 && (prev?.posts.length ?? 0) > 0,
+  });
+  if (stale) console.warn("[content] 使用缓存数据（可能不是最新）");
+  return value;
 }
 
 /** 全量文章列表（60s 内存缓存）；limit 省略时返回全部 */

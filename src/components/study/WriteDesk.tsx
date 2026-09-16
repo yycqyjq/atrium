@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Button, { ButtonLink } from "@/components/ui/Button";
 import { Input, Textarea, FieldLabel } from "@/components/ui/Field";
+import Combobox from "@/components/ui/Combobox";
 import Card from "@/components/ui/Card";
 import Alert from "@/components/ui/Alert";
 
@@ -24,10 +25,15 @@ export function fileNameFromTitle(title: string): string {
  * - 新文章可选填「参考资源（每行一个）」，保存时按旧版格式附加到正文尾部；
  * - 编辑模式沿用原文，参考资源在正文中原文保留。
  */
+const ROOT_FOLDER = "根目录";
+
 export default function WriteDesk({
   initial,
+  folders = [],
 }: {
   initial?: { slug: string; title: string; body: string; refs?: string };
+  /** 现有文件夹路径（树结构，如 "技术/前端"） */
+  folders?: string[];
 }) {
   const router = useRouter();
   const [title, setTitle] = useState(initial?.title ?? "");
@@ -40,7 +46,16 @@ export default function WriteDesk({
   const [deleting, setDeleting] = useState(false);
 
   const isEdit = Boolean(initial?.slug);
-  const autoSlug = initial?.slug ?? fileNameFromTitle(title);
+  const initialFolder = initial?.slug?.includes("/")
+    ? initial.slug.slice(0, initial.slug.lastIndexOf("/"))
+    : "";
+  const [folder, setFolder] = useState(initialFolder || ROOT_FOLDER);
+  // 文件名：编辑时保持原文件名；新建时随标题自动生成
+  const fileBase = isEdit
+    ? ((initial?.slug?.split("/").pop() ?? "").replace(/\.mdx?$/i, ""))
+    : fileNameFromTitle(title);
+  const folderPath = folder === ROOT_FOLDER ? "" : folder.trim().replace(/^\/+|\/+$/g, "");
+  const fullSlug = folderPath ? `${folderPath}/${fileBase}` : fileBase;
   const canSave = title.trim() !== "" && body.trim() !== "" && state !== "saving";
 
   async function save() {
@@ -62,7 +77,8 @@ export default function WriteDesk({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          slug: autoSlug,
+          slug: fullSlug,
+          ...(isEdit && initial?.slug ? { from: initial.slug } : {}),
           title: title.trim(),
           body: finalBody,
         }),
@@ -75,7 +91,7 @@ export default function WriteDesk({
       }
       setState("saved");
       setMessage(`已发布到仓库：${data.path}`);
-      setSavedSlug(autoSlug);
+      setSavedSlug(fullSlug);
       router.refresh();
     } catch {
       setState("error");
@@ -141,27 +157,37 @@ export default function WriteDesk({
     <Card className="bg-raised">
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
         {isEdit
-          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；参考资源已提取，可在此修改）`
-          : "新文章以 Markdown 存入内容仓库，文件名自动取标题。"}
+          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；改文件夹 = 移动文章；参考资源已提取，可在此修改）`
+          : "新文章以 Markdown 存入内容仓库，文件名自动取标题；可指定文件夹（支持多级，如 技术/前端）。"}
       </p>
 
-      <div className="mb-4">
-        <FieldLabel htmlFor="write-title">标题 *</FieldLabel>
-        <Input
-          id="write-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="文章标题"
-        />
-        <p className="mt-1.5 text-[11.5px] tracking-[0.03em] text-ink-3">
-          文件名：
-          {isEdit
-            ? `${autoSlug.split("/").pop() ?? autoSlug}.md（保持原文件名）`
-            : autoSlug
-              ? `${autoSlug}.md`
-              : "（随标题自动生成）"}
-        </p>
+      <div className="mb-3 grid gap-4 md:grid-cols-2">
+        <div>
+          <FieldLabel htmlFor="write-title">标题 *</FieldLabel>
+          <Input
+            id="write-title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="文章标题"
+          />
+        </div>
+        <div>
+          <FieldLabel htmlFor="write-folder">文件夹</FieldLabel>
+          <Combobox
+            id="write-folder"
+            value={folder}
+            onChange={setFolder}
+            options={[ROOT_FOLDER, ...folders]}
+            placeholder="根目录（默认）"
+            customHint={(v) => `新建文件夹「${v}」`}
+          />
+        </div>
       </div>
+
+      <p className="mb-4 text-[11.5px] tracking-[0.03em] text-ink-3">
+        存档路径：{fileBase ? `${fullSlug}.md` : "（填入标题后自动生成）"}
+        {isEdit ? "（保持原文件名；改文件夹即移动文章）" : ""}
+      </p>
 
       <div className="mb-4">
         <FieldLabel htmlFor="write-body">正文（Markdown）*</FieldLabel>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
+import { bustContentCache } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +41,7 @@ export async function DELETE(request: Request) {
     }
 
     await provider.deleteFile(filePath, `docs(study): 移除《${slug}》`, sha);
+    bustContentCache();
     return NextResponse.json({ ok: true, path: filePath, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -65,6 +67,7 @@ export async function POST(request: Request) {
 
   let payload: {
     slug?: unknown;
+    from?: unknown;
     title?: unknown;
     description?: unknown;
     date?: unknown;
@@ -103,6 +106,19 @@ export async function POST(request: Request) {
   if (!title) {
     return NextResponse.json({ error: "缺少 title" }, { status: 400 });
   }
+
+  // 移动来源（编辑时改文件夹）：与 slug 同规则校验
+  const from = typeof payload.from === "string" ? payload.from.trim() : "";
+  if (
+    from &&
+    (from.startsWith("/") ||
+      from.includes("\\") ||
+      from.includes("..") ||
+      /[\u0000-\u001f:*?"<>|]/.test(from) ||
+      from.split("/").some((seg) => !seg || seg.startsWith(".")))
+  ) {
+    return NextResponse.json({ error: "原路径不合法" }, { status: 400 });
+  }
   if (!body.trim()) {
     return NextResponse.json({ error: "正文不能为空" }, { status: 400 });
   }
@@ -134,6 +150,19 @@ export async function POST(request: Request) {
     const contentBase64 = Buffer.from(content, "utf8").toString("base64");
     const message = existingSha || sha ? `docs(study): 更新《${title}》` : `docs(study): 新增《${title}》`;
     await provider.putFile(filePath, contentBase64, message, sha ?? existingSha);
+
+    // 改文件夹 = 移动：写入新路径后删除旧文件
+    if (from && from !== slug) {
+      const oldPath = `${from}.md`;
+      try {
+        const old = await provider.getFile(oldPath);
+        await provider.deleteFile(oldPath, `docs(study): 移动《${from}》→ ${slug}`, old.sha);
+      } catch {
+        // 旧文件不存在：忽略
+      }
+    }
+
+    bustContentCache();
 
     return NextResponse.json({
       ok: true,

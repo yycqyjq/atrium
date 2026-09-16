@@ -1,4 +1,5 @@
 import { resolveGalleryConfig, galleryDir } from "@/lib/config";
+import { cacheThrough, invalidateCache } from "@/lib/cache";
 import { getProvider } from "@/lib/providers";
 import { ProviderError } from "@/lib/providers/types";
 import type { ContentReason } from "@/lib/content";
@@ -12,16 +13,11 @@ const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
 const IMAGE_CAP = 240;
 const ALBUM_CAP = 60;
 const ALBUM_FETCH_CAP = 24;
-const SECTIONS_TTL = 2 * 60_000;
-
-let sectionsCache: {
-  at: number;
-  value: { sections: GallerySection[]; dir: string; reason: ContentReason };
-} | null = null;
+const SECTIONS_TTL = 5 * 60_000;
 
 /** 写操作（上传 / 改名 / 移除）后调用，让画廊即刻反映最新内容 */
 export function bustGalleryCache() {
-  sectionsCache = null;
+  void invalidateCache("gallery");
 }
 
 /* 每张图的提交时间（卡片日期）：单独缓存 60 分钟，避免反复占用限额 */
@@ -70,11 +66,25 @@ export async function listGallerySections(): Promise<{
   reason: ContentReason;
 }> {
   const rootDir = await galleryDir();
-  if (sectionsCache && Date.now() - sectionsCache.at < SECTIONS_TTL) {
-    return sectionsCache.value;
-  }
-
   try {
+    const { value, stale } = await cacheThrough("gallery", SECTIONS_TTL, () => buildSections(rootDir), {
+      shouldCache: (v) => v.reason === "ok",
+      suspicious: (next, prev) => next.sections.length === 0 && (prev?.sections.length ?? 0) > 0,
+    });
+    if (stale) console.warn("[gallery] 使用缓存数据（可能不是最新）");
+    return value;
+  } catch (err) {
+    console.warn("[gallery] 获取失败：", err);
+    return { sections: [], dir: rootDir, reason: "fetch-failed" };
+  }
+}
+
+/** 实际抓取：成功返回数据；失败抛出（由缓存层决定是否端旧数据） */
+async function buildSections(rootDir: string): Promise<{
+  sections: GallerySection[];
+  dir: string;
+  reason: ContentReason;
+}> {
     const cfg = await resolveGalleryConfig();
     const provider = await getProvider(cfg.provider, cfg);
     if (!(await provider.isConfigured())) {
@@ -100,6 +110,7 @@ export async function listGallerySections(): Promise<{
       .filter((e) => e.type === "dir" && !e.name.startsWith("."))
       .slice(0, ALBUM_FETCH_CAP);
 
+    let albumFailures = 0;
     const sections = (
       await Promise.all(
         albumDirs.map(async (dirEntry) => {
@@ -111,11 +122,17 @@ export async function listGallerySections(): Promise<{
               .map(toImage);
             return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images };
           } catch {
+            albumFailures += 1;
             return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images: [] as GalleryImage[] };
           }
         }),
       )
     ).filter((s) => s.images.length > 0);
+
+    // 全部相册都读失败：视为整体失败（交给缓存层回退）
+    if (albumDirs.length > 0 && albumFailures === albumDirs.length && sections.length === 0) {
+      throw new Error("相册读取全部失败");
+    }
 
     const rootImages = rootEntries
       .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
@@ -132,15 +149,5 @@ export async function listGallerySections(): Promise<{
       if (ts) image.date = ts;
     });
 
-    const value = { sections, dir: rootDir, reason: "ok" as ContentReason };
-    sectionsCache = { at: Date.now(), value };
-    return value;
-  } catch (err) {
-    console.warn("[gallery] 获取失败：", err);
-    if (sectionsCache) {
-      // 抖动 / 临时限流：沿用上次成功的数据
-      return sectionsCache.value;
-    }
-    return { sections: [], dir: rootDir, reason: "fetch-failed" };
-  }
+    return { sections, dir: rootDir, reason: "ok" as ContentReason };
 }

@@ -1,4 +1,5 @@
 import { resolveDemoProjects, resolveRepoConfig, type DemoProject } from "./config";
+import { cacheThrough } from "@/lib/cache";
 
 export type DemoProp = { name: string; type?: string; default?: string; note?: string };
 
@@ -36,9 +37,6 @@ const LIST_TTL = 5 * 60_000;
 const COMMIT_TTL = 30 * 60_000;
 const FILE_TTL = 60_000;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
-
-/** 列表缓存：短时效，命中直接复用 */
-let listCache: { at: number; key: string; value: DemosResult } | null = null;
 
 async function ghToken(): Promise<string> {
   try {
@@ -227,11 +225,15 @@ async function listRepoItems(project: DemoProject): Promise<DemoItem[]> {
 }
 
 export async function listDemos(opts: { fresh?: boolean } = {}): Promise<DemosResult> {
+  const { value } = await cacheThrough("demos", LIST_TTL, buildDemos, {
+    force: opts.fresh,
+    shouldCache: (v) => !(v.items.length === 0 && v.errors.length > 0),
+  });
+  return value;
+}
+
+async function buildDemos(): Promise<DemosResult> {
   const projects = await resolveDemoProjects();
-  const key = JSON.stringify(projects);
-  if (!opts.fresh && listCache && listCache.key === key && Date.now() - listCache.at < LIST_TTL) {
-    return listCache.value;
-  }
   const items: DemoItem[] = [];
   const errors: string[] = [];
   for (const project of projects) {
@@ -239,22 +241,10 @@ export async function listDemos(opts: { fresh?: boolean } = {}): Promise<DemosRe
     try {
       items.push(...(await listRepoItems(project)));
     } catch (err) {
-      // 抖动 / 临时限流：优先沿用该项目的上次成功数据
-      const stale =
-        listCache && listCache.key === key
-          ? listCache.value.items.filter((item) => item.projectId === project.id)
-          : [];
-      if (stale.length > 0) {
-        console.warn(`[demos] 「${project.name}」刷新失败，沿用缓存：`, (err as Error).message);
-        items.push(...stale);
-      } else {
-        errors.push(`「${project.name}」读取失败：${(err as Error).message}`);
-      }
+      errors.push(`「${project.name}」读取失败：${(err as Error).message}`);
     }
   }
-  const value: DemosResult = { projects, items, errors };
-  listCache = { at: Date.now(), key, value };
-  return value;
+  return { projects, items, errors };
 }
 
 /* ================= 文件取件（代理转发与源码视图共用） ================= */

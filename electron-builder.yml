@@ -4,7 +4,7 @@ productName: 中庭
 
 directories:
   app: electron-app
-  output: release
+  output: ../atrium-dist/release
   buildResources: build
 
 files:
@@ -13,7 +13,7 @@ files:
   - "!**/node_modules/**"
 
 extraResources:
-  - from: desktop-server.tar.gz
+  - from: ../atrium-dist/build/desktop-server.tar.gz
     to: server.tar.gz
 
 asar: true

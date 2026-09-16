@@ -4,6 +4,7 @@ import WriteDesk from "@/components/study/WriteDesk";
 import PageHeader from "@/components/ui/PageHeader";
 import { getProvider } from "@/lib/providers";
 import { splitReferenceLinks } from "@/lib/reference-links";
+import { studyIndex } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,15 @@ export default async function WritePage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const { edit } = await searchParams;
+
+  // 现有文件夹（树结构全路径），供写作台「文件夹」选择
+  let folders: string[] = [];
+  try {
+    const idx = await studyIndex();
+    folders = idx.folders.map((f) => f.path);
+  } catch {
+    folders = [];
+  }
 
   let initial: { slug: string; title: string; body: string; refs?: string } | undefined;
   if (edit) {
@@ -51,7 +61,7 @@ export default async function WritePage({
           subtitle="写完直接存回仓库。没有中间商。"
         />
 
-        <WriteDesk initial={initial} />
+        <WriteDesk initial={initial} folders={folders} />
       </div>
       <Footer />
     </>

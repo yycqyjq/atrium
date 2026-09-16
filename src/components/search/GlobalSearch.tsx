@@ -15,7 +15,8 @@ type ExhibitHit = {
   group?: string;
   origin?: string;
 };
-type IndexData = { posts: PostHit[]; tools: ToolHit[]; exhibits: ExhibitHit[] };
+type ImageHit = { name: string; album: string; view: number };
+type IndexData = { posts: PostHit[]; tools: ToolHit[]; exhibits: ExhibitHit[]; images: ImageHit[] };
 
 type Hit = {
   key: string;
@@ -25,9 +26,9 @@ type Hit = {
   external?: boolean;
 };
 
-const EMPTY: IndexData = { posts: [], tools: [], exhibits: [] };
+const EMPTY: IndexData = { posts: [], tools: [], exhibits: [], images: [] };
 
-/** 全局搜索命令面板：⌘K / Ctrl+K 或侧边栏入口唤起，搜文章、展品与书签 */
+/** 全局搜索命令面板：⌘K / Ctrl+K 或侧边栏入口唤起，搜文章、展品、图片与书签 */
 export default function GlobalSearch() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -129,6 +130,15 @@ export default function GlobalSearch() {
         href: `/workshop/${item.projectId}/${item.id}`,
       }))
       .slice(0, 6);
+    const images: Hit[] = (data.images ?? [])
+      .filter((img) => `${img.name} ${img.album}`.toLowerCase().includes(q))
+      .map((img) => ({
+        key: `g:${img.album}/${img.name}`,
+        title: img.name,
+        sub: `图片 · ${img.album}`,
+        href: `/gallery?album=${encodeURIComponent(img.album)}&view=${img.view}`,
+      }))
+      .slice(0, 6);
     const tools: Hit[] = data.tools
       .filter((tool) => `${tool.name} ${tool.description} ${tool.category}`.toLowerCase().includes(q))
       .map((tool) => ({
@@ -139,7 +149,7 @@ export default function GlobalSearch() {
         external: true,
       }))
       .slice(0, 6);
-    return [...posts, ...exhibits, ...tools];
+    return [...posts, ...exhibits, ...images, ...tools];
   }, [data, query]);
 
   useEffect(() => setActive(0), [query]);
@@ -199,7 +209,7 @@ export default function GlobalSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={onInputKey}
-            placeholder="搜索文章、展品、书签…"
+            placeholder="搜索文章、展品、图片、书签…"
             className="w-full bg-transparent text-[14px] text-ink outline-none placeholder:text-ink-3"
           />
           <span className="shrink-0 rounded border border-line px-1.5 py-px text-[10.5px] text-ink-3">
@@ -210,7 +220,7 @@ export default function GlobalSearch() {
         <div ref={listRef} className="max-h-[52vh] overflow-y-auto px-2 py-2">
           {!query.trim() ? (
             <p className="px-3 py-6 text-center text-[12.5px] text-ink-3">
-              输入关键词，搜遍书房、工坊与工具房。
+              输入关键词，搜遍书房、工坊、画廊与工具房。
             </p>
           ) : hits.length === 0 ? (
             <p className="px-3 py-6 text-center text-[12.5px] text-ink-3">
@@ -249,7 +259,7 @@ export default function GlobalSearch() {
           <span>↑↓ 选择 · Enter 打开</span>
           <span>
             {data
-              ? `文章 ${data.posts.length} · 展品 ${data.exhibits.length} · 书签 ${data.tools.length}`
+              ? `文章 ${data.posts.length} · 展品 ${data.exhibits.length} · 图片 ${data.images?.length ?? 0} · 书签 ${data.tools.length}`
               : "索引加载中…"}
           </span>
         </div>

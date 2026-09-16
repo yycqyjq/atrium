@@ -1,6 +1,6 @@
 {
   "name": "atrium-desktop",
-  "version": "1.2.12",
+  "version": "1.2.13",
   "private": true,
   "description": "中庭桌面端（Electron 壳，本地服务模式）",
   "main": "main.js"

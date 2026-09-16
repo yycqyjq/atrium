@@ -30,12 +30,21 @@ if (!existsSync(join(standalone, "server.js"))) {
   process.exit(1);
 }
 
-const out = join(root, "desktop-server");
+// 产物放项目外（避免被 next dev 的文件监听扫描，曾导致 EMFILE 风暴）
+const OUT_BASE = join(root, "..", "atrium-dist", "build");
+const out = join(OUT_BASE, "desktop-server");
 if (existsSync(out)) {
-  // 旧产物改名为 .old（避免覆盖冲突：pnpm 自引用链接 cpSync 无法覆盖自身子目录）
-  const stale = `${out}.old-${Date.now()}`;
+  // 旧产物归档到项目外隔离区（名字用「年月日-时分」，便于人眼识别）
+  const attic = join(root, "..", "atrium-attic"); // 项目外隔离区：避免被 dev 文件监听扫到
+  mkdirSync(attic, { recursive: true });
+  const d = new Date();
+  const p2 = (n) => String(n).padStart(2, "0");
+  const stamp = `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}-${p2(d.getHours())}${p2(d.getMinutes())}`;
+  let stale = join(attic, `desktop-server-${stamp}`);
+  let i = 2;
+  while (existsSync(stale)) stale = join(attic, `desktop-server-${stamp}-${i++}`);
   renameSync(out, stale);
-  console.log(`[prepare-desktop] 旧目录已移走：${basename(stale)}`);
+  console.log(`[prepare-desktop] 旧产物已归档：atrium-attic/${basename(stale)}`);
 }
 mkdirSync(out, { recursive: true });
 
@@ -96,7 +105,7 @@ fixLinks(out);
 console.log(`[prepare-desktop] 链接处理完成：改写 ${rewritten} 个，外部链接 ${external} 个`);
 
 // 打单文件包（保留符号链接）
-const tarPath = join(root, "desktop-server.tar.gz");
+const tarPath = join(OUT_BASE, "desktop-server.tar.gz");
 const result = spawnSync("tar", ["-czf", tarPath, "-C", out, "."], { stdio: "inherit" });
 if (result.status !== 0) {
   console.error("[prepare-desktop] tar 打包失败");

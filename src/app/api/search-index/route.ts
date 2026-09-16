@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { listPosts } from "@/lib/content";
 import { listTools } from "@/lib/tools";
 import { listDemos } from "@/lib/demos";
+import { listGallerySections } from "@/lib/gallery";
 
 export const dynamic = "force-dynamic";
 
@@ -17,18 +18,19 @@ type Index = {
     group?: string;
     origin?: string;
   }[];
+  images: { name: string; album: string; view: number }[];
 };
 
 let cache: { at: number; value: Index } | null = null;
 const TTL = 5 * 60_000;
 
-/** 全局搜索索引：文章 + 展品 + 书签（五分钟缓存，任一路失败不影响其余） */
+/** 全局搜索索引：文章 + 展品 + 图片 + 书签（五分钟缓存，任一路失败不影响其余） */
 export async function GET() {
   if (cache && Date.now() - cache.at < TTL) {
     return NextResponse.json(cache.value);
   }
 
-  const value: Index = { posts: [], tools: [], exhibits: [] };
+  const value: Index = { posts: [], tools: [], exhibits: [], images: [] };
 
   try {
     const { items } = await listPosts();
@@ -72,6 +74,17 @@ export async function GET() {
     }));
   } catch {
     value.exhibits = cache?.value.exhibits ?? [];
+  }
+
+  try {
+    const { sections } = await listGallerySections();
+    value.images = sections
+      .flatMap((section) =>
+        section.images.map((image, view) => ({ name: image.name, album: section.name, view })),
+      )
+      .slice(0, 1200);
+  } catch {
+    value.images = cache?.value.images ?? [];
   }
 
   cache = { at: Date.now(), value };

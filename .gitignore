@@ -18,6 +18,7 @@
 .trash-desktop-server-bloat/
 certs/*.pem
 data/config.json
+data/cache/
 desktop-server.bloat-*/
 desktop-server.old-*/
 desktop-server.tar.gz

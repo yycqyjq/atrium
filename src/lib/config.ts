@@ -1,4 +1,5 @@
 import { promises as fs } from "node:fs";
+import { invalidateCache } from "@/lib/cache";
 import path from "node:path";
 import { PROVIDER_KEYS, isProviderKey, type ProviderKey } from "./providers/types";
 
@@ -294,6 +295,7 @@ export async function updateConfig(input: Record<string, unknown>) {
 
   await fs.mkdir(DATA_DIR, { recursive: true });
   await fs.writeFile(CONFIG_PATH, `${JSON.stringify(next, null, 2)}\n`, { mode: 0o600 });
+  void invalidateCache("demos"); // 组件项目等配置可能变化
   cache = null;
   return publicConfig(next);
 }

@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { cacheThrough, invalidateCache } from "@/lib/cache";
 import path from "node:path";
 import { getProvider } from "@/lib/providers";
 import { ProviderError } from "@/lib/providers/types";
@@ -52,12 +53,29 @@ function parseTools(raw: string): { categories: string[]; items: ToolItem[] } | 
  * 工具房：读取工具清单（默认仓库 admin/tools.json，兼容旧版 ark-admin 格式）。
  * ATRIUM_TOOLS_FILE 可指定其他仓库路径；以 / 或 ./ 开头时读取本地文件。
  */
-export async function listTools(): Promise<{
+export type ToolsResult = {
   groups: ToolGroup[];
   count: number;
   reason: ContentReason;
   source: "repo" | "local";
-}> {
+};
+
+const TOOLS_TTL = 5 * 60_000;
+
+/** 写操作（增删改书签）后调用，让工具房即刻反映最新内容 */
+export function bustToolsCache() {
+  void invalidateCache("tools");
+}
+
+/** 带两级缓存的工具清单（失败回退旧数据） */
+export async function listTools(): Promise<ToolsResult> {
+  const { value } = await cacheThrough("tools", TOOLS_TTL, computeTools, {
+    shouldCache: (v) => v.reason === "ok",
+  });
+  return value;
+}
+
+async function computeTools(): Promise<ToolsResult> {
   const file = (process.env.ATRIUM_TOOLS_FILE ?? DEFAULT_FILE).trim() || DEFAULT_FILE;
   const source: "repo" | "local" = isLocalPath(file) ? "local" : "repo";
 
