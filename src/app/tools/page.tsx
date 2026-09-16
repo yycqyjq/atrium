@@ -39,7 +39,7 @@ export default async function ToolsPage() {
           <EmptyState title={emptyCopy.title} sub={emptyCopy.sub} />
         ) : (
           <div data-floor-nav>
-            <ToolsList groups={groups} />
+            <ToolsList groups={groups} canWrite={canWrite} />
           </div>
         )}
       </div>

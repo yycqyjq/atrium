@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GalleryImage } from "@/lib/gallery";
-import { IconX, IconChevronLeft, IconChevronRight } from "@/components/icons";
+import { IconX, IconChevronLeft, IconChevronRight, IconPencil } from "@/components/icons";
+import CardActions from "@/components/ui/CardActions";
 
 /** 带备用源降级的图片：主源加载失败时自动依次切换 fallbackUrls */
 function SmartImage({
@@ -101,6 +102,11 @@ export default function GalleryGrid({
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
   const [renameError, setRenameError] = useState<string | null>(null);
+  // 网格卡片上的行内重命名（与灯箱同一套改名逻辑）
+  const [editingPath, setEditingPath] = useState<string | null>(null);
+  const [cardDraft, setCardDraft] = useState("");
+  const [cardSaving, setCardSaving] = useState(false);
+  const [cardError, setCardError] = useState<string | null>(null);
   const pendingFocusPath = useRef<string | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const touchX = useRef<number | null>(null);
@@ -185,21 +191,9 @@ export default function GalleryGrid({
     setEditing(true);
   };
 
-  const confirmRename = async () => {
-    if (!active || saving) return;
-    const next = draft.trim();
-    if (!next) {
-      setRenameError("名字不能为空");
-      return;
-    }
-    if (next === active.name) {
-      setEditing(false);
-      return;
-    }
-    setSaving(true);
-    setRenameError(null);
-    const origin = active;
-    try {
+  /** 改名（灯箱与网格卡片共用）：成功后打本地补丁 + 刷新服务端数据，返回新路径 */
+  const performRename = useCallback(
+    async (origin: GalleryImage, next: string): Promise<string> => {
       const res = await fetch("/api/gallery/rename", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -241,13 +235,71 @@ export default function GalleryGrid({
         }
         return nextPatches;
       });
+      router.refresh();
+      return newPath;
+    },
+    [router],
+  );
+
+  const confirmRename = async () => {
+    if (!active || saving) return;
+    const next = draft.trim();
+    if (!next) {
+      setRenameError("名字不能为空");
+      return;
+    }
+    if (next === active.name) {
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    setRenameError(null);
+    const origin = active;
+    try {
+      const newPath = await performRename(origin, next);
       pendingFocusPath.current = newPath;
       setEditing(false);
       setSaving(false);
-      router.refresh();
     } catch (err) {
       setSaving(false);
       setRenameError(err instanceof Error ? err.message : "改名失败，请稍后再试");
+    }
+  };
+
+  const startCardRename = (image: GalleryImage) => {
+    const view = patches[image.path] ?? image;
+    setEditingPath(image.path);
+    setCardDraft(view.name);
+    setCardError(null);
+  };
+
+  const cancelCardRename = () => {
+    setEditingPath(null);
+    setCardError(null);
+  };
+
+  const saveCardRename = async (image: GalleryImage) => {
+    if (cardSaving) return;
+    const origin = patches[image.path] ?? image;
+    const next = cardDraft.trim();
+    if (!next) {
+      setCardError("名字不能为空");
+      return;
+    }
+    if (next === origin.name) {
+      setEditingPath(null);
+      setCardError(null);
+      return;
+    }
+    setCardSaving(true);
+    setCardError(null);
+    try {
+      await performRename(origin, next);
+      setEditingPath(null);
+      setCardSaving(false);
+    } catch (err) {
+      setCardSaving(false);
+      setCardError(err instanceof Error ? err.message : "改名失败，请稍后再试");
     }
   };
 
@@ -256,25 +308,86 @@ export default function GalleryGrid({
       <div className="columns-2 gap-3 md:columns-3 xl:columns-4">
         {images.map((image, i) => {
           const view = patches[image.path] ?? image;
+          const editingThis = editingPath === image.path;
           return (
-            <button
+            <div
               key={image.path}
-              type="button"
-              onClick={() => setCurrent(base + i)}
-              className="group mb-3 block w-full break-inside-avoid cursor-zoom-in overflow-hidden rounded-ctl border border-line text-left transition-colors duration-200 hover:border-line-strong"
-              title={view.name}
+              className="group relative mb-3 break-inside-avoid overflow-hidden rounded-ctl border border-line transition-colors duration-200 hover:border-line-strong"
             >
-              {/* 图片直接来自仓库原始文件，按需懒加载 */}
-              <SmartImage
-                src={view.url}
-                fallbacks={view.fallbackUrls}
-                alt={view.name}
-                className="block w-full transition-opacity duration-200 group-hover:opacity-90"
-              />
-              <p className="truncate px-2.5 pb-2 pt-1.5 text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
-                {view.name}
-              </p>
-            </button>
+              <button
+                type="button"
+                onClick={() => setCurrent(base + i)}
+                className="block w-full cursor-zoom-in text-left"
+                title={view.name}
+                aria-label={`打开 ${view.name}`}
+              >
+                {/* 图片直接来自仓库原始文件，按需懒加载 */}
+                <SmartImage
+                  src={view.url}
+                  fallbacks={view.fallbackUrls}
+                  alt={view.name}
+                  className="block w-full transition-opacity duration-200 group-hover:opacity-90"
+                />
+              </button>
+              {editingThis ? (
+                <div className="px-2.5 pb-2 pt-1.5">
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={cardDraft}
+                      onChange={(e) => setCardDraft(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          void saveCardRename(image);
+                        }
+                        if (e.key === "Escape") {
+                          e.stopPropagation();
+                          cancelCardRename();
+                        }
+                      }}
+                      autoFocus
+                      aria-label={`重命名 ${view.name}`}
+                      className="min-w-0 flex-1 rounded-ctl border border-line-strong bg-raised px-2 py-1 text-[12px] text-ink focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void saveCardRename(image)}
+                      disabled={cardSaving}
+                      className="shrink-0 text-[12px] text-accent-ink underline decoration-accent/40 underline-offset-2 transition-colors duration-150 hover:text-accent disabled:opacity-50"
+                    >
+                      {cardSaving ? "保存中…" : "保存"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={cancelCardRename}
+                      className="shrink-0 text-[12px] text-ink-3 underline decoration-line underline-offset-2 transition-colors duration-150 hover:text-ink-2"
+                    >
+                      取消
+                    </button>
+                  </div>
+                  {cardError ? <p className="mt-1.5 text-[11.5px] text-accent-ink">{cardError}</p> : null}
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 px-2.5 pb-2 pt-1.5">
+                  <p className="min-w-0 flex-1 truncate text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
+                    {view.name}
+                  </p>
+                  {canEdit ? (
+                    <CardActions
+                      variant="plain"
+                      actions={[
+                        {
+                          key: "rename",
+                          label: `重命名 ${view.name}`,
+                          icon: <IconPencil className="size-[13px]" />,
+                          onClick: () => startCardRename(image),
+                        },
+                      ]}
+                    />
+                  ) : null}
+                </div>
+              )}
+            </div>
           );
         })}
       </div>

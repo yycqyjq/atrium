@@ -10,6 +10,7 @@ import Button from "@/components/ui/Button";
 import { Input } from "@/components/ui/Field";
 import Card from "@/components/ui/Card";
 import Alert from "@/components/ui/Alert";
+import CardActions from "@/components/ui/CardActions";
 import { IconPencil, IconX } from "@/components/icons";
 import type { ToolGroup } from "@/lib/tools";
 
@@ -23,12 +24,13 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   const [categoryName, setCategoryName] = useState("");
   const [editTool, setEditTool] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: "", url: "", description: "", category: "" });
+  const [editOrigin, setEditOrigin] = useState({ name: "", url: "" });
 
   async function saveEdit() {
     const res = await fetch("/api/tools", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ kind: "tool", ...editForm }),
+      body: JSON.stringify({ kind: "tool", oldName: editOrigin.name, oldUrl: editOrigin.url, ...editForm }),
     });
     const data = (await res.json()) as { ok?: boolean; error?: string };
     if (!res.ok || !data.ok) {
@@ -184,33 +186,30 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                         className="group relative block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
                       >
                         {canWrite && confirmDelete !== key ? (
-                          <span className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-all duration-150 group-hover:opacity-100">
-                            <button
-                              type="button"
-                              aria-label={`编辑 ${tool.name}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setEditForm({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
-                                setEditTool(key);
-                                setConfirmDelete(null);
-                              }}
-                              className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
-                            >
-                              <IconPencil className="size-3.5" />
-                            </button>
-                            <button
-                              type="button"
-                              aria-label={`删除 ${tool.name}`}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                setConfirmDelete(key);
-                                setEditTool(null);
-                              }}
-                              className="rounded p-1 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-accent"
-                            >
-                              <IconX className="size-3.5" />
-                            </button>
-                          </span>
+                          <CardActions
+                            actions={[
+                              {
+                                key: "edit",
+                                label: `编辑 ${tool.name}`,
+                                icon: <IconPencil className="size-3.5" />,
+                                onClick: () => {
+                                  setEditForm({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
+                                  setEditOrigin({ name: tool.name, url: tool.url });
+                                  setEditTool(key);
+                                  setConfirmDelete(null);
+                                },
+                              },
+                              {
+                                key: "remove",
+                                label: `移除 ${tool.name}`,
+                                icon: <IconX className="size-3.5" />,
+                                onClick: () => {
+                                  setConfirmDelete(key);
+                                  setEditTool(null);
+                                },
+                              },
+                            ]}
+                          />
                         ) : null}
                         <ToolCardContent
                           name={tool.name}
