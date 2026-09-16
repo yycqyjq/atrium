@@ -145,8 +145,8 @@ export default function FloorNav() {
                     isCurrent
                       ? "font-semibold text-accent"
                       : isAncestor
-                        ? "font-medium text-accent/60"
-                        : "font-semibold text-ink"
+                        ? "text-accent/60"
+                        : "text-ink"
                   }`}
                 >
                   {item.title}
