@@ -30,3 +30,4 @@ release/
 tsconfig.tsbuildinfo
 docs/screenshots/
 data/icon-cache/
+next-env.d.ts
