@@ -4,7 +4,8 @@ import { useState } from "react";
 import Alert from "@/components/ui/Alert";
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { FieldLabel, Input, fieldClasses } from "@/components/ui/Field";
+import { FieldLabel, Input } from "@/components/ui/Field";
+import Combobox from "@/components/ui/Combobox";
 import type { DemoProject } from "@/lib/config";
 
 type Row = {
@@ -135,15 +136,13 @@ export default function DemoProjectsEditor({ initial }: { initial: DemoProject[]
               <div className="grid gap-3 md:grid-cols-2">
                 <div>
                   <FieldLabel htmlFor={`dp-kind-${i}`}>类型</FieldLabel>
-                  <select
+                  <Combobox
                     id={`dp-kind-${i}`}
-                    className={fieldClasses()}
-                    value={row.kind}
-                    onChange={(e) => update(i, { kind: e.target.value as Row["kind"] })}
-                  >
-                    <option value="repo">组件仓库</option>
-                    <option value="url">线上站点</option>
-                  </select>
+                    strict
+                    value={row.kind === "url" ? "线上站点" : "组件仓库"}
+                    onChange={(v) => update(i, { kind: v === "线上站点" ? "url" : "repo" })}
+                    options={["组件仓库", "线上站点"]}
+                  />
                 </div>
                 <div>
                   <FieldLabel htmlFor={`dp-name-${i}`}>名称</FieldLabel>

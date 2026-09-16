@@ -6,7 +6,10 @@ export function fieldClasses(
 ) {
   const { size = "md", mono = false, extra = "" } = opts;
   const sizeCls =
-    size === "sm" ? "px-3 py-1.5 text-[12.5px]" : mono ? "px-3.5 py-2.5 text-[13px]" : "px-3.5 py-2.5 text-[13.5px]";
+    size === "sm"
+      ? "px-3 py-1.5 text-[12.5px]"
+      : (mono ? "px-3.5 py-2.5 text-[13px]" : "px-3.5 py-2.5 text-[13.5px]") +
+        " [[data-density=compact]_&]:px-3 [[data-density=compact]_&]:py-1.5 [[data-density=compact]_&]:text-[12.5px]";
   const monoCls = mono ? " font-mono leading-relaxed" : "";
   return `w-full rounded-ctl border border-line bg-raised outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent ${sizeCls}${monoCls} ${extra}`.trim();
 }

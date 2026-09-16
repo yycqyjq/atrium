@@ -23,6 +23,7 @@ export default function Combobox({
   size = "md",
   customHint,
   autoWidth = false,
+  strict = false,
 }: {
   id?: string;
   value: string;
@@ -36,6 +37,8 @@ export default function Combobox({
   customHint?: (input: string) => string;
   /** 宽度自适应：输入框随内容撑开（行内场景用） */
   autoWidth?: boolean;
+  /** 严格模式：只读输入（只能从候选中挑选），适合固定枚举字段 */
+  strict?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -66,7 +69,7 @@ export default function Combobox({
   }, [options, value, filtering]);
 
   const exact = options.some((option) => option === value.trim());
-  const showCustom = filtering && value.trim() !== "" && !exact;
+  const showCustom = !strict && filtering && value.trim() !== "" && !exact;
   const rows = useMemo(
     () => (showCustom ? [...filtered, value.trim()] : filtered),
     [filtered, showCustom, value],
@@ -235,6 +238,7 @@ export default function Combobox({
         aria-autocomplete="list"
         autoComplete="off"
         value={value}
+        readOnly={strict}
         onChange={(e) => {
           onChange(e.target.value);
           if (!open) openDropdown();
@@ -248,7 +252,7 @@ export default function Combobox({
         }}
         onKeyDown={onKeyDown}
         placeholder={placeholder}
-        className={`${fieldClasses({ size, extra: size === "sm" ? "pr-8" : "pr-9" })}`}
+        className={`${fieldClasses({ size, extra: `${size === "sm" ? "pr-8" : "pr-9"}${strict ? " cursor-pointer" : ""}` })}`}
       />
       <button
         type="button"

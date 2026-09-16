@@ -19,7 +19,7 @@ export function buttonClasses(variant: Variant = "primary", size: Size = "md", e
   const sizeCls = boxed
     ? size === "sm"
       ? "px-3 py-1.5 text-[12.5px]"
-      : "px-3.5 py-2.5 text-[13.5px]"
+      : "px-3.5 py-2.5 text-[13.5px] [[data-density=compact]_&]:px-3 [[data-density=compact]_&]:py-1.5 [[data-density=compact]_&]:text-[12.5px]"
     : size === "sm"
       ? "text-[12px]"
       : "text-[12.5px]";

@@ -13,7 +13,7 @@ export default function Chip({
   return (
     <Link
       href={href}
-      className={`rounded-ctl border px-[13px] py-[5px] text-[12.5px] tracking-[0.03em] transition-colors duration-150 ${
+      className={`rounded-ctl border px-[13px] py-[5px] text-[12.5px] tracking-[0.03em] [[data-density=compact]_&]:px-[11px] [[data-density=compact]_&]:py-[3px] transition-colors duration-150 ${
         active
           ? "border-accent bg-accent-soft font-medium text-accent-ink"
           : "border-line text-ink-3 hover:border-line-strong hover:text-ink-2"

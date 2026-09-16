@@ -15,8 +15,8 @@ export default function Alert({
     ok: "border-line bg-raised text-ink-2",
   } as const;
   const sizes = {
-    md: "px-4 py-2.5 text-[13px]",
-    sm: "px-4 py-2 text-[12.5px]",
+    md: "px-4 py-2.5 text-[13px] [[data-density=compact]_&]:py-2",
+    sm: "px-4 py-2 text-[12.5px] [[data-density=compact]_&]:py-1.5",
   } as const;
   return (
     <p className={`rounded-ctl border ${sizes[size]} ${tones[tone]} ${className}`}>{children}</p>
