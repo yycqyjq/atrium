@@ -19,6 +19,7 @@
 | `GITHUB_GALLERY_REPO` | `ark-images` | 画廊用独立仓库（不设则跟主仓库） |
 | `ATRIUM_GALLERY_DIR` | ``（留空 = 仓库根） | 画廊图片目录 |
 | `ATRIUM_DEMO_PROJECTS` | （可选，JSON 数组） | 工坊的组件项目；不设则读 data/config.json（部署版无本地文件，建议用这个变量） |
+| `NEXT_PUBLIC_SITE_URL` | `https://你的域名` | RSS / sitemap 里的站点地址；不设时为占位符 `https://atrium.local` |
 
 4. 点 **Deploy**，一分钟内完成，得到 `https://atrium-<你的子域>.vercel.app`。
 
@@ -41,12 +42,12 @@
 - `/study`：文章列表来自 ark-notes 根目录的 `.md` 文件；
 - `/gallery`：图片来自 ark-images；
 - `/tools`：书签来自 ark-notes 的 `admin/tools.json`；
-- `/workshop`：展品来自组件仓库的 `atrium.json` 清单（取件后在页面内渲染；仓颉编辑器等展品首次打开需可访问阿里 CDN）；
+- `/workshop`：展品来自组件仓库的 `atrium.json` 清单（取件后在页面内渲染；大部分运行时资产走仓库同源，仓颉编辑器体积最大的那件首次打开需可访问阿里 CDN 或 npmmirror）；
 - `/atelier`：组件陈列廊（纯静态）；
 - `/api/providers`：`{"github":{"configured":true,...}}` 即接入正常。
 
 ## 五、与桌面端的关系
 
-- 桌面 App（`release/mac-arm64/中庭.app`）走本地服务，数据目录在 `~/Library/Application Support/atrium-desktop/`；
+- 桌面 App（打包产物在 `~/Desktop/atrium-dist/`，日常入口是其中的 `中庭.app`）走本地服务，数据目录在 `~/Library/Application Support/atrium-desktop/`；
 - 网页版走 Vercel，两边读同一个仓库，内容一致；
 - 桌面端配置令牌：把 `GITHUB_TOKEN` 写进 `data/config.json`（打包版在 userData/data/ 下）。
