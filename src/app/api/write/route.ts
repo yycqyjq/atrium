@@ -14,8 +14,14 @@ export async function DELETE(request: Request) {
   const { searchParams } = new URL(request.url);
   const slug = (searchParams.get("slug") ?? "").trim();
 
-  if (!/^[0-9A-Za-z\u4e00-\u9fff][0-9A-Za-z\u4e00-\u9fff _/-]*$/.test(slug) || slug.includes("..")) {
-    return NextResponse.json({ error: "slug 不合法" }, { status: 400 });
+  if (
+    !slug ||
+    slug.startsWith(".") ||
+    slug.includes("\\") ||
+    slug.includes("..") ||
+    /[\u0000-\u001f:*?"<>|]/.test(slug.replace(/\//g, ""))
+  ) {
+    return NextResponse.json({ error: "文件名包含不可用字符" }, { status: 400 });
   }
 
   try {
@@ -82,9 +88,16 @@ export async function POST(request: Request) {
   const body = typeof payload.body === "string" ? payload.body : "";
   const sha = typeof payload.sha === "string" && payload.sha ? payload.sha : undefined;
 
-  // slug：中英文、数字、连字符，防止路径穿越
-  if (!/^[0-9A-Za-z\u4e00-\u9fff][0-9A-Za-z\u4e00-\u9fff _-]*$/.test(slug) || slug.includes("..")) {
-    return NextResponse.json({ error: "slug 只能包含中英文、数字、空格、连字符或下划线" }, { status: 400 });
+  // 文件名从标题自动生成：只禁止路径不安全字符，兼容中文标点（：+、 等）
+  if (
+    !slug ||
+    slug.startsWith(".") ||
+    slug.includes("/") ||
+    slug.includes("\\") ||
+    slug.includes("..") ||
+    /[\u0000-\u001f:*?"<>|]/.test(slug)
+  ) {
+    return NextResponse.json({ error: "文件名包含不可用字符" }, { status: 400 });
   }
   if (!title) {
     return NextResponse.json({ error: "缺少 title" }, { status: 400 });

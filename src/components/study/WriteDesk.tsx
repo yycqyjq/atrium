@@ -6,18 +6,30 @@ import { useState } from "react";
 
 type WriteState = "edit" | "saving" | "saved" | "error";
 
+/** 文件名自动识别：标题去掉路径不安全字符后即为文件名 */
+export function fileNameFromTitle(title: string): string {
+  return title
+    .trim()
+    .replace(/[\\/:*?"<>|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 /**
  * 书房写作台：新建 / 更新文章，直接发布到内容仓库。
- * slug 为空时视为新建；编辑已有文章时由页面传入 slug 与初始内容。
+ * - 文件名自动取标题（不再手填）；
+ * - 新文章可选填「参考链接（每行一个）」，保存时按旧版格式附加到正文尾部；
+ * - 编辑模式沿用原文，参考链接在正文中原文保留。
  */
-export default function WriteDesk({ initial }: { initial?: { slug: string; title: string; description: string; date: string; tags: string[]; body: string } }) {
+export default function WriteDesk({
+  initial,
+}: {
+  initial?: { slug: string; title: string; body: string };
+}) {
   const router = useRouter();
-  const [slug, setSlug] = useState(initial?.slug ?? "");
   const [title, setTitle] = useState(initial?.title ?? "");
-  const [description, setDescription] = useState(initial?.description ?? "");
-  const [date, setDate] = useState(initial?.date ?? new Date().toISOString().slice(0, 10));
-  const [tags, setTags] = useState(initial?.tags?.join(", ") ?? "");
   const [body, setBody] = useState(initial?.body ?? "");
+  const [refs, setRefs] = useState("");
   const [state, setState] = useState<WriteState>("edit");
   const [message, setMessage] = useState("");
   const [savedSlug, setSavedSlug] = useState("");
@@ -25,22 +37,30 @@ export default function WriteDesk({ initial }: { initial?: { slug: string; title
   const [deleting, setDeleting] = useState(false);
 
   const isEdit = Boolean(initial?.slug);
+  const autoSlug = initial?.slug ?? fileNameFromTitle(title);
   const canSave = title.trim() !== "" && body.trim() !== "" && state !== "saving";
 
   async function save() {
     setState("saving");
     setMessage("");
     try {
+      // 参考链接：仅新建时附加（旧版格式），编辑模式沿用原文
+      let finalBody = body;
+      const refLines = refs
+        .split("\n")
+        .map((l) => l.trim())
+        .filter(Boolean);
+      if (!isEdit && refLines.length > 0) {
+        finalBody = `${body.replace(/\s+$/, "")}\n\n---\n\n**参考链接**：\n${refLines.map((l) => `- ${l}`).join("\n")}`;
+      }
+
       const res = await fetch("/api/write", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          slug: slug.trim() || title.trim(),
+          slug: autoSlug,
           title: title.trim(),
-          description: description.trim(),
-          date: date.trim(),
-          tags: tags.split(/[,，]/).map((t) => t.trim()).filter(Boolean),
-          body,
+          body: finalBody,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; path?: string; error?: string };
@@ -51,7 +71,7 @@ export default function WriteDesk({ initial }: { initial?: { slug: string; title
       }
       setState("saved");
       setMessage(`已发布到仓库：${data.path}`);
-      setSavedSlug(slug.trim() || title.trim());
+      setSavedSlug(autoSlug);
       router.refresh();
     } catch {
       setState("error");
@@ -86,7 +106,8 @@ export default function WriteDesk({ initial }: { initial?: { slug: string; title
     }
   }
 
-  const field = "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 focus:border-accent";
+  const field =
+    "w-full rounded-ctl border border-line bg-raised px-3.5 py-2.5 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 focus:border-accent";
   const label = "mb-1.5 block text-[11.5px] tracking-[0.1em] text-ink-3";
 
   if (state === "saved") {
@@ -130,35 +151,26 @@ export default function WriteDesk({ initial }: { initial?: { slug: string; title
   return (
     <div className="rounded-ctl border border-line bg-raised p-5 md:p-6">
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
-        {isEdit ? `正在编辑：${initial?.slug}.md` : "新文章会以 Markdown 存到内容仓库的根目录，与你的其他文章同级。"}
+        {isEdit
+          ? `正在编辑：${initial?.slug}.md`
+          : "新文章以 Markdown 存入内容仓库根目录，文件名自动取标题。"}
       </p>
 
-      <div className="mb-4 grid gap-4 md:grid-cols-2">
-        <div>
-          <label className={label} htmlFor="write-title">标题 *</label>
-          <input id="write-title" className={field} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="文章标题" />
-        </div>
-        <div>
-          <label className={label} htmlFor="write-slug">文件名 slug</label>
-          <input id="write-slug" className={field} value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="留空则用标题" disabled={isEdit} />
-        </div>
-        <div>
-          <label className={label} htmlFor="write-desc">摘要</label>
-          <input id="write-desc" className={field} value={description} onChange={(e) => setDescription(e.target.value)} placeholder="一句话摘要（可选）" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className={label} htmlFor="write-date">日期</label>
-            <input id="write-date" type="date" className={field} value={date} onChange={(e) => setDate(e.target.value)} />
-          </div>
-          <div>
-            <label className={label} htmlFor="write-tags">标签</label>
-            <input id="write-tags" className={field} value={tags} onChange={(e) => setTags(e.target.value)} placeholder="用逗号分隔" />
-          </div>
-        </div>
+      <div className="mb-4">
+        <label className={label} htmlFor="write-title">标题 *</label>
+        <input
+          id="write-title"
+          className={field}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="文章标题"
+        />
+        <p className="mt-1.5 text-[11.5px] tracking-[0.03em] text-ink-3">
+          文件名：{autoSlug ? `${autoSlug}.md` : "（随标题自动生成）"}
+        </p>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-4">
         <label className={label} htmlFor="write-body">正文（Markdown）*</label>
         <textarea
           id="write-body"
@@ -168,6 +180,21 @@ export default function WriteDesk({ initial }: { initial?: { slug: string; title
           placeholder={"## 小标题\n\n正文…"}
         />
       </div>
+
+      {!isEdit ? (
+        <div className="mb-5">
+          <label className={label} htmlFor="write-refs">参考链接（每行一个，可选）</label>
+          <textarea
+            id="write-refs"
+            className={`${field} min-h-[84px] resize-y font-mono text-[13px] leading-relaxed`}
+            value={refs}
+            onChange={(e) => setRefs(e.target.value)}
+            placeholder={"https://example.com\n[标题](https://example.com)"}
+          />
+        </div>
+      ) : (
+        <div className="mb-5" />
+      )}
 
       {state === "error" ? (
         <p className="mb-4 rounded-ctl border border-accent bg-accent-soft px-4 py-2.5 text-[13px] text-accent-ink">{message}</p>

@@ -4,8 +4,8 @@
   "private": true,
   "main": "electron/main.js",
   "scripts": {
-    "dev": "ulimit -n 10240; WATCHPACK_POLLING=true next dev",
-    "dev:cert": "ulimit -n 10240; WATCHPACK_POLLING=true NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
+    "dev": "ulimit -n 10240; ATRIUM_ALLOW_WRITE=1 WATCHPACK_POLLING=true next dev",
+    "dev:cert": "ulimit -n 10240; ATRIUM_ALLOW_WRITE=1 WATCHPACK_POLLING=true NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
     "build": "next build",
     "start": "ulimit -n 10240; node scripts/start.mjs",
     "start:cert": "ulimit -n 10240; NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem node scripts/start.mjs",

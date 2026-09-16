@@ -16,7 +16,7 @@ export default async function WritePage({
 }) {
   const { edit } = await searchParams;
 
-  let initial: { slug: string; title: string; description: string; date: string; tags: string[]; body: string } | undefined;
+  let initial: { slug: string; title: string; body: string } | undefined;
   if (edit) {
     try {
       const provider = await getProvider();
@@ -26,14 +26,7 @@ export default async function WritePage({
       const fm = m?.[1] ?? "";
       const body = m?.[2] ?? text;
       const pick = (key: string) => new RegExp(`^${key}:\\s*(.+)$`, "m").exec(fm)?.[1]?.trim().replace(/^"|"$/g, "") ?? "";
-      initial = {
-        slug: edit,
-        title: pick("title"),
-        description: pick("description"),
-        date: pick("date") || new Date().toISOString().slice(0, 10),
-        tags: /^\s*tags:\s*\[(.+)\]/m.exec(fm)?.[1]?.split(",").map((t) => t.trim().replace(/^"|"$/g, "")).filter(Boolean) ?? [],
-        body,
-      };
+      initial = { slug: edit, title: pick("title"), body };
     } catch {
       initial = undefined; // 找不到就当新建
     }

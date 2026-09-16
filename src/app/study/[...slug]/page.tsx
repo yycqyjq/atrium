@@ -8,6 +8,7 @@ import StudyBrowser, { type BrowserSection } from "@/components/study/StudyBrows
 import FloorNav from "@/components/shell/FloorNav";
 import { IconArrowRight } from "@/components/icons";
 import { getPostBySlug, getStudyDir, type PostMeta } from "@/lib/content";
+import { splitReferenceLinks } from "@/lib/reference-links";
 import { extractToc } from "@/lib/toc";
 
 export const dynamic = "force-dynamic";
@@ -130,7 +131,8 @@ export default async function StudySlugPage({ params }: Props) {
   }
 
   if (post) {
-    const { meta, body } = post;
+    const { meta } = post;
+    const { body, links } = splitReferenceLinks(post.body);
     const toc = extractToc(body);
     const folderSegments = meta.slug.split("/").slice(0, -1);
 
@@ -188,6 +190,40 @@ export default async function StudySlugPage({ params }: Props) {
               </aside>
             ) : null}
           </div>
+
+          {links.length > 0 ? (
+            <section className="mt-12 max-w-[44em] border-t border-line pt-6">
+              <h2 className="mb-3 font-serif text-[15px] tracking-[0.08em] text-ink-2">参考链接</h2>
+              <ul className="space-y-2">
+                {links.map((link) => (
+                  <li key={link.url} className="flex items-start gap-2.5">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      aria-hidden="true"
+                      className="mt-[3.5px] size-[13px] shrink-0 text-accent"
+                    >
+                      <path d="M10.5 13.5 L13.5 10.5" />
+                      <path d="M9 7 L11 5 C12.4 3.6 14.6 3.6 16 5 L19 8 C20.4 9.4 20.4 11.6 19 13 L17 15" />
+                      <path d="M15 17 L13 19 C11.6 20.4 9.4 20.4 8 19 L5 16 C3.6 14.6 3.6 12.4 5 11 L7 9" />
+                    </svg>
+                    <a
+                      href={link.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="break-all text-[13.5px] leading-relaxed text-ink-2 underline decoration-line-strong underline-offset-4 transition-colors duration-150 hover:text-accent hover:decoration-accent/50"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <div className="mt-14 border-t border-line pt-6">
             <Link
