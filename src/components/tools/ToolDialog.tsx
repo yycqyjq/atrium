@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Button from "@/components/ui/Button";
 import { Input, FieldLabel } from "@/components/ui/Field";
 import Combobox from "@/components/ui/Combobox";
 import Modal from "@/components/ui/Modal";
 import { Toast, useToast } from "@/components/ui/Toast";
+import Loading from "@/components/ui/Loading";
 
 export type ToolFormValue = { name: string; url: string; description: string; category: string };
 
@@ -37,6 +38,10 @@ export default function ToolDialog({
   const [state, setState] = useState<"idle" | "saving" | "error">("idle");
   const [message, setMessage] = useState("");
   const { toast, showToast } = useToast();
+  // 粘贴网址自动解析：回填名称/描述
+  const [parsing, setParsing] = useState(false);
+  const [parseNote, setParseNote] = useState("");
+  const lastAutoName = useRef<string | null>(null);
 
   // 打开时按模式初始化表单
   useEffect(() => {
@@ -54,6 +59,9 @@ export default function ToolDialog({
     }
     setState("idle");
     setMessage("");
+    setParsing(false);
+    setParseNote("");
+    lastAutoName.current = null;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode]);
 
@@ -64,6 +72,57 @@ export default function ToolDialog({
   }, [onClose]);
 
   const canSave = name.trim() !== "" && /^https?:\/\//i.test(url.trim()) && state !== "saving";
+
+  /** 网址规范化：纯域名自动补 https://；含空格或不像网址则视为普通文本 */
+  const normalizeUrl = (text: string) => {
+    const value = text.trim();
+    if (!value || /\s/.test(value)) return null;
+    if (/^https?:\/\//i.test(value)) return value;
+    if (/^[\w-]+(\.[\w-]+)+(\/\S*)?$/i.test(value)) return `https://${value}`;
+    return null;
+  };
+
+  /** 抓取站点标题与描述并回填（不覆盖用户手填的内容） */
+  const parseSite = async (target: string) => {
+    setParsing(true);
+    setParseNote("");
+    try {
+      const res = await fetch(`/api/site-info?url=${encodeURIComponent(target)}`);
+      const data = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        title?: string;
+        description?: string;
+        error?: string;
+      };
+      if (!res.ok || !data.ok) {
+        setParseNote(data.error ?? "解析失败，可手动填写");
+        return;
+      }
+      const filled: string[] = [];
+      if (data.title && (!name.trim() || name === lastAutoName.current)) {
+        setName(data.title);
+        lastAutoName.current = data.title;
+        filled.push("名称");
+      }
+      if (data.description && !description.trim()) {
+        setDescription(data.description);
+        filled.push("描述");
+      }
+      setParseNote(filled.length > 0 ? `已从网页带回${filled.join("与")}，可修改。` : "未发现可回填的信息，手动补充即可。");
+    } catch {
+      setParseNote("解析失败，可手动填写");
+    } finally {
+      setParsing(false);
+    }
+  };
+
+  const onUrlPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const normalized = normalizeUrl(e.clipboardData.getData("text"));
+    if (!normalized) return; // 不是纯网址：保持默认粘贴
+    e.preventDefault();
+    setUrl(normalized);
+    void parseSite(normalized);
+  };
 
   async function save() {
     setState("saving");
@@ -122,7 +181,14 @@ export default function ToolDialog({
           </div>
           <div>
             <FieldLabel htmlFor="tool-url">地址 *</FieldLabel>
-            <Input id="tool-url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://" />
+            <Input id="tool-url" value={url} onChange={(e) => setUrl(e.target.value)} onPaste={onUrlPaste} placeholder="https://" />
+            {parsing ? (
+              <div className="mt-2">
+                <Loading size="sm" label="正在解析站点信息…" />
+              </div>
+            ) : parseNote ? (
+              <p className="mt-2 text-[12px] text-ink-3">{parseNote}</p>
+            ) : null}
           </div>
           <div>
             <FieldLabel htmlFor="tool-desc">描述</FieldLabel>
