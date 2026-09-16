@@ -237,8 +237,10 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
     <table>
       <tr><th>现象</th><th>原因与处理</th></tr>
       <tr><td>写作台/添加工具/上传入口不见了</td><td>未连接仓库。点侧边栏左下角「连接仓库」，配好令牌后入口全部出现。</td></tr>
+      <tr><td>令牌保存后输入框仍为空</td><td>设计如此：令牌只写本机配置、不再回显（留空表示保持不变）；保存成功会提示「已保存」。</td></tr>
       <tr><td>画廊空但书房有文章</td><td>画廊仓库指向未配置（跟随了内容仓库）。在连接页填画廊仓库名，或配置文件写 galleryRepo。</td></tr>
       <tr><td>书房 / 工具房空</td><td>检查 config.json 的仓库指向与令牌；<code>/api/providers</code> 返回 configured:true 即接入正常。</td></tr>
+      <tr><td>画廊 / 工具房 / 工坊空白（书房正常）</td><td>多半是网络证书问题：本机若在用 Watt Toolkit 等 GitHub 加速（HTTPS 中间人），需把其证书导出放到 <code>~/Library/Application Support/atrium-desktop/certs/watt-toolkit.pem</code>，重启应用即恢复；临时判断：暂停加速工具后重开应用能否加载。</td></tr>
       <tr><td>画廊图片偶发破图</td><td>jsDelivr 对新文件有缓存延迟（数小时），会自动恢复；也可稍后刷新触发 raw 兜底。</td></tr>
       <tr><td>写作 / 上传 403</td><td>本地出现即说明启动脚本未注入开关（正常不会发生）；线上 403 是设计行为。</td></tr>
       <tr><td>保存提示「sha 过期」</td><td>仓库端在你编辑期间有新改动，刷新页面后重试即可。</td></tr>
