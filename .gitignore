@@ -28,3 +28,4 @@ out/
 release/
 tsconfig.tsbuildinfo
 docs/screenshots/
+data/icon-cache/
