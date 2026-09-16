@@ -6,10 +6,9 @@ import { SearchInput } from "@/components/search/SearchBox";
 import SectionHeading from "@/components/ui/SectionHeading";
 import EmptyState from "@/components/ui/EmptyState";
 import { ToolCardContent } from "./ToolCard";
-import Button from "@/components/ui/Button";
-import Alert from "@/components/ui/Alert";
-import CardActions from "@/components/ui/CardActions";
+import ActionCard from "@/components/ui/ActionCard";
 import ToolDialog, { type ToolFormValue } from "./ToolDialog";
+import { Toast, useToast } from "@/components/ui/Toast";
 import { IconPencil, IconX } from "@/components/icons";
 import type { ToolGroup } from "@/lib/tools";
 
@@ -18,33 +17,22 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
-  const [notice, setNotice] = useState<{ kind: "ok" | "error"; text: string } | null>(null);
+  const { toast, showToast } = useToast();
   const [editTarget, setEditTarget] = useState<ToolFormValue | null>(null);
 
   async function remove(name: string, url: string) {
-    const key = `${name}|${url}`;
     setConfirmDelete(null);
     try {
       const res = await fetch(`/api/tools?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`, {
         method: "DELETE",
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
-      if (!res.ok || !data.ok) {
-        setNotice({ kind: "error", text: data.error ?? "删除失败" });
-        return;
-      }
-      setNotice({ kind: "ok", text: `已移除「${name}」` });
-      routerRefresh();
-    } catch {
-      setNotice({ kind: "error", text: "网络异常" });
+      if (!res.ok || !data.ok) throw new Error(data.error ?? "移除失败，请稍后再试");
+      showToast(`已移除「${name}」。`);
+      router.refresh();
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "网络异常，请稍后再试", "error");
     }
-    setTimeout(() => setNotice(null), 3000);
-  }
-
-  function routerRefresh() {
-    // Next.js 客户端组件内刷新当前路由
-    router.refresh();
-
   }
 
   const q = query.trim().toLowerCase();
@@ -67,12 +55,6 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
     <>
       <SearchInput value={query} onChange={setQuery} placeholder="搜索工具、描述、域名…" />
 
-      {notice ? (
-        <Alert tone={notice.kind === "error" ? "error" : "ok"} size="sm" className="mb-4">
-          {notice.text}
-        </Alert>
-      ) : null}
-
       {total === 0 ? (
         <EmptyState
           variant="search"
@@ -90,16 +72,10 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                   const key = `${tool.name}|${tool.url}`;
                   return (
                     <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
-                      <div className="group relative">
-                        <a
-                          href={tool.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
-                        >
-                          {canWrite ? (
-                            <CardActions
-                              actions={[
+                      <ActionCard
+                        actions={
+                          canWrite
+                            ? [
                                 {
                                   key: "edit",
                                   label: `编辑 ${tool.name}`,
@@ -113,13 +89,22 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                                   key: "remove",
                                   label: `移除 ${tool.name}`,
                                   icon: <IconX className="size-3.5" />,
-                                  onClick: () => {
-                                    setConfirmDelete(key);
-                                  },
+                                  onClick: () => setConfirmDelete(key),
                                 },
-                              ]}
-                            />
-                          ) : null}
+                              ]
+                            : []
+                        }
+                        confirming={confirmDelete === key}
+                        confirmText={`从清单移除「${tool.name}」？`}
+                        onConfirm={() => remove(tool.name, tool.url)}
+                        onCancelConfirm={() => setConfirmDelete(null)}
+                      >
+                        <a
+                          href={tool.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                        >
                           <ToolCardContent
                             name={tool.name}
                             url={tool.url}
@@ -127,22 +112,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
                             showArrow={!canWrite}
                           />
                         </a>
-                        {confirmDelete === key ? (
-                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 rounded-ctl border border-line-strong bg-raised/95 px-4 text-center backdrop-blur-[1px]">
-                            <p className="text-[12.5px] leading-relaxed text-ink-2">
-                              从清单移除「{tool.name}」？
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" onClick={() => remove(tool.name, tool.url)}>
-                                确认移除
-                              </Button>
-                              <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(null)}>
-                                取消
-                              </Button>
-                            </div>
-                          </div>
-                        ) : null}
-                      </div>
+                      </ActionCard>
                     </li>
                   );
                 })}
@@ -163,6 +133,7 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
         initial={editTarget}
         onClose={() => setEditTarget(null)}
       />
+      <Toast toast={toast} />
     </>
   );
 }
