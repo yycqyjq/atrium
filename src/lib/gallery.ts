@@ -11,16 +11,21 @@ export type GalleryAlbum = { name: string; path: string };
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
 const IMAGE_CAP = 240;
 const ALBUM_CAP = 60;
+const ALBUM_FETCH_CAP = 24;
 
 /**
  * 画廊：列出「相册（子目录）」与「图片」。
  * 默认从仓库的 images/ 目录读取，可用 ATRIUM_GALLERY_DIR 调整；
  * 仓库可用 GITHUB_GALLERY_* / GITEE_GALLERY_* 单独指定（默认跟随主仓库）。
  */
-export async function listGallery(album?: string): Promise<{
-  albums: GalleryAlbum[];
-  images: GalleryImage[];
-  current: string | null;
+export type GallerySection = { key: string; name: string; slug: string; images: GalleryImage[] };
+
+/**
+ * 画廊分区：按「相册（子目录）」逐卷铺开，另附根目录的散张。
+ * 供画廊页的分区布局 + 楼层目录使用；只保留有图的相册。
+ */
+export async function listGallerySections(): Promise<{
+  sections: GallerySection[];
   dir: string;
   reason: ContentReason;
 }> {
@@ -30,44 +35,56 @@ export async function listGallery(album?: string): Promise<{
     const cfg = await resolveGalleryConfig();
     const provider = await getProvider(cfg.provider, cfg);
     if (!(await provider.isConfigured())) {
-      return { albums: [], images: [], current: null, dir: rootDir, reason: "not-configured" };
+      return { sections: [], dir: rootDir, reason: "not-configured" };
     }
 
-    const target = album ? `${rootDir}/${album}` : rootDir;
-
-    let entries;
+    let rootEntries;
     try {
-      entries = await provider.listDir(target);
+      rootEntries = await provider.listDir(rootDir);
     } catch (err) {
-      // 目录不存在 → 视为「空画廊 / 相册不存在」
       if (err instanceof ProviderError && err.status === 404) {
-        return { albums: [], images: [], current: album ?? null, dir: rootDir, reason: "ok" };
+        return { sections: [], dir: rootDir, reason: "ok" };
       }
       throw err;
     }
 
-    // 进入相册后，顶部的相册导航仍取自根目录
-    let rootEntries = entries;
-    if (album) {
-      rootEntries = await provider.listDir(rootDir).catch(() => []);
-    }
+    const toImage = (entry: { name: string; path: string }): GalleryImage => {
+      const candidates = provider.rawUrlCandidates(entry.path);
+      return { name: entry.name, path: entry.path, url: candidates[0], fallbackUrls: candidates.slice(1) };
+    };
 
-    const albums = rootEntries
+    const albumDirs = rootEntries
       .filter((e) => e.type === "dir" && !e.name.startsWith("."))
-      .slice(0, ALBUM_CAP)
-      .map((e) => ({ name: e.name, path: e.path }));
+      .slice(0, ALBUM_FETCH_CAP);
 
-    const images = entries
+    const sections = (
+      await Promise.all(
+        albumDirs.map(async (dirEntry) => {
+          try {
+            const entries = await provider.listDir(dirEntry.path);
+            const images = entries
+              .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
+              .slice(0, IMAGE_CAP)
+              .map(toImage);
+            return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images };
+          } catch {
+            return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images: [] as GalleryImage[] };
+          }
+        }),
+      )
+    ).filter((s) => s.images.length > 0);
+
+    const rootImages = rootEntries
       .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
       .slice(0, IMAGE_CAP)
-      .map((e) => {
-        const candidates = provider.rawUrlCandidates(e.path);
-        return { name: e.name, path: e.path, url: candidates[0], fallbackUrls: candidates.slice(1) };
-      });
+      .map(toImage);
+    if (rootImages.length > 0) {
+      sections.push({ key: "__root__", name: "散张", slug: "root", images: rootImages });
+    }
 
-    return { albums, images, current: album ?? null, dir: rootDir, reason: "ok" };
+    return { sections, dir: rootDir, reason: "ok" };
   } catch (err) {
     console.warn("[gallery] 获取失败：", err);
-    return { albums: [], images: [], current: album ?? null, dir: rootDir, reason: "fetch-failed" };
+    return { sections: [], dir: rootDir, reason: "fetch-failed" };
   }
 }

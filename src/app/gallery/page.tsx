@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
+import FloorNav from "@/components/shell/FloorNav";
 import GalleryGrid from "@/components/gallery/GalleryGrid";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
 import EmptyState from "@/components/ui/EmptyState";
-import Chip from "@/components/ui/Chip";
 import PageHeader from "@/components/ui/PageHeader";
-import { listGallery, type ContentReason } from "@/lib/gallery";
+import SectionHeading from "@/components/ui/SectionHeading";
+import { listGallerySections, type ContentReason } from "@/lib/gallery";
 import { resolveGalleryConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
@@ -31,17 +32,19 @@ function emptyCopy(reason: ContentReason, dir: string) {
   };
 }
 
+/** 画廊：按相册（子目录）逐卷铺开，楼层目录导航；灯箱沿用 ?album=&view= 深链 */
 export default async function GalleryPage({
   searchParams,
 }: {
   searchParams: Promise<{ album?: string; view?: string }>;
 }) {
   const { album, view } = await searchParams;
-  const { albums, images, current, dir, reason } = await listGallery(album);
+  const { sections, dir, reason } = await listGallerySections();
   const viewNum = view != null ? Number.parseInt(view, 10) : Number.NaN;
   const copy = emptyCopy(reason, dir);
   const galleryCfg = await resolveGalleryConfig();
   const canUpload = Boolean(galleryCfg.token);
+  const total = sections.reduce((n, section) => n + section.images.length, 0);
 
   return (
     <>
@@ -52,30 +55,33 @@ export default async function GalleryPage({
           subtitle="照片与影像。存放目光的地方。"
         />
 
-        {canUpload ? <GalleryUpload dir={current ?? ""} albums={albums.map((a) => a.name)} /> : null}
-
-        {albums.length > 0 || current ? (
-          <div className="mb-5 flex flex-wrap items-center gap-2">
-            <Chip href="/gallery" active={!current}>
-              全部
-            </Chip>
-            {albums.map((item) => (
-              <Chip key={item.path} href={`/gallery?album=${encodeURIComponent(item.name)}`} active={current === item.name}>
-                {item.name}
-              </Chip>
-            ))}
-          </div>
+        {canUpload ? (
+          <GalleryUpload dir="" albums={sections.filter((s) => s.key !== "__root__").map((s) => s.name)} />
         ) : null}
 
-        {images.length === 0 ? (
+        {total === 0 ? (
           <EmptyState title={copy.title} sub={copy.sub} />
         ) : (
-          <>
-            <GalleryGrid images={images} initialView={Number.isInteger(viewNum) ? viewNum : undefined} />
-            <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">共 {images.length} 张</p>
-          </>
+          <div data-floor-nav>
+            {sections.map((section) => (
+              <section key={section.key} className="mb-10">
+                <SectionHeading
+                  id={`album-${section.slug}`}
+                  title={section.name}
+                  count={`${section.images.length} 张`}
+                  className="mb-4"
+                />
+                <GalleryGrid
+                  images={section.images}
+                  initialView={album === section.name && Number.isInteger(viewNum) ? viewNum : undefined}
+                />
+              </section>
+            ))}
+            <p className="mt-6 text-[12.5px] tracking-[0.05em] text-ink-3">共 {total} 张</p>
+          </div>
         )}
       </div>
+      <FloorNav />
       <Footer />
     </>
   );
