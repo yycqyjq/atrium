@@ -9,16 +9,15 @@ const BAR_WIDTH: Record<number, number> = { 1: 20, 2: 13, 3: 9 };
 const CURRENT_EXTRA = 9;
 
 /**
- * 右侧轻量楼层跳转目录。
+ * 右侧轻量楼层跳转目录（形变版）。
  *
- * - 默认：极简小横杠（右侧竖排，按层级长短缩进），当前楼层高亮（更长更亮），
- *   所在层级的所有父级弱高亮；
- * - 悬停 / 键盘聚焦：平滑展开标题列表（层级缩进），当前项高亮、父级弱高亮，
- *   光标在横杠与文字之间移动不会误收起；
- * - 点击：平滑滚动到目标楼层（带顶部偏移），立即更新高亮并同步地址栏（不跳动）；
- * - 滚动：自动判定当前楼层（含页面底部归最后一层），窗口缩放后重算。
+ * - 默认：竖排小横杠，当前楼层更长更亮（主题色），父级弱高亮；
+ * - 悬停 / 键盘聚焦：横杠原地收拢、同位浮出标题文字（纯 opacity/transform，无布局位移，
+ *   不跳动、不遮挡式的菜单面板）；移开后文字缩回横杠；
+ * - 点击：平滑滚动到对应楼层（带顶部偏移），立即高亮并同步地址栏（不跳页）；
+ * - 滚动：自动判定当前楼层（底部归最后一项），窗口缩放与结构变化后重算。
  *
- * 挂在任意内容容器上：给容器加 `data-floor-nav`，组件扫描其中的 h2/h3/h4（最多三级）。
+ * 挂载：给内容容器加 `data-floor-nav`，组件扫描其中的 h2/h3/h4（最多三级）。
  */
 export default function FloorNav() {
   const [items, setItems] = useState<FloorItem[]>([]);
@@ -126,7 +125,7 @@ export default function FloorNav() {
   return (
     <nav
       aria-label="楼层目录"
-      className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:flex"
+      className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block"
       onMouseEnter={() => {
         cancelClose();
         setExpanded(true);
@@ -143,64 +142,55 @@ export default function FloorNav() {
         if (!event.currentTarget.contains(event.relatedTarget as Node)) setExpanded(false);
       }}
     >
-      <div className="flex items-center">
-        {/* 展开面板：宽度平滑过渡（横杠位置不动，无跳动） */}
-        <div
-          aria-hidden={!expanded}
-          className={`overflow-hidden transition-[width,opacity] duration-200 ease-out ${
-            expanded ? "w-[196px] opacity-100" : "w-0 opacity-0"
-          }`}
-        >
-          <ul className="max-h-[62vh] w-[196px] overflow-y-auto rounded-ctl border border-line bg-raised py-1">
-            {items.map((item, i) => {
-              const isCurrent = i === current;
-              const isAncestor = ancestors.has(i);
-              return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    data-floor-row
-                    data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                    tabIndex={expanded ? 0 : -1}
-                    onClick={() => jump(i)}
-                    className={`flex h-7 w-full items-center truncate rounded-[6px] pr-3 text-left text-[12.5px] leading-normal transition-colors duration-150 ${
-                      item.level === 1 ? "pl-3" : item.level === 2 ? "pl-7" : "pl-11"
-                    } ${
-                      isCurrent
-                        ? "bg-accent-soft font-medium text-accent-ink"
-                        : isAncestor
-                          ? "text-accent/55"
-                          : "text-ink-2 hover:bg-wash hover:text-accent"
-                    }`}
-                  >
-                    {item.title}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-        {/* 横杠列（收起状态本体）：行高与面板行一致，逐行对齐 */}
-        <span className="ml-2 flex flex-col items-end py-1 pr-0.5">
-          {items.map((item, i) => {
-            const isCurrent = i === current;
-            const isAncestor = ancestors.has(i);
-            return (
-              <span key={item.id} aria-hidden className="flex h-7 items-center justify-end">
+      <ul className="flex flex-col items-end">
+        {items.map((item, i) => {
+          const isCurrent = i === current;
+          const isAncestor = ancestors.has(i);
+          return (
+            <li key={item.id} className="h-7">
+              <button
+                type="button"
+                data-floor-row
+                data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
+                tabIndex={expanded ? 0 : -1}
+                onClick={() => jump(i)}
+                aria-label={item.title}
+                className="relative flex h-7 w-[44px] cursor-pointer items-center justify-end outline-none"
+              >
+                {/* 标题（悬停态）：与横杠同一位置形变浮现，不产生布局位移 */}
                 <span
+                  aria-hidden
+                  data-floor-label
+                  className={`absolute right-0 flex h-7 items-center whitespace-nowrap rounded-[6px] px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
+                    expanded ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
+                  } ${
+                    isCurrent
+                      ? "bg-accent-soft font-medium text-accent-ink"
+                      : isAncestor
+                        ? "bg-surface/90 text-accent/55"
+                        : "bg-surface/90 text-ink-2 hover:text-accent"
+                  }`}
+                >
+                  {item.title}
+                </span>
+
+                {/* 横杠（收起态） */}
+                <span
+                  aria-hidden
                   data-floor-bar
                   data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                  style={{ width: (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0) }}
+                  style={{ width: expanded ? 0 : (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0) }}
                   className={`block rounded-full transition-all duration-200 ${
                     item.level === 1 ? "h-[3px]" : "h-[2.5px]"
-                  } ${isCurrent ? "bg-accent" : isAncestor ? "bg-accent/40" : "bg-line-strong"}`}
+                  } ${expanded ? "opacity-0" : "opacity-100"} ${
+                    isCurrent ? "bg-accent" : isAncestor ? "bg-accent/40" : "bg-line-strong"
+                  }`}
                 />
-              </span>
-            );
-          })}
-        </span>
-      </div>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </nav>
   );
 }
