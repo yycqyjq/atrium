@@ -18,6 +18,7 @@
 | `ATRIUM_DEFAULT_PROVIDER` | `github` | 缺省即 github，可省略 |
 | `GITHUB_GALLERY_REPO` | `ark-images` | 画廊用独立仓库（不设则跟主仓库） |
 | `ATRIUM_GALLERY_DIR` | ``（留空 = 仓库根） | 画廊图片目录 |
+| `ATRIUM_DEMO_PROJECTS` | （可选，JSON 数组） | 工坊的组件项目；不设则读 data/config.json（部署版无本地文件，建议用这个变量） |
 
 4. 点 **Deploy**，一分钟内完成，得到 `https://atrium-<你的子域>.vercel.app`。
 
@@ -36,10 +37,12 @@
 
 ## 四、部署后验证
 
-- 打开首页：应显示中庭门厅与四间房入口；
+- 打开首页：应显示中庭门厅与五间房入口（书房 / 画廊 / 工具房 / 工坊 / 陈列廊）；
 - `/study`：文章列表来自 ark-notes 根目录的 `.md` 文件；
 - `/gallery`：图片来自 ark-images；
 - `/tools`：书签来自 ark-notes 的 `admin/tools.json`；
+- `/workshop`：展品来自组件仓库的 `atrium.json` 清单（取件后在页面内渲染；仓颉编辑器等展品首次打开需可访问阿里 CDN）；
+- `/atelier`：组件陈列廊（纯静态）；
 - `/api/providers`：`{"github":{"configured":true,...}}` 即接入正常。
 
 ## 五、与桌面端的关系
