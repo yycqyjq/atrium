@@ -18,9 +18,9 @@ export default function DoorBand({ className = "" }: { className?: string }) {
         <Link
           key={door.href}
           href={door.href}
-          className={`group flex min-h-[178px] flex-col gap-3 pt-[26px] pb-7 transition-colors duration-200 hover:bg-wash max-xs:min-h-0 max-xs:px-0 max-xs:py-5 ${
-            i === 0 ? "pr-6 pl-0" : "px-6"
-          } ${i > 0 ? "border-l border-line max-xs:border-t max-xs:border-l-0" : ""}`}
+          className={`group flex min-h-[178px] flex-col gap-3 px-6 pt-[26px] pb-7 transition-colors duration-200 hover:bg-wash max-xs:min-h-0 max-xs:px-0 max-xs:py-5 ${
+            i > 0 ? "border-l border-line max-xs:border-t max-xs:border-l-0" : ""
+          }`}
         >
           <span className="flex items-center gap-3">
             <span
