@@ -9,25 +9,54 @@ function SmartImage({
   src,
   fallbacks,
   alt,
-  loading,
+  eager = false,
   className,
 }: {
   src: string;
   fallbacks: string[];
   alt: string;
-  loading?: "lazy" | "eager";
+  /** 灯箱大图等需要立即加载的场景置 true；默认按视口懒加载 */
+  eager?: boolean;
   className?: string;
 }) {
   const [idx, setIdx] = useState(0);
+  const [visible, setVisible] = useState(eager);
+  const ref = useRef<HTMLImageElement | null>(null);
   const chain = [src, ...fallbacks];
   const current = chain[Math.min(idx, chain.length - 1)] ?? src;
+
+  // 视口门控：进入视口（含少量余量）前不发起图片请求，先以浅底占位
+  useEffect(() => {
+    if (visible) return;
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "360px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible]);
+
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={current}
+      ref={ref}
+      src={visible ? current : undefined}
+      data-src={visible ? undefined : current}
       alt={alt}
-      loading={loading}
-      className={className}
+      loading={eager ? "eager" : "lazy"}
+      decoding="async"
+      className={`${className ?? ""}${visible ? "" : " min-h-[120px] bg-wash"}`}
       onError={() => setIdx((i) => (i < chain.length - 1 ? i + 1 : i))}
     />
   );
@@ -118,7 +147,6 @@ export default function GalleryGrid({
               src={image.url}
               fallbacks={image.fallbackUrls}
               alt={image.name}
-              loading="lazy"
               className="block w-full transition-opacity duration-200 group-hover:opacity-90"
             />
           </button>
@@ -171,6 +199,7 @@ export default function GalleryGrid({
               src={active.url}
               fallbacks={active.fallbackUrls}
               alt={active.name}
+              eager
               className="max-h-full max-w-full rounded-ctl object-contain shadow-2xl"
             />
             {images.length > 1 ? (

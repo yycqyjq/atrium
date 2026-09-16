@@ -37,6 +37,7 @@ export default function RecentShots({ shots, className = "" }: Props) {
               src={shot.url}
               alt={shot.name}
               loading="lazy"
+              decoding="async"
               className="block aspect-square w-full object-cover transition-opacity duration-200 group-hover:opacity-90"
             />
           </Link>

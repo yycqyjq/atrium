@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IconArrowUpRight } from "@/components/icons";
 
 /** 域名提取（去 www） */
@@ -15,29 +15,61 @@ export function hostOf(url: string) {
 /** 站点图标：服务端代理（/api/icon，带磁盘缓存）；失败回退首字方块 */
 export function ToolIcon({ host, name }: { host: string; name: string }) {
   const [failed, setFailed] = useState(false);
-  if (failed || !host) {
-    return (
-      <span
-        aria-hidden
-        className="flex size-5 shrink-0 items-center justify-center rounded-[5px] border border-line bg-wash font-serif text-[11px] leading-none text-ink-2"
-      >
-        {name.slice(0, 1)}
-      </span>
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLSpanElement | null>(null);
+
+  // 视口门控：滚动到附近前不请求站点图标，先以首字方块占位（尺寸不变，无抖动）
+  useEffect(() => {
+    if (visible) return;
+    const el = ref.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === "undefined") {
+      setVisible(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setVisible(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: "360px 0px" },
     );
-  }
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible]);
+
+  const letter = (
+    <span
+      aria-hidden
+      className="flex size-5 shrink-0 items-center justify-center rounded-[5px] border border-line bg-wash font-serif text-[11px] leading-none text-ink-2"
+    >
+      {name.slice(0, 1)}
+    </span>
+  );
+
+  if (failed || !host) return letter;
+
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img
-      src={`/api/icon?d=${encodeURIComponent(host)}`}
-      alt=""
-      width={20}
-      height={20}
-      loading="lazy"
-      decoding="async"
-      data-tool-icon
-      onError={() => setFailed(true)}
-      className="size-5 shrink-0 rounded-[5px]"
-    />
+    <span ref={ref} className="inline-flex size-5 shrink-0">
+      {visible ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`/api/icon?d=${encodeURIComponent(host)}`}
+          alt=""
+          width={20}
+          height={20}
+          loading="lazy"
+          decoding="async"
+          data-tool-icon
+          onError={() => setFailed(true)}
+          className="size-5 shrink-0 rounded-[5px]"
+        />
+      ) : (
+        letter
+      )}
+    </span>
   );
 }
 
