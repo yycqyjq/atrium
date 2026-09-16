@@ -10,6 +10,7 @@ import Breadcrumb from "@/components/ui/Breadcrumb";
 import Button from "@/components/ui/Button";
 import Chip from "@/components/ui/Chip";
 import EmptyState from "@/components/ui/EmptyState";
+import Loading from "@/components/ui/Loading";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { ToolCardContent } from "@/components/tools/ToolCard";
 import PostRow from "@/components/study/PostRow";
@@ -280,7 +281,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="状态与提示" note="空态 / 提示条">
+          <Section title="状态与提示" note="空态 / 提示条 / 载入态">
             <div className="grid gap-3 md:grid-cols-2">
               <Card padding="none">
                 <EmptyState title="房间级空态。" sub="衬线标题 + 副文案（EmptyState 组件）。" />
@@ -292,6 +293,9 @@ export default function AtelierPage() {
             <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-ctl border border-line py-8">
               <Alert size="sm" tone="error">提示条：强调底色，用于错误与警告（Alert · error）。</Alert>
               <Alert size="sm" tone="ok">提示条：描边浅面，用于常规告知（Alert · ok）。</Alert>
+            </div>
+            <div className="mt-3 flex items-center justify-center rounded-ctl border border-line py-8">
+              <Loading label="载入中…（路由切换与等待时同款）" />
             </div>
           </Section>
 
