@@ -123,12 +123,12 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
               <Combobox
                 id="upload-dir"
                 size="sm"
+                autoWidth
                 value={target}
                 onChange={setTarget}
                 options={[ROOT, ...albums]}
                 placeholder="选择或输入相册"
                 customHint={(input: string) => `新建相册「${input}」`}
-                className="w-[190px]"
               />
               <span>目录</span>
             </div>

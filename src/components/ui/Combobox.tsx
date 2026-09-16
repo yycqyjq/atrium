@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { fieldClasses } from "@/components/ui/Field";
 import { IconChevronDown, IconCheck, IconPlus } from "@/components/icons";
 
-type PanelPos = { left: number; width: number; top?: number; bottom?: number };
+type PanelPos = { left: number; width: number; maxWidth: number; top?: number; bottom?: number };
 
 /**
  * 可输入下拉（Combobox · 全站统一）：
@@ -22,6 +22,7 @@ export default function Combobox({
   className = "",
   size = "md",
   customHint,
+  autoWidth = false,
 }: {
   id?: string;
   value: string;
@@ -33,6 +34,8 @@ export default function Combobox({
   size?: "md" | "sm";
   /** 「候选之外」行的文案生成器（默认「使用新分类」） */
   customHint?: (input: string) => string;
+  /** 宽度自适应：输入框随内容撑开（行内场景用） */
+  autoWidth?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
@@ -41,6 +44,20 @@ export default function Combobox({
   const rootRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const measureRef = useRef<HTMLSpanElement | null>(null);
+  const [autoW, setAutoW] = useState<number | null>(null);
+
+  // 宽度自适应：用隐藏量尺按当前值/占位文本测量，随内容撑开
+  useLayoutEffect(() => {
+    if (!autoWidth) {
+      setAutoW(null);
+      return;
+    }
+    const el = measureRef.current;
+    if (!el) return;
+    const extra = size === "sm" ? 46 : 66;
+    setAutoW(Math.max(size === "sm" ? 84 : 120, Math.ceil(el.getBoundingClientRect().width) + extra));
+  }, [autoWidth, value, placeholder, size]);
 
   const filtered = useMemo(() => {
     const q = value.trim().toLowerCase();
@@ -61,14 +78,16 @@ export default function Combobox({
     const el = rootRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
+    const maxWidth = Math.max(rect.width, Math.min(440, window.innerWidth - rect.left - 16));
     if (window.innerHeight - rect.bottom < 256 && rect.top > 256) {
-      setPos({ left: rect.left, width: rect.width, bottom: window.innerHeight - rect.top + 6 });
+      setPos({ left: rect.left, width: rect.width, maxWidth, bottom: window.innerHeight - rect.top + 6 });
     } else {
-      setPos({ left: rect.left, width: rect.width, top: rect.bottom + 6 });
+      setPos({ left: rect.left, width: rect.width, maxWidth, top: rect.bottom + 6 });
     }
   }, []);
 
   const openDropdown = () => {
+    if (open) return;
     updatePos();
     setActive(0);
     setFiltering(false);
@@ -100,8 +119,9 @@ export default function Combobox({
 
   const pick = (next: string) => {
     onChange(next);
-    setOpen(false);
+    // 先复位焦点再收起：即便焦点事件触发重开，也会被随后的关闭覆盖
     inputRef.current?.focus();
+    setOpen(false);
   };
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -140,7 +160,9 @@ export default function Combobox({
             style={{
               position: "fixed",
               left: pos.left,
-              width: pos.width,
+              width: "max-content",
+              minWidth: pos.width,
+              maxWidth: pos.maxWidth,
               ...(pos.top != null ? { top: pos.top } : { bottom: pos.bottom }),
             }}
             className="z-[80] max-h-[218px] animate-rise overflow-y-auto rounded-ctl border border-line bg-raised py-1 shadow-lg"
@@ -192,7 +214,18 @@ export default function Combobox({
       : null;
 
   return (
-    <div ref={rootRef} className={`relative ${className}`}>
+    <div ref={rootRef} className={`relative ${className}`} style={autoW != null ? { width: autoW } : undefined}>
+      {autoWidth ? (
+        <span
+          ref={measureRef}
+          aria-hidden
+          className={`pointer-events-none invisible absolute left-0 top-0 whitespace-pre ${
+            size === "sm" ? "text-[12.5px]" : "text-[13.5px]"
+          }`}
+        >
+          {value || placeholder || "\u00A0"}
+        </span>
+      ) : null}
       <input
         ref={inputRef}
         id={id}
