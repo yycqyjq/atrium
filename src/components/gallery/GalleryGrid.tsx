@@ -3,6 +3,22 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { GalleryImage } from "@/lib/gallery";
+
+/** 卡片短日期：同年省年份 */
+function shortDate(ts: number) {
+  const d = new Date(ts);
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear()
+    ? `${d.getMonth() + 1}月${d.getDate()}日`
+    : `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+}
+
+/** 灯箱完整时间 */
+function fullDate(ts: number) {
+  const d = new Date(ts);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日 ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 import { IconX, IconChevronLeft, IconChevronRight, IconPencil } from "@/components/icons";
 import ActionCard from "@/components/ui/ActionCard";
 import ImageRenameDialog from "@/components/gallery/ImageRenameDialog";
@@ -221,6 +237,7 @@ export default function GalleryGrid({
         return u.includes(fromE) ? u.replace(fromE, toE) : u;
       };
       const patched: GalleryImage = {
+        ...origin,
         name: newName,
         path: newPath,
         url: swap(origin.url),
@@ -324,9 +341,14 @@ export default function GalleryGrid({
               onConfirm={() => void removeImage(image)}
               onCancelConfirm={() => setConfirmPath(null)}
             >
-              <p className="truncate px-2.5 pb-1.5 pt-2 text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
-                {view.name}
-              </p>
+              <div className="flex items-baseline justify-between gap-2 px-2.5 pb-1.5 pt-2">
+                <p className="min-w-0 flex-1 truncate text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
+                  {view.name}
+                </p>
+                {view.date ? (
+                  <span className="shrink-0 text-[11px] tabular-nums text-ink-3/80">{shortDate(view.date)}</span>
+                ) : null}
+              </div>
               <button
                 type="button"
                 onClick={() => setCurrent(base + i)}
@@ -400,7 +422,10 @@ export default function GalleryGrid({
                 ) : null}
               </div>
             ) : (
-              <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">{active.name}</p>
+              <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">
+                {active.name}
+                {active.date ? <span className="text-white/55"> · {fullDate(active.date)}</span> : null}
+              </p>
             )}
             <div className="flex shrink-0 items-center gap-4">
               <span className="text-[12px] tabular-nums">

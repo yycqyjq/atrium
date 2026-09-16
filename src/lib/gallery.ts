@@ -5,7 +5,7 @@ import type { ContentReason } from "@/lib/content";
 
 export type { ContentReason };
 
-export type GalleryImage = { name: string; path: string; url: string; fallbackUrls: string[] };
+export type GalleryImage = { name: string; path: string; url: string; fallbackUrls: string[]; date?: number };
 export type GalleryAlbum = { name: string; path: string };
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
@@ -22,6 +22,35 @@ let sectionsCache: {
 /** 写操作（上传 / 改名 / 移除）后调用，让画廊即刻反映最新内容 */
 export function bustGalleryCache() {
   sectionsCache = null;
+}
+
+/* 每张图的提交时间（卡片日期）：单独缓存 60 分钟，避免反复占用限额 */
+const commitDateCache = new Map<string, { at: number; value: number | null }>();
+const COMMIT_DATE_TTL = 60 * 60_000;
+
+async function imageCommitDate(
+  provider: { lastCommitDate: (path: string) => Promise<number | null> },
+  path: string,
+): Promise<number | null> {
+  const hit = commitDateCache.get(path);
+  if (hit && Date.now() - hit.at < COMMIT_DATE_TTL) return hit.value;
+  const value = await provider.lastCommitDate(path);
+  if (commitDateCache.size > 600) commitDateCache.clear();
+  commitDateCache.set(path, { at: Date.now(), value });
+  return value;
+}
+
+/** 小并发批处理（限制同时进行的请求数） */
+async function mapLimit<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
+  let index = 0;
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (index < items.length) {
+      const current = items[index];
+      index += 1;
+      await fn(current);
+    }
+  });
+  await Promise.all(workers);
 }
 
 /**
@@ -95,6 +124,13 @@ export async function listGallerySections(): Promise<{
     if (rootImages.length > 0) {
       sections.push({ key: "__root__", name: "散张", slug: "root", images: rootImages });
     }
+
+    // 补齐每张图的提交时间（失败静默，不影响出图）
+    const allImages = sections.flatMap((section) => section.images);
+    await mapLimit(allImages, 5, async (image) => {
+      const ts = await imageCommitDate(provider, image.path);
+      if (ts) image.date = ts;
+    });
 
     const value = { sections, dir: rootDir, reason: "ok" as ContentReason };
     sectionsCache = { at: Date.now(), value };
