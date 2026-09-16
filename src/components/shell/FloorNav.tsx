@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type FloorItem = { id: string; title: string; level: number; el: HTMLElement };
 
@@ -9,11 +9,11 @@ const BAR_WIDTH: Record<number, number> = { 1: 20, 2: 13, 3: 9 };
 const CURRENT_EXTRA = 9;
 
 /**
- * 右侧轻量楼层跳转目录（形变版）。
+ * 右侧轻量楼层跳转目录（逐项形变版）。
  *
  * - 默认：竖排小横杠，当前楼层更长更亮（主题色），父级弱高亮；
- * - 悬停 / 键盘聚焦：横杠原地收拢、同位浮出标题文字（纯 opacity/transform，无布局位移，
- *   不跳动、不遮挡式的菜单面板）；移开后文字缩回横杠；
+ * - 悬停（或键盘聚焦）：**只有划过的那一根**在原位变成对应的标题文字，
+ *   其余保持横杠；移开后缩回横杠。纯 opacity/transform，零布局位移；
  * - 点击：平滑滚动到对应楼层（带顶部偏移），立即高亮并同步地址栏（不跳页）；
  * - 滚动：自动判定当前楼层（底部归最后一项），窗口缩放与结构变化后重算。
  *
@@ -22,8 +22,7 @@ const CURRENT_EXTRA = 9;
 export default function FloorNav() {
   const [items, setItems] = useState<FloorItem[]>([]);
   const [current, setCurrent] = useState(0);
-  const [expanded, setExpanded] = useState(false);
-  const closeTimer = useRef<number | null>(null);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   // 扫描容器内的标题（结构变化时重建，如搜索过滤）
   const scan = useCallback(() => {
@@ -115,74 +114,53 @@ export default function FloorNav() {
     }
   }
 
-  const cancelClose = () => {
-    if (closeTimer.current !== null) {
-      window.clearTimeout(closeTimer.current);
-      closeTimer.current = null;
-    }
-  };
-
   return (
-    <nav
-      aria-label="楼层目录"
-      className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block"
-      onMouseEnter={() => {
-        cancelClose();
-        setExpanded(true);
-      }}
-      onMouseLeave={() => {
-        cancelClose();
-        closeTimer.current = window.setTimeout(() => setExpanded(false), 120);
-      }}
-      onFocusCapture={() => {
-        cancelClose();
-        setExpanded(true);
-      }}
-      onBlurCapture={(event) => {
-        if (!event.currentTarget.contains(event.relatedTarget as Node)) setExpanded(false);
-      }}
-    >
+    <nav aria-label="楼层目录" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
       <ul className="flex flex-col items-end">
         {items.map((item, i) => {
           const isCurrent = i === current;
           const isAncestor = ancestors.has(i);
+          const isHovered = hovered === i;
           return (
             <li key={item.id} className="h-7">
               <button
                 type="button"
                 data-floor-row
                 data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                tabIndex={expanded ? 0 : -1}
                 onClick={() => jump(i)}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+                onFocus={() => setHovered(i)}
+                onBlur={() => setHovered((h) => (h === i ? null : h))}
                 aria-label={item.title}
                 className="relative flex h-7 w-[44px] cursor-pointer items-center justify-end outline-none"
               >
-                {/* 标题（悬停态）：与横杠同一位置形变浮现，不产生布局位移 */}
+                {/* 标题：划过时在同位浮现，其余项保持横杠 */}
                 <span
                   aria-hidden
                   data-floor-label
                   className={`absolute right-0 flex h-7 items-center whitespace-nowrap rounded-[6px] px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
-                    expanded ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
+                    isHovered ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
                   } ${
                     isCurrent
                       ? "bg-accent-soft font-medium text-accent-ink"
                       : isAncestor
                         ? "bg-surface/90 text-accent/55"
-                        : "bg-surface/90 text-ink-2 hover:text-accent"
+                        : "bg-surface/90 text-ink-2"
                   }`}
                 >
                   {item.title}
                 </span>
 
-                {/* 横杠（收起态） */}
+                {/* 横杠：该行被划过时收拢 */}
                 <span
                   aria-hidden
                   data-floor-bar
                   data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                  style={{ width: expanded ? 0 : (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0) }}
+                  style={{ width: isHovered ? 0 : (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0) }}
                   className={`block rounded-full transition-all duration-200 ${
                     item.level === 1 ? "h-[3px]" : "h-[2.5px]"
-                  } ${expanded ? "opacity-0" : "opacity-100"} ${
+                  } ${isHovered ? "opacity-0" : "opacity-100"} ${
                     isCurrent ? "bg-accent" : isAncestor ? "bg-accent/40" : "bg-line-strong"
                   }`}
                 />
