@@ -29,13 +29,16 @@ function activeKey(pathname: string): string {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const [connected, setConnected] = useState(true); // 默认按已连接渲染，避免闪烁
+  const [account, setAccount] = useState({ connected: true, owner: "" });
   useEffect(() => {
     fetch("/api/config")
       .then((r) => r.json())
       .then((d) => {
         const gh = d?.repos?.github;
-        setConnected(Boolean(gh?.tokenSet && gh?.owner && gh?.repo));
+        setAccount({
+          connected: Boolean(gh?.tokenSet && gh?.owner && gh?.repo),
+          owner: String(gh?.owner ?? ""),
+        });
       })
       .catch(() => {});
   }, []);
@@ -92,16 +95,48 @@ export default function Sidebar() {
       </nav>
 
       <div className="mt-5 flex shrink-0 items-center justify-between gap-2 border-t border-line pt-4 max-lg:mt-0 max-lg:border-0 max-lg:p-0 max-xs:order-2 max-xs:ml-auto">
-        <div className="flex min-w-0 items-center gap-[9px]">
+        <Link
+          href="/connect"
+          title={account.connected ? `已连接 ${account.owner || "账号"}，点击管理` : "未连接，点击配置账号与仓库"}
+          className="flex min-w-0 items-center gap-[9px] rounded-ctl px-1 py-0.5 transition-colors duration-150 hover:bg-wash"
+        >
           <span
             aria-hidden
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent font-serif text-[13px] font-semibold text-on-accent"
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full font-serif text-[13px] font-semibold ${
+              account.connected
+                ? "bg-accent text-on-accent"
+                : "border border-dashed border-line-strong text-ink-3"
+            }`}
           >
-            Y
+            {account.connected ? (account.owner ? account.owner.charAt(0).toUpperCase() : "·") : "·"}
           </span>
-          <span className="truncate text-[12.5px] text-ink-2 max-lg:hidden">yycqyjq</span>
-        </div>
-        <ThemeToggle />
+          <span className="truncate text-[12.5px] text-ink-2 max-lg:hidden">
+            {account.connected ? account.owner || "已连接" : "连接仓库"}
+          </span>
+        </Link>
+        <span className="flex items-center gap-0.5">
+          <Link
+            href="/connect"
+            title="账号与设置"
+            aria-label="账号与设置"
+            className="rounded-ctl p-1.5 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-ink-2"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              className="size-[15px]"
+            >
+              <circle cx="12" cy="12" r="3.2" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" />
+            </svg>
+          </Link>
+          <ThemeToggle />
+        </span>
       </div>
     </aside>
   );

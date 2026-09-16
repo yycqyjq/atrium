@@ -6,7 +6,7 @@ import { readPublicConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = { title: "连接仓库" };
+export const metadata: Metadata = { title: "设置" };
 
 /** 连接仓库页：配令牌 + 仓库指向（桌面端/本机的「登录」入口） */
 export default async function ConnectPage() {
@@ -33,15 +33,15 @@ export default async function ConnectPage() {
               中庭
             </Link>
             {" / "}
-            <span className="text-ink-2">连接仓库</span>
+            <span className="text-ink-2">设置</span>
           </p>
           <h1 className="mb-3 font-serif text-[34px] font-semibold leading-tight tracking-[0.03em] max-xs:text-[28px]">
-            连接仓库
+            设置
           </h1>
           <p className="max-w-[34em] text-ink-2">
             {connected
-              ? "中庭已连接你的仓库，全部功能可用。"
-              : "填入 GitHub 令牌与仓库信息，中庭即连上你的数据。配置保存在本机，绝不进入仓库。"}
+              ? "账号与仓库。中庭已连接你的仓库，全部功能可用。"
+              : "账号与仓库。填入 GitHub 令牌与仓库信息，中庭即连上你的数据；配置保存在本机，绝不进入仓库。"}
           </p>
         </header>
 
