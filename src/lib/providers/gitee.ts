@@ -74,13 +74,18 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
 
     async getFile(filePath): Promise<RepoFile> {
       const res = await call(`/repos/${repoPath}/contents/${encodeURI(filePath)}?ref=${ref}`);
-      const data = (await res.json()) as Record<string, unknown>;
+      const data: unknown = await res.json();
+      // 目录会返回数组：对 getFile 语义而言等同「不存在」，抛 404 让调用方走目录分支
+      if (Array.isArray(data) || (data as Record<string, unknown>).type === "dir") {
+        throw new ProviderError(404, `不是文件：${filePath}`);
+      }
+      const file = data as Record<string, unknown>;
       return {
-        name: String(data.name ?? ""),
-        path: String(data.path ?? filePath),
-        sha: String(data.sha ?? ""),
-        content: String(data.content ?? ""),
-        encoding: String(data.encoding ?? "base64"),
+        name: String(file.name ?? ""),
+        path: String(file.path ?? filePath),
+        sha: String(file.sha ?? ""),
+        content: String(file.content ?? ""),
+        encoding: String(file.encoding ?? "base64"),
       };
     },
 

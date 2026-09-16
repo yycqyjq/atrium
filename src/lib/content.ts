@@ -25,7 +25,11 @@ export type ContentReason = "ok" | "not-configured" | "fetch-failed";
 
 const MD_RE = /\.mdx?$/i;
 /** 单次扫描最多处理的 markdown 文件数 */
-const FILE_CAP = 60;
+const FILE_CAP = 400;
+/** 递归遍历的最大目录数 */
+const DIR_CAP = 120;
+/** 最大下钻深度 */
+const MAX_DEPTH = 6;
 /** 无 front-matter 日期时回退查询提交时间的文件数上限 */
 const DATE_FALLBACK_CAP = 12;
 const CACHE_TTL = 60_000;
@@ -154,26 +158,69 @@ function metaFromData(filePath: string, data: Record<string, unknown>, body: str
   };
 }
 
-async function collectMdFiles(provider: RepoProvider): Promise<RepoEntry[]> {
-  const root = await provider.listDir("");
+export type StudyFolder = {
+  name: string;
+  path: string;
+  depth: number;
+  /** 直属文章数 */
+  files: number;
+  /** 含子目录的递归文章数 */
+  total: number;
+};
+
+/**
+ * 递归遍历仓库：收集全部 .md 文件与文件夹索引（支持多层下钻）。
+ * 跳过隐藏目录与根级 admin（配置目录）；受深度、目录数与文件数上限保护。
+ */
+async function walkRepo(
+  provider: RepoProvider,
+): Promise<{ files: RepoEntry[]; folders: StudyFolder[] }> {
   const files: RepoEntry[] = [];
-  for (const entry of root) {
-    if (entry.type === "file" && MD_RE.test(entry.name)) {
-      files.push(entry);
-    } else if (entry.type === "dir" && !entry.name.startsWith(".")) {
-      try {
-        const sub = await provider.listDir(entry.path);
-        for (const item of sub) {
-          if (item.type === "file" && MD_RE.test(item.name)) files.push(item);
-        }
-      } catch {
-        /* 子目录读取失败忽略 */
-      }
+  const dirRecords = new Map<string, { name: string; depth: number; direct: number }>();
+  const queue: Array<{ path: string; depth: number }> = [{ path: "", depth: 0 }];
+  let visited = 0;
+
+  while (queue.length > 0 && visited < DIR_CAP && files.length < FILE_CAP) {
+    const { path, depth } = queue.shift()!;
+    visited += 1;
+    let entries: RepoEntry[];
+    try {
+      entries = await provider.listDir(path);
+    } catch {
+      continue; // 子目录读取失败忽略
     }
-    if (files.length >= FILE_CAP) break;
+    let direct = 0;
+    for (const entry of entries) {
+      if (entry.type === "file" && MD_RE.test(entry.name) && !entry.name.startsWith(".")) {
+        files.push(entry);
+        direct += 1;
+      } else if (
+        entry.type === "dir" &&
+        !entry.name.startsWith(".") &&
+        !(path === "" && entry.name === "admin") &&
+        depth + 1 <= MAX_DEPTH
+      ) {
+        queue.push({ path: entry.path, depth: depth + 1 });
+      }
+      if (files.length >= FILE_CAP) break;
+    }
+    if (path) dirRecords.set(path, { name: path.split("/").pop() ?? path, depth, direct });
   }
-  return files.slice(0, FILE_CAP);
+
+  // 递归计数：含子目录的文章总数
+  const folders: StudyFolder[] = [];
+  for (const [p, rec] of dirRecords) {
+    let total = rec.direct;
+    for (const [q, qrec] of dirRecords) {
+      if (q !== p && q.startsWith(`${p}/`)) total += qrec.direct;
+    }
+    folders.push({ name: rec.name, path: p, depth: rec.depth, files: rec.direct, total });
+  }
+  folders.sort((a, b) => a.path.localeCompare(b.path));
+  return { files, folders };
 }
+
+const parentDir = (p: string) => (p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "");
 
 async function loadOne(
   provider: RepoProvider,
@@ -189,11 +236,13 @@ async function loadOne(
   }
 }
 
-async function collectPosts(providerKey?: string): Promise<PostMeta[]> {
+async function collectRepo(
+  providerKey?: string,
+): Promise<{ posts: PostMeta[]; folders: StudyFolder[] }> {
   const provider = await getProvider(providerKey);
   if (!(await provider.isConfigured())) throw new NotConfiguredError();
 
-  const files = await collectMdFiles(provider);
+  const { files, folders } = await walkRepo(provider);
   const loaded = await Promise.all(
     files.map(async (file) => ({
       file,
@@ -215,12 +264,25 @@ async function collectPosts(providerKey?: string): Promise<PostMeta[]> {
     }),
   );
 
-  return metas.sort(
-    (a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0) || a.path.localeCompare(b.path),
-  );
+  return {
+    posts: metas.sort(
+      (a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0) || a.path.localeCompare(b.path),
+    ),
+    folders,
+  };
 }
 
-let cache: { at: number; key: string; items: PostMeta[] } | null = null;
+let cache: { at: number; key: string; posts: PostMeta[]; folders: StudyFolder[] } | null = null;
+
+/** 读取仓库（含文件夹索引），60s 内存缓存 */
+async function loadRepo(providerKey?: string) {
+  const cacheKey = providerKey ?? "default";
+  if (!cache || cache.key !== cacheKey || Date.now() - cache.at > CACHE_TTL) {
+    const { posts, folders } = await collectRepo(providerKey);
+    cache = { at: Date.now(), key: cacheKey, posts, folders };
+  }
+  return cache;
+}
 
 /** 全量文章列表（60s 内存缓存）；limit 省略时返回全部 */
 export async function listPosts({
@@ -231,11 +293,8 @@ export async function listPosts({
   reason: ContentReason;
 }> {
   try {
-    const cacheKey = provider ?? "default";
-    if (!cache || cache.key !== cacheKey || Date.now() - cache.at > CACHE_TTL) {
-      cache = { at: Date.now(), key: cacheKey, items: await collectPosts(provider) };
-    }
-    const items = typeof limit === "number" ? cache.items.slice(0, limit) : cache.items;
+    const repo = await loadRepo(provider);
+    const items = typeof limit === "number" ? repo.posts.slice(0, limit) : repo.posts;
     return { items, reason: "ok" };
   } catch (err) {
     if (err instanceof NotConfiguredError) {
@@ -244,6 +303,73 @@ export async function listPosts({
     console.warn("[content] 文章列表获取失败：", err);
     return { items: [], reason: "fetch-failed" };
   }
+}
+
+/** 书房索引：全量文章 + 文件夹树（供分组视图与全量搜索） */
+export async function studyIndex(): Promise<{
+  posts: PostMeta[];
+  folders: StudyFolder[];
+  reason: ContentReason;
+}> {
+  try {
+    const repo = await loadRepo();
+    return { posts: repo.posts, folders: repo.folders, reason: "ok" };
+  } catch (err) {
+    if (err instanceof NotConfiguredError) {
+      return { posts: [], folders: [], reason: "not-configured" };
+    }
+    console.warn("[content] 书房索引获取失败：", err);
+    return { posts: [], folders: [], reason: "fetch-failed" };
+  }
+}
+
+/**
+ * 目录视图数据：某目录（或根）的直属文章与子目录。
+ * slugParts 为空 = 根目录；目录不存在返回 null。
+ */
+export async function getStudyDir(slugParts: string[]): Promise<{
+  path: string;
+  folders: StudyFolder[];
+  posts: PostMeta[];
+  allPosts: PostMeta[];
+} | null> {
+  const decoded = slugParts.map((part) => {
+    try {
+      return decodeURIComponent(part);
+    } catch {
+      return part;
+    }
+  });
+  const path = decoded.join("/");
+
+  const repo = await loadRepo();
+  const isRoot = path === "";
+  const known = isRoot || repo.folders.some((f) => f.path === path);
+
+  if (!known) {
+    // 兜底探测：目录可能真实存在但不在索引（空目录 / 超出扫描上限）
+    const provider = await getProvider();
+    try {
+      const entries = await provider.listDir(path);
+      const sub = entries
+        .filter((e) => e.type === "dir" && !e.name.startsWith("."))
+        .map((e) => ({
+          name: e.name,
+          path: e.path,
+          depth: decoded.length + 1,
+          files: 0,
+          total: 0,
+        }));
+      return { path, folders: sub, posts: [], allPosts: [] };
+    } catch (err) {
+      if (err instanceof ProviderError && err.status === 404) return null;
+      throw err;
+    }
+  }
+
+  const folders = repo.folders.filter((f) => parentDir(f.path) === path);
+  const posts = repo.posts.filter((p) => parentDir(p.path) === path);
+  return { path, folders, posts, allPosts: repo.posts };
 }
 
 export async function getRecentPosts(limit = 4) {
