@@ -324,6 +324,9 @@ export default function GalleryGrid({
               onConfirm={() => void removeImage(image)}
               onCancelConfirm={() => setConfirmPath(null)}
             >
+              <p className="truncate px-2.5 pb-1.5 pt-2 text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
+                {view.name}
+              </p>
               <button
                 type="button"
                 onClick={() => setCurrent(base + i)}
@@ -339,9 +342,6 @@ export default function GalleryGrid({
                   className="block w-full transition-opacity duration-200 group-hover:opacity-90"
                 />
               </button>
-              <p className="truncate px-2.5 pb-2 pt-1.5 text-[12px] tracking-[0.03em] text-ink-3 transition-colors duration-200 group-hover:text-ink-2">
-                {view.name}
-              </p>
             </ActionCard>
           );
         })}
