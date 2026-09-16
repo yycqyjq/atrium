@@ -1,0 +1,45 @@
+name: 自动体检
+
+# 每次推送到 main 自动跑「类型检查 + 构建」：改坏立刻标红，绿勾＝可放心。
+# 说明：构建产物不入库；构建本身内置 TypeScript 检查，之后再过一遍独立 tsc。
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      # CI 只做检查不跑桌面端，跳过 Electron 二进制下载（省时间也更稳）
+      ELECTRON_SKIP_BINARY_DOWNLOAD: "1"
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: 安装 Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+
+      - name: 构建（内置类型检查）
+        run: pnpm build
+
+      - name: 类型检查
+        run: pnpm exec tsc --noEmit
