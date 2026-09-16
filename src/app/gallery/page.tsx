@@ -3,6 +3,8 @@ import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import GalleryGrid from "@/components/gallery/GalleryGrid";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
+import EmptyState from "@/components/ui/EmptyState";
+import Chip from "@/components/ui/Chip";
 import { listGallery, type ContentReason } from "@/lib/gallery";
 import { resolveGalleryConfig } from "@/lib/config";
 
@@ -62,37 +64,19 @@ export default async function GalleryPage({
 
         {albums.length > 0 || current ? (
           <div className="mb-5 flex flex-wrap items-center gap-2">
-            <Link
-              href="/gallery"
-              className={`rounded-ctl border px-[13px] py-[5px] text-[12.5px] tracking-[0.03em] transition-colors duration-150 ${
-                current
-                  ? "border-line text-ink-3 hover:border-line-strong hover:text-ink-2"
-                  : "border-accent bg-accent-soft font-medium text-accent-ink"
-              }`}
-            >
+            <Chip href="/gallery" active={!current}>
               全部
-            </Link>
+            </Chip>
             {albums.map((item) => (
-              <Link
-                key={item.path}
-                href={`/gallery?album=${encodeURIComponent(item.name)}`}
-                className={`rounded-ctl border px-[13px] py-[5px] text-[12.5px] tracking-[0.03em] transition-colors duration-150 ${
-                  current === item.name
-                    ? "border-accent bg-accent-soft font-medium text-accent-ink"
-                    : "border-line text-ink-3 hover:border-line-strong hover:text-ink-2"
-                }`}
-              >
+              <Chip key={item.path} href={`/gallery?album=${encodeURIComponent(item.name)}`} active={current === item.name}>
                 {item.name}
-              </Link>
+              </Chip>
             ))}
           </div>
         ) : null}
 
         {images.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="mb-2 font-serif text-[19px] tracking-[0.02em]">{copy.title}</p>
-            <p className="text-[13px] text-ink-3">{copy.sub}</p>
-          </div>
+          <EmptyState title={copy.title} sub={copy.sub} />
         ) : (
           <>
             <GalleryGrid images={images} initialView={Number.isInteger(viewNum) ? viewNum : undefined} />

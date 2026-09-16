@@ -3,6 +3,7 @@ import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import StudyBrowser, { type BrowserPost, type BrowserSection } from "@/components/study/StudyBrowser";
 import FloorNav from "@/components/shell/FloorNav";
+import EmptyState from "@/components/ui/EmptyState";
 import { studyIndex, type ContentReason, type PostMeta } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
@@ -77,10 +78,7 @@ export default async function StudyPage() {
         </header>
 
         {posts.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="mb-2 font-serif text-[19px] tracking-[0.02em]">{copy.title}</p>
-            <p className="text-[13px] text-ink-3">{copy.sub}</p>
-          </div>
+          <EmptyState title={copy.title} sub={copy.sub} />
         ) : (
           <div data-floor-nav>
             <StudyBrowser

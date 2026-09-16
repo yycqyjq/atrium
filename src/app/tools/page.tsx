@@ -3,6 +3,7 @@ import Link from "next/link";
 import Footer from "@/components/shell/Footer";
 import ToolsList from "@/components/tools/ToolsList";
 import FloorNav from "@/components/shell/FloorNav";
+import EmptyState from "@/components/ui/EmptyState";
 import ToolsAdd from "@/components/tools/ToolsAdd";
 import { listTools } from "@/lib/tools";
 import { resolveRepoConfig } from "@/lib/config";
@@ -45,10 +46,7 @@ export default async function ToolsPage() {
         </header>
 
         {count === 0 ? (
-          <div className="py-16 text-center">
-            <p className="mb-2 font-serif text-[19px] tracking-[0.02em]">{emptyCopy.title}</p>
-            <p className="text-[13px] text-ink-3">{emptyCopy.sub}</p>
-          </div>
+          <EmptyState title={emptyCopy.title} sub={emptyCopy.sub} />
         ) : (
           <div data-floor-nav>
             <ToolsList groups={groups} />

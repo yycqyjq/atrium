@@ -28,7 +28,9 @@ export default function FloorNav() {
   const scan = useCallback(() => {
     const root = document.querySelector("[data-floor-nav]");
     if (!root) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>("h2, h3, h4"));
+    const els = Array.from(root.querySelectorAll<HTMLElement>("h2, h3, h4")).filter(
+      (el) => !el.closest("[data-floor-skip]"),
+    );
     setItems(
       els.map((el, i) => ({
         id: el.id || `floor-${i}`,
