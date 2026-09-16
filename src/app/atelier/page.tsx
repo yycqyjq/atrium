@@ -311,9 +311,6 @@ export default function AtelierPage() {
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">输入框（Input）</p>
                 <FieldLabel htmlFor="demo-input">示例标签（FieldLabel）</FieldLabel>
                 <Input id="demo-input" placeholder="标准输入框 · 设置页同款" />
-                <div className="mt-3">
-                  <Input size="sm" placeholder="紧凑输入框 · 工具编辑同款" />
-                </div>
               </Card>
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">文本域（Textarea）</p>
