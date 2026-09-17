@@ -1,10 +1,13 @@
 # 中庭 Atrium
 
-个人数字空间「中庭」：一个中心，四间房。全栈 Next.js 实现。
+[![自动体检](https://github.com/yycqyjq/atrium/actions/workflows/ci.yml/badge.svg)](https://github.com/yycqyjq/atrium/actions/workflows/ci.yml)
+
+个人数字空间「中庭」：一个中心，五间房。全栈 Next.js 实现。
 
 - **中庭**：个人主页，身份、房间入口与最近动态
 - **书房**：文章与长文（读）
 - **画廊**：照片与影像（看）
+- **工坊**：组件展品，真实取件运行（演）
 - **工具房**：书签与常用工具（用）
 - **陈列廊**：组件与实验（造）
 
@@ -56,18 +59,18 @@ atrium/
 ├── src/
 │   ├── app/                  页面与 API（App Router）
 │   │   ├── page.tsx          中庭（首页）
-│   │   ├── study|gallery|tools|atelier/page.tsx  四间房
-│   │   └── api/
-│   │       ├── providers/    内容源清单与配置状态
-│   │       ├── config/       站点配置读写（合并式，永不整体覆盖）
-│   │       └── posts/        文章列表（服务端缓存 + 降级语义）
+│   │   ├── study|gallery|tools|atelier|workshop/  五间房
+│   │   ├── study/write/      写作台；connect/ 连接仓库
+│   │   └── api/              内容、配置、搜索、上传、写作等接口
 │   ├── components/
-│   │   ├── shell/            侧栏、主题切换、页脚
-│   │   ├── home/             首页区块（问候、天井、四扇门、列表、常用）
-│   │   └── RoomStub.tsx      房间占位组件（迁移中状态）
+│   │   ├── shell/            侧栏、楼层导航、主题、页脚
+│   │   ├── home/             首页区块（问候、天井、四扇门、列表）
+│   │   ├── study|gallery|tools|workshop|atelier|search/  各房间组件
+│   │   └── ui/               公共组件（按钮、弹层、输入、提示…）
 │   └── lib/
 │       ├── config.ts         配置解析（环境变量 > data/config.json）
-│       ├── content.ts        内容服务（列表、缓存、降级）
+│       ├── content|gallery|tools|demos.ts  四路数据服务
+│       ├── cache.ts          两级缓存（内存 + 磁盘，失败保旧）
 │       └── providers/        内容源抽象（GitHub / Gitee / 可扩展）
 ├── design/                   静态方向样板（视觉基准，可直接双击浏览）
 ├── data/                     运行时数据（config.json 不进 git）
@@ -135,5 +138,11 @@ atrium/
 - [x] 陈列廊：设计系统展台（色板 / 排印 / 组件）
 - [x] 画廊灯箱：弹层大图 + 键盘 / 滑动翻页 + 深链定位
 - [x] 图源自动降级：jsDelivr 主源 + raw 兑底
+- [x] 写作台：在线写作、编辑、删除与文件夹管理
+- [x] 图片直传：画廊上传、重命名与日期标注
+- [x] 全局搜索：文章 / 展品 / 图片 / 书签
+- [x] 工坊：组件仓库取件渲染（atrium.json 清单标准）
+- [x] 两级缓存：内存 + 磁盘，源站失败时保旧数据
+- [x] 自动体检：推送即跑类型检查与构建（GitHub Actions）
 - [ ] 部署上线（见 docs/DEPLOY.md，一次点击可完成）
 - [x] 桌面安装包（独立 .app + 应用图标；dmg 可用 desktop:dist）
