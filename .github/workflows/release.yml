@@ -18,10 +18,8 @@ jobs:
         include:
           - os: macos-14
             target: mac
-            asset: "*.dmg"
           - os: windows-latest
             target: win
-            asset: "*.exe"
     runs-on: ${{ matrix.os }}
     steps:
       - name: 检出代码
@@ -53,11 +51,17 @@ jobs:
       - name: 打包（${{ matrix.target }}）
         run: pnpm exec electron-builder --${{ matrix.target }} --publish never
 
-      - name: 收集产物
+      - name: 收集产物（改 ASCII 文件名：Actions 产物链路会丢中文）
         shell: bash
         run: |
+          V=$(node -p "require('./package.json').version")
           mkdir -p release-assets
-          cp ../atrium-dist/release/${{ matrix.asset }} release-assets/
+          if [ "${{ matrix.target }}" = "mac" ]; then
+            cp ../atrium-dist/release/*.dmg "release-assets/atrium-${V}-mac-arm64.dmg"
+          else
+            cp ../atrium-dist/release/*.exe "release-assets/atrium-${V}-windows-setup.exe"
+          fi
+          ls -la release-assets/
 
       - name: 上传产物
         uses: actions/upload-artifact@v4
