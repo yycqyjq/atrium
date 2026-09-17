@@ -1,5 +1,5 @@
 # 中庭 · electron-builder 配置（桌面壳独立目录，不打包业务依赖）
-appId: com.yycqyjq.atrium
+appId: com.atrium.desktop
 productName: 中庭
 
 directories:

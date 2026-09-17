@@ -212,11 +212,11 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
     <p>config.json 示例（桌面端已写好，token 为你的 GitHub 令牌）：</p>
     <pre><code>{
   "defaultProvider": "github",
-  "repos": { "github": { "owner": "yycqyjq", "repo": "ark-notes", "branch": "main", "token": "…" } },
-  "galleryRepo": { "owner": "yycqyjq", "repo": "ark-images", "branch": "main" },
+  "repos": { "github": { "owner": "你的账号", "repo": "你的内容仓库", "branch": "main", "token": "…" } },
+  "galleryRepo": { "owner": "你的账号", "repo": "你的画廊仓库", "branch": "main" },
   "galleryDir": "",
   "demoProjects": [
-    { "id": "bricks", "name": "砖瓦", "kind": "repo", "repo": "yycqyjq/bricks", "branch": "main" }
+    { "id": "bricks", "name": "砖瓦", "kind": "repo", "repo": "bricks", "branch": "main" }
   ]
 }</code></pre>
   </section>
@@ -225,7 +225,7 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
     <div class="sec-head"><span class="sec-n">07</span><h2>部署到 Vercel</h2></div>
     <ol class="steps">
       <li><span class="no">1</span><span class="tx">打开 vercel.com/new，GitHub 登录，Import「atrium」。</span></li>
-      <li><span class="no">2</span><span class="tx">环境变量填：<code>GITHUB_OWNER=yycqyjq</code>、<code>GITHUB_REPO=ark-notes</code>、<code>GITHUB_TOKEN=你的令牌</code>（建议加 <code>GITHUB_GALLERY_REPO=ark-images</code>）。</span></li>
+      <li><span class="no">2</span><span class="tx">环境变量填：<code>GITHUB_OWNER=你的账号</code>、<code>GITHUB_REPO=你的内容仓库</code>、<code>GITHUB_TOKEN=你的令牌</code>（建议加 <code>GITHUB_GALLERY_REPO=你的画廊仓库</code>）。</span></li>
       <li><span class="no">3</span><span class="tx">点 Deploy，一分钟出网址。</span></li>
       <li><span class="no">4</span><span class="tx">部署后把 <code>NEXT_PUBLIC_SITE_URL</code> 设为正式域名并 Redeploy，RSS 与 sitemap 链接即指向正式地址。</span></li>
     </ol>

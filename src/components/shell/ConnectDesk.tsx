@@ -79,7 +79,7 @@ export default function ConnectDesk({
       <div className="mb-4 grid gap-4 md:grid-cols-2">
         <div>
           <FieldLabel htmlFor="conn-owner">GitHub 用户名</FieldLabel>
-          <Input id="conn-owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="yycqyjq" />
+          <Input id="conn-owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="你的账号" />
         </div>
         <div>
           <FieldLabel htmlFor="conn-token">
@@ -96,7 +96,7 @@ export default function ConnectDesk({
         </div>
         <div>
           <FieldLabel htmlFor="conn-repo">内容仓库名</FieldLabel>
-          <Input id="conn-repo" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="ark-notes" />
+          <Input id="conn-repo" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="内容仓库名" />
         </div>
         <div>
           <FieldLabel htmlFor="conn-branch">分支</FieldLabel>

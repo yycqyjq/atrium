@@ -119,7 +119,7 @@ const demoPost2 = {
 
 const demoTool = {
   name: "GitHub",
-  url: "https://github.com/yycqyjq",
+  url: "https://github.com",
   description: "代码托管与协作。此卡片由工具房同款公共组件渲染。",
 };
 
