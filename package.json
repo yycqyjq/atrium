@@ -2,7 +2,8 @@
   "name": "atrium",
   "version": "1.2.14",
   "private": true,
-  "main": "electron/main.js",
+  "description": "中庭 · 个人数字空间：书房 / 画廊 / 工具房 / 陈列廊，GitHub 即数据库",
+  "license": "MIT",
   "scripts": {
     "dev": "ulimit -n 10240; ATRIUM_ALLOW_WRITE=1 WATCHPACK_POLLING=true next dev",
     "dev:cert": "ulimit -n 10240; ATRIUM_ALLOW_WRITE=1 WATCHPACK_POLLING=true NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem next dev",
