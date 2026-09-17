@@ -14,8 +14,8 @@
     "desktop:cert": "ulimit -n 10240; NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem electron electron-app/main.js",
     "desktop:smoke": "ulimit -n 10240; NODE_EXTRA_CA_CERTS=$PWD/certs/watt-toolkit.pem ATRIUM_SMOKE=1 electron electron-app/main.js",
     "desktop:prepare": "node scripts/prepare-desktop.mjs",
-    "desktop:pack": "next build && node scripts/prepare-desktop.mjs && node node_modules/.pnpm/electron-builder@26.15.3_electron-builder-squirrel-windows@26.15.3/node_modules/electron-builder/cli.js --mac --dir",
-    "desktop:dist": "next build && node scripts/prepare-desktop.mjs && node node_modules/.pnpm/electron-builder@26.15.3_electron-builder-squirrel-windows@26.15.3/node_modules/electron-builder/cli.js --mac",
+    "desktop:pack": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac --dir",
+    "desktop:dist": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac",
     "typecheck": "tsc --noEmit",
     "smoke": "node scripts/smoke.mjs"
   },
@@ -42,6 +42,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "electron": "^44.3.0",
+    "electron-builder": "26.15.3",
     "rehype-stringify": "^10.0.1",
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",

@@ -54,7 +54,13 @@ mkdirSync(out, { recursive: true });
 const KEEP = ["server.js", "package.json", "node_modules", ".next"];
 for (const name of KEEP) {
   const from = join(standalone, name);
-  if (existsSync(from)) cpSync(from, join(out, name), { recursive: true, dereference: false });
+  if (existsSync(from)) {
+    // Windows 下把链接全部实体化（符号链接需权限，打包与解包都会出问题）
+    cpSync(from, join(out, name), {
+      recursive: true,
+      dereference: process.platform === "win32",
+    });
+  }
 }
 
 // 静态资源

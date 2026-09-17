@@ -52,6 +52,14 @@ pnpm desktop:dist     # 额外产出 dmg 安装包
 - 本机证书（Watt Toolkit 等）放到 `~/Library/Application Support/atrium-desktop/certs/watt-toolkit.pem`，打包版启动时自动加载；
 - 应用图标：`build/icon.svg`（源）与 `build/icon.png`（1024，构建时自动转换为 icns）。
 
+### 发布安装包（GitHub Releases）
+
+推送 `v*` 版本标签（或在仓库 Actions 页手动运行「发布安装包」）即可在云端完成发布：
+
+- GitHub Actions 分别构建 macOS（arm64）dmg 与 Windows（NSIS 安装器）；
+- 构建完成后自动创建对应版本的 Release 并挂上全部安装包；
+- 本机无需参与；产物同时留档在仓库 Releases 页，供下载与备份。
+
 ## 目录结构
 
 ```
@@ -145,4 +153,4 @@ atrium/
 - [x] 两级缓存：内存 + 磁盘，源站失败时保旧数据
 - [x] 自动体检：推送即跑类型检查与构建（GitHub Actions）
 - [ ] 部署上线（见 docs/DEPLOY.md，一次点击可完成）
-- [x] 桌面安装包（独立 .app + 应用图标；dmg 可用 desktop:dist）
+- [x] 桌面安装包（独立 .app + 应用图标；本地 `desktop:dist`，云端一键发布 mac 与 Windows 安装包）
