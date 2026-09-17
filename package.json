@@ -17,7 +17,8 @@
     "desktop:pack": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac --dir",
     "desktop:dist": "next build && node scripts/prepare-desktop.mjs && electron-builder --mac",
     "typecheck": "tsc --noEmit",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "postinstall": "node scripts/ensure-electron.mjs"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
