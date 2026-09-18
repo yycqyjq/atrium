@@ -58,7 +58,7 @@ export async function listPosts(limit = 20) {
 \`\`\`
 
 \`\`\`bash
-pnpm build && pnpm start:cert
+pnpm build && pnpm start
 \`\`\`
 
 ### 表格与引用

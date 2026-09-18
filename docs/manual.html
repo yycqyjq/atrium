@@ -126,7 +126,7 @@
     <p><strong>桌面端</strong>是日常入口。打开 <code>~/Desktop/atrium-dist/release/mac-arm64/中庭.app</code>，首次启动会解压内置服务到系统数据目录，随后窗口直接打开中庭。之后每天双击即用。</p>
     <p><strong>本机开发模式</strong>（改代码时用）：</p>
     <pre><code>pnpm build        # 构建 standalone 产物
-pnpm desktop:cert # 打开桌面窗口（含证书注入）
+pnpm desktop      # 打开桌面窗口
 pnpm desktop:smoke # 自检：全链路验证后自动退出
 pnpm smoke        # 冒烟巡检：六房 + 接口逐项体检</code></pre>
     <p><strong>重新打包</strong>（改完代码想要新 App）：</p>

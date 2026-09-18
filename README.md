@@ -18,7 +18,7 @@
 - **框架**：Next.js 16（App Router）+ React 19，全栈一体（原 Koa 后端的职责由 Route Handlers 承接）
 - **样式**：Tailwind CSS v4（`src/app/globals.css` 中的 `@theme` 定义了全部设计 tokens）
 - **语言**：TypeScript（严格模式）
-- **桌面端**：Electron 壳内启动本地 Next 服务（已接入：`pnpm desktop:cert`；`next.config.ts` 开启 `standalone` 输出）
+- **桌面端**：Electron 壳内启动本地 Next 服务（已接入：`pnpm desktop`；`next.config.ts` 开启 `standalone` 输出）
 
 ## 快速开始
 
@@ -41,7 +41,7 @@ pnpm start        # 生产：http://localhost:3000
 
 ```bash
 pnpm build            # 首次或代码更新后：构建 standalone 产物
-pnpm desktop:cert     # 打开桌面窗口（本机含证书的启动方式）
+pnpm desktop          # 打开桌面窗口
 pnpm desktop:smoke    # 自检：隐藏窗口启动、验证全链路后自动退出
 
 pnpm desktop:pack     # 打包为独立 App：release/mac-arm64/中庭.app（双击即用，未签名）
@@ -106,7 +106,8 @@ atrium/
 **抓取仓库失败，报 `UNABLE_TO_VERIFY_LEAF_SIGNATURE`？**
 
 本机有对 GitHub 做代理/加速的工具（如 Watt Toolkit）时，Node 不信任其自签根证书。
-按 `certs/README.md` 导出证书后，改用 `pnpm dev:cert` / `pnpm start:cert` 启动即可。
+按 `certs/README.md` 把证书导出到 `certs/watt-toolkit.pem` 即可——`dev` / `start` / `desktop`
+都会自动带上它，不用换命令；文件不存在时按「没有代理」正常启动。
 
 **首页没有文章？**
 

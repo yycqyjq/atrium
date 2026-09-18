@@ -173,7 +173,7 @@ export default function AtelierPage() {
               </Card>
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">等宽 · Mono　13</p>
-                <p className="font-mono text-[13px] text-ink-2">pnpm build && pnpm desktop:cert</p>
+                <p className="font-mono text-[13px] text-ink-2">pnpm build && pnpm desktop</p>
               </Card>
             </div>
           </Section>

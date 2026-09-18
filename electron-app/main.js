@@ -6,9 +6,10 @@
  * - ATRIUM_SMOKE=1：自检模式，隐藏窗口、加载完成后自动退出（退出码 0 = 通过）
  *
  * 运行前请先 `pnpm build`（需要 .next/standalone 产物）。
+ * 证书由本进程自动注入：开发态读项目 certs/watt-toolkit.pem，打包态读 userData/certs/。
+ *
  * 常用命令：
  *   pnpm desktop          # 打开中庭桌面窗口
- *   pnpm desktop:cert     # 本机（含 Watt Toolkit 证书的启动方式）
  *   pnpm desktop:smoke    # 自检
  */
 const { app, BrowserWindow, shell, Menu } = require("electron");
@@ -68,13 +69,19 @@ function startServer() {
       HOSTNAME: "127.0.0.1",
     };
 
-    // 证书：相对路径转绝对；打包版支持从 userData/certs/watt-toolkit.pem 自动注入
+    // 证书：显式指定优先（相对路径转绝对）；没指定就按运行形态找默认位置——
+    // 开发态 = 项目 certs/，打包态 = userData/certs/（应用包只读，证书得放用户目录）。
+    // 文件不存在也不报错：没装 Watt Toolkit 这类加速工具时本来就不需要。
     if (env.NODE_EXTRA_CA_CERTS && !path.isAbsolute(env.NODE_EXTRA_CA_CERTS)) {
       env.NODE_EXTRA_CA_CERTS = path.resolve(plan.cwd, env.NODE_EXTRA_CA_CERTS);
     }
-    if (!env.NODE_EXTRA_CA_CERTS && IS_PACKAGED) {
-      const userCert = path.join(app.getPath("userData"), "certs", "watt-toolkit.pem");
-      if (fs.existsSync(userCert)) env.NODE_EXTRA_CA_CERTS = userCert;
+    if (!env.NODE_EXTRA_CA_CERTS) {
+      const cert = path.join(
+        IS_PACKAGED ? app.getPath("userData") : ROOT,
+        "certs",
+        "watt-toolkit.pem",
+      );
+      if (fs.existsSync(cert)) env.NODE_EXTRA_CA_CERTS = cert;
     }
 
     // 数据目录：开发=项目 data/；打包=系统 userData（应用包保持只读）

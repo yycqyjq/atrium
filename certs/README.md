@@ -11,12 +11,9 @@ security find-certificate -a -c "SteamTools" -p /Library/Keychains/System.keycha
 security find-certificate -a -c "SteamTools" -p "$HOME/Library/Keychains/login.keychain-db" >> certs/watt-toolkit.pem 2>/dev/null
 ```
 
-然后使用带证书的启动命令：
-
-```bash
-pnpm dev:cert     # 开发
-pnpm start:cert   # 生产（先 pnpm build）
-```
+导出到本目录后**不需要改命令**：`pnpm dev` / `pnpm start` 会带上它，
+`pnpm desktop` 由 Electron 主进程自行读取本目录（打包版读 `userData/certs/`）。
+文件不存在时按「没有代理」正常启动，所以没装这类工具也无需任何操作。
 
 说明：
 
