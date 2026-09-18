@@ -13,7 +13,7 @@ const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
 const IMAGE_CAP = 240;
 const ALBUM_CAP = 60;
 const ALBUM_FETCH_CAP = 24;
-const SECTIONS_TTL = 5 * 60_000;
+const SECTIONS_TTL = 30 * 60_000;
 
 /** 写操作（上传 / 改名 / 移除）后调用，让画廊即刻反映最新内容 */
 export function bustGalleryCache() {

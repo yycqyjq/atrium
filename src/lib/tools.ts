@@ -60,7 +60,7 @@ export type ToolsResult = {
   source: "repo" | "local";
 };
 
-const TOOLS_TTL = 5 * 60_000;
+const TOOLS_TTL = 30 * 60_000;
 
 /** 写操作（增删改书签）后调用，让工具房即刻反映最新内容 */
 export function bustToolsCache() {

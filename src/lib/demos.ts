@@ -33,8 +33,8 @@ export type DemosResult = {
 };
 
 const MANIFEST = "atrium.json";
-const LIST_TTL = 5 * 60_000;
-const COMMIT_TTL = 30 * 60_000;
+const LIST_TTL = 30 * 60_000;
+const COMMIT_TTL = 60 * 60_000;
 const FILE_TTL = 60_000;
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 

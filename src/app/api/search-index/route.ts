@@ -22,8 +22,8 @@ type Index = {
   images: { name: string; album: string; view: number }[];
 };
 
-/** 五分钟缓存；发布文章时由 bustContentCache() 按 search-index 前缀一并清掉 */
-const TTL = 5 * 60_000;
+/** 三十分钟缓存；发布文章时由 bustContentCache() 按 search-index 前缀一并清掉 */
+const TTL = 30 * 60_000;
 
 /**
  * 单路缓存 + 单路降级：某一路回源失败（抖动 / 限流）时沿用自己上次的结果，

@@ -273,7 +273,7 @@ async function collectRepo(
   };
 }
 
-const CONTENT_TTL = 10 * 60_000;
+const CONTENT_TTL = 30 * 60_000;
 
 /**
  * 写操作（发布 / 编辑 / 删除文章）后调用，让书房即刻反映最新内容。
@@ -282,7 +282,7 @@ const CONTENT_TTL = 10 * 60_000;
  */
 export async function bustContentCache() {
   await invalidateCachePrefix("content-");
-  // 全局搜索索引里也含文章列表，一并失效，否则要等它自己的 5 分钟 TTL
+  // 全局搜索索引里也含文章列表，一并失效，否则要等它自己的 30 分钟 TTL
   await invalidateCachePrefix("search-index");
 }
 
