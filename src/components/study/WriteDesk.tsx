@@ -93,6 +93,8 @@ export default function WriteDesk({
       setMessage(`已发布到仓库：${data.path}`);
       setSavedSlug(fullSlug);
       router.refresh();
+      // 全局搜索面板在浏览器里持有索引快照，广播一下让它丢弃，下次打开时重新拉取
+      window.dispatchEvent(new Event("atrium:index-invalidate"));
     } catch {
       setState("error");
       setMessage("网络异常，请稍后再试");
@@ -117,6 +119,8 @@ export default function WriteDesk({
       setMessage(`已从仓库移除：${initial.slug}.md`);
       setSavedSlug("");
       router.refresh();
+      // 全局搜索面板在浏览器里持有索引快照，广播一下让它丢弃，下次打开时重新拉取
+      window.dispatchEvent(new Event("atrium:index-invalidate"));
     } catch {
       setState("error");
       setMessage("网络异常，请稍后再试");
@@ -144,9 +148,17 @@ export default function WriteDesk({
             onClick={() => {
               setState("edit");
               setSavedSlug("");
+              setMessage("");
+              // 新建：清空表单直接接着写下一篇（文件夹保留，方便连续写同目录）；
+              // 编辑：保留内容，语义是继续改这篇，清空会变成新建、有误覆盖风险
+              if (!isEdit) {
+                setTitle("");
+                setBody("");
+                setRefs("");
+              }
             }}
           >
-            继续写
+            {isEdit ? "继续编辑" : "再写一篇"}
           </Button>
         </div>
       </div>

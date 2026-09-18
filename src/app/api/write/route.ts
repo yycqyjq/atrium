@@ -41,7 +41,7 @@ export async function DELETE(request: Request) {
     }
 
     await provider.deleteFile(filePath, `docs(study): 移除《${slug}》`, sha);
-    bustContentCache();
+    await bustContentCache();
     return NextResponse.json({ ok: true, path: filePath, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
       }
     }
 
-    bustContentCache();
+    await bustContentCache();
 
     return NextResponse.json({
       ok: true,

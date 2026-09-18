@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 export type ToastTone = "ok" | "error";
 export type ToastState = { text: string; tone: ToastTone } | null;
@@ -26,10 +27,17 @@ export function useToast() {
   return { toast, showToast };
 }
 
+/**
+ * 用 Portal 挂到 body：调用处常包在 opacity / overflow 容器里
+ * （例如列表行的悬停操作组 opacity-0），留在原地会被一起淡出或裁掉。
+ */
 export function Toast({ toast }: { toast: ToastState }) {
-  if (!toast) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  if (!toast || !mounted) return null;
   const tone = toast.tone ?? "ok";
-  return (
+  return createPortal(
     <div className="pointer-events-none fixed inset-x-0 bottom-7 z-[70] flex justify-center">
       <div
         className={`animate-rise rounded-ctl border bg-raised px-4 py-2.5 text-[13px] shadow-lg ${
@@ -38,6 +46,7 @@ export function Toast({ toast }: { toast: ToastState }) {
       >
         {toast.text}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

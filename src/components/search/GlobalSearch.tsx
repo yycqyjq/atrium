@@ -85,6 +85,13 @@ export default function GlobalSearch() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 写操作（发布 / 删除文章）后索引已在服务端失效：丢掉本地快照，下次打开面板时重新拉取
+  useEffect(() => {
+    const onInvalidate = () => setData(null);
+    window.addEventListener("atrium:index-invalidate", onInvalidate);
+    return () => window.removeEventListener("atrium:index-invalidate", onInvalidate);
+  }, []);
+
   // 打开时载入索引（一次）+ 锁滚动 + 聚焦输入
   useEffect(() => {
     if (!open) return;

@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { IconX } from "@/components/icons";
 
 /**
  * 弹层外壳（全站统一）：遮罩 + 居中面板 + 标题栏 + Esc/背板关闭 + 滚动锁定。
- * 内容区由使用方填充（表单、字段等）；工具弹层与画廊改名弹层共用。
+ * 内容区由使用方填充（表单、字段等）；工具弹层、画廊改名弹层、二次确认弹窗共用。
+ * 用 Portal 挂到 body：既不受调用处 DOM 结构限制（可以在 span / 行内元素里使用），
+ * 也避免被祖先的定位或溢出裁剪影响。
  */
 export default function Modal({
   open,
@@ -22,6 +25,10 @@ export default function Modal({
   width?: string;
   children: React.ReactNode;
 }) {
+  // Portal 只能在客户端挂载后使用；SSR 期间先不渲染，避免 document 未定义
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -36,9 +43,9 @@ export default function Modal({
     };
   }, [open, onClose]);
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center overflow-y-auto bg-black/45 px-4 py-8 backdrop-blur-[2px]"
       onClick={onClose}
@@ -63,6 +70,7 @@ export default function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

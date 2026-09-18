@@ -9,6 +9,12 @@ import path from "node:path";
  * - 失效：invalidateCache(key) / invalidateCachePrefix(prefix)（写操作后调用）
  *
  * 目录：<数据目录>/cache/*.json（与 config.json 同级，桌面版/网页版自动适配）
+ *
+ * ⚠️ 内存状态必须挂在 globalThis（见 getStore）：
+ * Next.js 会把本模块分别打包进多个 server chunk（页面 / 路由处理 / SSR 各一份），
+ * 模块作用域的 Map 因此存在多份互不相通的副本。写接口调用失效时清掉的是自己那一份，
+ * 页面读到的仍是另一份里的旧数据 —— 表现为「发布后列表不刷新」。
+ * 挂到 globalThis 后，同一进程内所有 chunk 共享同一份内存缓存与失效水位。
  */
 
 const DATA_DIR = process.env.ATRIUM_DATA_DIR || path.join(process.cwd(), "data");
@@ -16,11 +22,40 @@ const CACHE_DIR = path.join(DATA_DIR, "cache");
 
 type Envelope<T> = { at: number; value: T };
 
-const mem = new Map<string, Envelope<unknown>>();
-const inflight = new Map<string, Promise<unknown>>();
+type CacheStore = {
+  mem: Map<string, Envelope<unknown>>;
+  inflight: Map<string, Promise<unknown>>;
+  /** key 或 prefix → 最近一次失效时刻；早于它的缓存条目一律视为过期 */
+  invalidated: Map<string, number>;
+};
+
+const STORE_KEY = "__atriumCacheStore__";
+
+function getStore(): CacheStore {
+  const g = globalThis as typeof globalThis & { [STORE_KEY]?: CacheStore };
+  if (g[STORE_KEY]) return g[STORE_KEY];
+  const created: CacheStore = {
+    mem: new Map(),
+    inflight: new Map(),
+    invalidated: new Map(),
+  };
+  g[STORE_KEY] = created;
+  return created;
+}
+
+const store = getStore();
 
 function filePathFor(key: string) {
   return path.join(CACHE_DIR, `${key.replace(/[^a-zA-Z0-9._-]/g, "_")}.json`);
+}
+
+/** 该 key 的失效水位：所有匹配前缀中最晚的一次失效时刻（无则 0） */
+function invalidationFloor(key: string): number {
+  let floor = 0;
+  for (const [prefix, at] of store.invalidated) {
+    if (at > floor && key.startsWith(prefix)) floor = at;
+  }
+  return floor;
 }
 
 async function readDisk<T>(key: string): Promise<Envelope<T> | null> {
@@ -63,23 +98,31 @@ export async function cacheThrough<T>(
     suspicious?: (value: T, previous: T | null) => boolean;
   } = {},
 ): Promise<CacheResult<T>> {
-  const memHit = mem.get(key) as Envelope<T> | undefined;
+  // 失效水位：早于它的条目（内存或磁盘）都不算数，必须回源
+  const floor = invalidationFloor(key);
+  const memHit = store.mem.get(key) as Envelope<T> | undefined;
+  const memUsable = memHit && memHit.at >= floor;
   let previous: T | null = memHit?.value ?? null;
 
-  if (!opts.force && memHit && Date.now() - memHit.at < ttl) {
+  if (!opts.force && memUsable && Date.now() - memHit.at < ttl) {
     return { value: memHit.value, stale: false };
   }
 
-  if (!memHit || opts.force) {
+  if (!memHit || !memUsable || opts.force) {
     const disk = await readDisk<T>(key);
     if (disk) {
-      if (!memHit) mem.set(key, disk);
-      if (previous == null || opts.force) previous = disk.value;
-      if (!opts.force && Date.now() - disk.at < ttl) return { value: disk.value, stale: false };
+      if (disk.at >= floor) {
+        if (!memHit) store.mem.set(key, disk);
+        if (previous == null || opts.force) previous = disk.value;
+        if (!opts.force && Date.now() - disk.at < ttl) return { value: disk.value, stale: false };
+      } else if (previous == null) {
+        // 已失效的旧条目：不能直接返回，但仍可作为回源失败时的兜底
+        previous = disk.value;
+      }
     }
   }
 
-  const running = inflight.get(key) as Promise<CacheResult<T>> | undefined;
+  const running = store.inflight.get(key) as Promise<CacheResult<T>> | undefined;
   if (running) return running;
 
   const work = (async (): Promise<CacheResult<T>> => {
@@ -94,7 +137,7 @@ export async function cacheThrough<T>(
         return { value: previous, stale: true };
       }
       const env: Envelope<T> = { at: Date.now(), value };
-      mem.set(key, env);
+      store.mem.set(key, env);
       await writeDisk(key, env);
       return { value, stale: false };
     } catch (err) {
@@ -105,16 +148,20 @@ export async function cacheThrough<T>(
       }
       throw err;
     } finally {
-      inflight.delete(key);
+      store.inflight.delete(key);
     }
   })();
-  inflight.set(key, work);
+  store.inflight.set(key, work);
   return work;
 }
 
-/** 失效：删除内存与磁盘条目 */
+/**
+ * 失效：抬高失效水位（所有 chunk 立刻可见），并删除内存与磁盘条目。
+ * 即使磁盘删除失败或被别的进程重新写回，水位也会让旧条目失效。
+ */
 export async function invalidateCache(key: string) {
-  mem.delete(key);
+  store.invalidated.set(key, Date.now());
+  store.mem.delete(key);
   try {
     await fs.unlink(filePathFor(key));
   } catch {
@@ -122,10 +169,11 @@ export async function invalidateCache(key: string) {
   }
 }
 
-/** 按前缀失效（如 content-） */
+/** 按前缀失效（如 content-）：水位、内存、磁盘一起处理 */
 export async function invalidateCachePrefix(prefix: string) {
-  for (const key of [...mem.keys()]) {
-    if (key.startsWith(prefix)) mem.delete(key);
+  store.invalidated.set(prefix, Date.now());
+  for (const key of [...store.mem.keys()]) {
+    if (key.startsWith(prefix)) store.mem.delete(key);
   }
   const safePrefix = prefix.replace(/[^a-zA-Z0-9._-]/g, "_");
   try {

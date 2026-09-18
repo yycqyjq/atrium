@@ -70,6 +70,8 @@
   --radius-ctl: 8px;
 
   --breakpoint-xs: 680px;
+  /* 文章侧边目录：与 Electron 窗口 minWidth(960) 对齐，窄屏时目录收窄至 176px */
+  --breakpoint-toc: 960px;
 
   --animate-rise: rise 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 

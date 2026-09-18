@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cacheThrough } from "@/lib/cache";
 import { listPosts } from "@/lib/content";
 import { listTools } from "@/lib/tools";
 import { listDemos } from "@/lib/demos";
@@ -21,72 +22,87 @@ type Index = {
   images: { name: string; album: string; view: number }[];
 };
 
-let cache: { at: number; value: Index } | null = null;
+/** 五分钟缓存；发布文章时由 bustContentCache() 按 search-index 前缀一并清掉 */
 const TTL = 5 * 60_000;
 
-/** 全局搜索索引：文章 + 展品 + 图片 + 书签（五分钟缓存，任一路失败不影响其余） */
+/**
+ * 单路缓存 + 单路降级：某一路回源失败（抖动 / 限流）时沿用自己上次的结果，
+ * 不会因为一路失败把整块索引拖空。走统一缓存层，因此写操作能真正失效它。
+ */
+async function cachedSlice<T>(name: string, fetcher: () => Promise<T>, empty: T): Promise<T> {
+  try {
+    const { value } = await cacheThrough(`search-index:${name}`, TTL, fetcher);
+    return value;
+  } catch {
+    return empty;
+  }
+}
+
+/** 全局搜索索引：文章 + 展品 + 图片 + 书签 */
 export async function GET() {
-  if (cache && Date.now() - cache.at < TTL) {
-    return NextResponse.json(cache.value);
-  }
+  const [posts, tools, exhibits, images] = await Promise.all([
+    cachedSlice<Index["posts"]>(
+      "posts",
+      async () => {
+        const { items } = await listPosts();
+        return items.map((post) => ({
+          title: post.title,
+          slug: post.slug,
+          category: post.category,
+          dateLabel: post.dateLabel,
+        }));
+      },
+      [],
+    ),
 
-  const value: Index = { posts: [], tools: [], exhibits: [], images: [] };
+    cachedSlice<Index["tools"]>(
+      "tools",
+      async () => {
+        const data = (await listTools()) as {
+          groups?: { name: string; items: { name: string; url: string; description?: string }[] }[];
+        };
+        return (data.groups ?? []).flatMap((group) =>
+          group.items.map((tool) => ({
+            name: tool.name,
+            url: tool.url,
+            description: tool.description ?? "",
+            category: group.name,
+          })),
+        );
+      },
+      [],
+    ),
 
-  try {
-    const { items } = await listPosts();
-    value.posts = items.map((post) => ({
-      title: post.title,
-      slug: post.slug,
-      category: post.category,
-      dateLabel: post.dateLabel,
-    }));
-  } catch {
-    // 抓取失败（抖动/限流）：沿用上次索引，避免整块消失
-    value.posts = cache?.value.posts ?? [];
-  }
+    cachedSlice<Index["exhibits"]>(
+      "exhibits",
+      async () => {
+        const { items } = await listDemos();
+        return items.map((item) => ({
+          title: item.title,
+          desc: item.desc,
+          projectId: item.projectId,
+          projectName: item.projectName,
+          id: item.id,
+          group: item.group,
+          origin: item.origin,
+        }));
+      },
+      [],
+    ),
 
-  try {
-    const data = (await listTools()) as {
-      groups?: { name: string; items: { name: string; url: string; description?: string }[] }[];
-    };
-    value.tools = (data.groups ?? []).flatMap((group) =>
-      group.items.map((tool) => ({
-        name: tool.name,
-        url: tool.url,
-        description: tool.description ?? "",
-        category: group.name,
-      })),
-    );
-  } catch {
-    value.tools = cache?.value.tools ?? [];
-  }
+    cachedSlice<Index["images"]>(
+      "images",
+      async () => {
+        const { sections } = await listGallerySections();
+        return sections
+          .flatMap((section) =>
+            section.images.map((image, view) => ({ name: image.name, album: section.name, view })),
+          )
+          .slice(0, 1200);
+      },
+      [],
+    ),
+  ]);
 
-  try {
-    const { items } = await listDemos();
-    value.exhibits = items.map((item) => ({
-      title: item.title,
-      desc: item.desc,
-      projectId: item.projectId,
-      projectName: item.projectName,
-      id: item.id,
-      group: item.group,
-      origin: item.origin,
-    }));
-  } catch {
-    value.exhibits = cache?.value.exhibits ?? [];
-  }
-
-  try {
-    const { sections } = await listGallerySections();
-    value.images = sections
-      .flatMap((section) =>
-        section.images.map((image, view) => ({ name: image.name, album: section.name, view })),
-      )
-      .slice(0, 1200);
-  } catch {
-    value.images = cache?.value.images ?? [];
-  }
-
-  cache = { at: Date.now(), value };
-  return NextResponse.json(value);
+  return NextResponse.json({ posts, tools, exhibits, images });
 }

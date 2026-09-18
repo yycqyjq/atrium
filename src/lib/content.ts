@@ -275,9 +275,15 @@ async function collectRepo(
 
 const CONTENT_TTL = 10 * 60_000;
 
-/** 写操作（发布 / 编辑 / 删除文章）后调用，让书房即刻反映最新内容 */
-export function bustContentCache() {
-  void invalidateCachePrefix("content-");
+/**
+ * 写操作（发布 / 编辑 / 删除文章）后调用，让书房即刻反映最新内容。
+ * - 失效水位记在进程级共享状态里，所有 server chunk（页面 / 路由）立刻可见；
+ * - 返回 Promise：await 可确保磁盘缓存也清干净后再回响应，避免紧跟的请求读到旧文件。
+ */
+export async function bustContentCache() {
+  await invalidateCachePrefix("content-");
+  // 全局搜索索引里也含文章列表，一并失效，否则要等它自己的 5 分钟 TTL
+  await invalidateCachePrefix("search-index");
 }
 
 /** 读取仓库（含文件夹索引）：两级缓存（内存 + 磁盘），失败回退旧数据 */

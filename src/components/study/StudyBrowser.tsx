@@ -16,15 +16,18 @@ export type BrowserSection = { folder: BrowserFolder | null; posts: BrowserPost[
  * 书房浏览器：文件夹分组视图 + 全量搜索。
  * - 无查询：按分组渲染（根目录文章 + 各文件夹标题与其文章，标题可下钻）
  * - 有查询：在全部文章（跨目录、多层）内过滤，扁平展示
+ * - manageable：是否在行内显示编辑 / 删除（由页面按写开关传入）
  */
 export default function StudyBrowser({
   sections,
   allPosts,
   placeholder,
+  manageable = false,
 }: {
   sections: BrowserSection[];
   allPosts: BrowserPost[];
   placeholder: string;
+  manageable?: boolean;
 }) {
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
@@ -58,7 +61,7 @@ export default function StudyBrowser({
             <ul>
               {filtered.map((post) => (
                 <li key={post.slug}>
-                  <PostRow post={post} showFolder />
+                  <PostRow post={post} showFolder manageable={manageable} />
                 </li>
               ))}
             </ul>
@@ -94,7 +97,7 @@ export default function StudyBrowser({
                 <ul>
                   {section.posts.map((post) => (
                     <li key={post.slug}>
-                      <PostRow post={post} />
+                      <PostRow post={post} manageable={manageable} />
                     </li>
                   ))}
                 </ul>

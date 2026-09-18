@@ -14,6 +14,7 @@ import { IconArrowRight, IconPencil, IconLink } from "@/components/icons";
 import { getPostBySlug, getStudyDir, type PostMeta } from "@/lib/content";
 import { splitReferenceLinks } from "@/lib/reference-links";
 import { extractToc } from "@/lib/toc";
+import { isWriteEnabled } from "@/lib/write-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -151,7 +152,7 @@ export default async function StudySlugPage({ params }: Props) {
           <div
             className={
               toc.length >= 2
-                ? "grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_228px]"
+                ? "grid grid-cols-1 gap-10 toc:grid-cols-[minmax(0,1fr)_176px] toc:gap-7 xl:grid-cols-[minmax(0,1fr)_228px] xl:gap-10"
                 : ""
             }
           >
@@ -159,7 +160,7 @@ export default async function StudySlugPage({ params }: Props) {
               <Markdown>{body}</Markdown>
             </article>
             {toc.length >= 2 ? (
-              <aside className="hidden xl:block">
+              <aside className="hidden toc:block">
                 <Toc items={toc} />
               </aside>
             ) : null}
@@ -236,6 +237,7 @@ export default async function StudySlugPage({ params }: Props) {
             sections={sections}
             allPosts={dir.allPosts.map(toBrowserPost)}
             placeholder="全量搜索文章（标题、摘要、标签、目录）…"
+            manageable={isWriteEnabled()}
           />
         </div>
       </div>
