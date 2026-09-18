@@ -35,7 +35,7 @@ export default function StudyBrowser({
   const filtered = useMemo(() => {
     if (!q) return [];
     return allPosts.filter((post) =>
-      [post.title, post.description, post.tags.join(" "), post.folder, post.slug].some((text) =>
+      [post.title, post.description, post.folder, post.slug].some((text) =>
         text.toLowerCase().includes(q),
       ),
     );

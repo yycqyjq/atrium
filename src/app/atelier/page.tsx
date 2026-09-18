@@ -105,7 +105,6 @@ const demoPost = {
   description: "书房列表与陈列廊共用的文章行（真实组件渲染）。",
   dateLabel: "9月16日",
   folder: "示例目录",
-  tags: [],
 };
 
 const demoPost2 = {
@@ -114,7 +113,6 @@ const demoPost2 = {
   description: "",
   dateLabel: "9月15日",
   folder: "示例目录",
-  tags: [],
 };
 
 const demoTool = {

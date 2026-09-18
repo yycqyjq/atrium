@@ -29,7 +29,6 @@ function toBrowserPost(post: PostMeta) {
     description: post.description ?? "",
     dateLabel: post.dateLabel,
     folder: parentDir(post.path),
-    tags: post.tags,
   };
 }
 

@@ -22,7 +22,6 @@ function toBrowserPost(post: PostMeta): BrowserPost {
     description: post.description ?? "",
     dateLabel: post.dateLabel,
     folder: parentDir(post.path),
-    tags: post.tags,
   };
 }
 
@@ -73,7 +72,7 @@ export default async function StudyPage() {
             <StudyBrowser
               sections={sections}
               allPosts={posts.map(toBrowserPost)}
-              placeholder="全量搜索文章（标题、摘要、标签、目录）…"
+              placeholder="全量搜索文章（标题、摘要、目录）…"
               manageable={isWriteEnabled()}
             />
           </div>

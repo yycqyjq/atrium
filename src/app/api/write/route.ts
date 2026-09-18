@@ -56,7 +56,7 @@ export async function DELETE(request: Request) {
 /**
  * 写作发布 API：新建 / 更新书房文章，直接写入配置的内容仓库。
  * 仅限本地服务使用（桌面 App / 本机开发），部署到 Vercel 前需自行加鉴权。
- * 请求体：{ slug: string, title: string, description?: string, date?: string, tags?: string[], body: string }
+ * 请求体：{ slug: string, title: string, date?: string, body: string }
  * - slug 不带扩展名（如 "my-note"），保存为 <slug>.md
  * - 更新时带上 from 服务端返回的 sha，避免覆盖别人的修改
  */
@@ -69,9 +69,7 @@ export async function POST(request: Request) {
     slug?: unknown;
     from?: unknown;
     title?: unknown;
-    description?: unknown;
     date?: unknown;
-    tags?: unknown;
     body?: unknown;
     sha?: unknown;
   };
@@ -83,11 +81,7 @@ export async function POST(request: Request) {
 
   const slug = typeof payload.slug === "string" ? payload.slug.trim() : "";
   const title = typeof payload.title === "string" ? payload.title.trim() : "";
-  const description = typeof payload.description === "string" ? payload.description.trim() : "";
   const date = typeof payload.date === "string" ? payload.date.trim() : "";
-  const tags = Array.isArray(payload.tags)
-    ? payload.tags.filter((t): t is string => typeof t === "string" && t.trim() !== "").map((t) => t.trim())
-    : [];
   const body = typeof payload.body === "string" ? payload.body : "";
   const sha = typeof payload.sha === "string" && payload.sha ? payload.sha : undefined;
 
@@ -124,9 +118,7 @@ export async function POST(request: Request) {
   }
 
   const frontMatterLines = ["---", `title: "${title.replace(/"/g, '\\"')}"`];
-  if (description) frontMatterLines.push(`description: "${description.replace(/"/g, '\\"')}"`);
   frontMatterLines.push(`date: ${date || new Date().toISOString().slice(0, 10)}`);
-  if (tags.length > 0) frontMatterLines.push(`tags: [${tags.map((t) => `"${t.replace(/"/g, '\\"')}"`).join(", ")}]`);
   frontMatterLines.push("---", "");
   const content = `${frontMatterLines.join("\n")}\n${body.replace(/\r\n/g, "\n")}\n`;
 

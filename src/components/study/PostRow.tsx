@@ -7,7 +7,6 @@ export type PostRowData = {
   description: string;
   dateLabel: string;
   folder: string;
-  tags: string[];
 };
 
 const postHref = (slug: string) => `/study/${slug.split("/").map(encodeURIComponent).join("/")}`;
