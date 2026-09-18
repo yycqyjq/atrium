@@ -16,6 +16,8 @@
 .next/
 .openclaw-tmp-dist-check/
 .trash-desktop-server-bloat/
+# AI 协作助手的本地工作日志（仓库为 public，不入版本控制）
+.workbuddy-ai/
 certs/*.pem
 data/config.json
 data/cache/
