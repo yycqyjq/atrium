@@ -12,11 +12,13 @@ import {
   existsSync,
   lstatSync,
   mkdirSync,
+  readFileSync,
   renameSync,
   readdirSync,
   readlinkSync,
   symlinkSync,
   unlinkSync,
+  writeFileSync,
 } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
@@ -24,6 +26,16 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const standalone = join(root, ".next", "standalone");
+
+// 版本号单一来源：根 package.json → 同步进桌面壳清单（electron-builder 读的是后者）
+const rootVersion = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+const shellManifestPath = join(root, "electron-app", "package.json");
+const shellManifest = JSON.parse(readFileSync(shellManifestPath, "utf8"));
+if (shellManifest.version !== rootVersion) {
+  shellManifest.version = rootVersion;
+  writeFileSync(shellManifestPath, `${JSON.stringify(shellManifest, null, 2)}\n`, "utf8");
+  console.log(`[prepare-desktop] 桌面壳版本已同步为 ${rootVersion}`);
+}
 
 if (!existsSync(join(standalone, "server.js"))) {
   console.error("[prepare-desktop] 找不到 .next/standalone/server.js，请先执行 pnpm build");
