@@ -1,8 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
 import StudyBrowser, { type BrowserPost, type BrowserSection } from "@/components/study/StudyBrowser";
 import FloorNav from "@/components/shell/FloorNav";
 import PageHeader from "@/components/ui/PageHeader";
+import Loading from "@/components/ui/Loading";
 import { ButtonLink } from "@/components/ui/Button";
 import { IconArrowRight } from "@/components/icons";
 import EmptyState from "@/components/ui/EmptyState";
@@ -35,7 +37,7 @@ function emptyCopy(reason: ContentReason) {
   return { title: "书房还是空的。", sub: "在仓库里写下第一篇 Markdown，这里就会亮起来。" };
 }
 
-export default async function StudyPage() {
+async function StudyFloor() {
   const { posts, folders, reason } = await studyIndex();
   const copy = emptyCopy(reason);
 
@@ -50,6 +52,21 @@ export default async function StudyPage() {
     })),
   ];
 
+  if (posts.length === 0) return <EmptyState title={copy.title} sub={copy.sub} />;
+
+  return (
+    <div data-floor-nav>
+      <StudyBrowser
+        sections={sections}
+        allPosts={posts.map(toBrowserPost)}
+        placeholder="全量搜索文章（标题、摘要、目录）…"
+        manageable={isWriteEnabled()}
+      />
+    </div>
+  );
+}
+
+export default function StudyPage() {
   return (
     <>
       <div className="mb-[72px]">
@@ -65,18 +82,9 @@ export default async function StudyPage() {
           }
         />
 
-        {posts.length === 0 ? (
-          <EmptyState title={copy.title} sub={copy.sub} />
-        ) : (
-          <div data-floor-nav>
-            <StudyBrowser
-              sections={sections}
-              allPosts={posts.map(toBrowserPost)}
-              placeholder="全量搜索文章（标题、摘要、目录）…"
-              manageable={isWriteEnabled()}
-            />
-          </div>
-        )}
+        <Suspense fallback={<Loading className="my-24" />}>
+          <StudyFloor />
+        </Suspense>
       </div>
       <FloorNav />
       <Footer />

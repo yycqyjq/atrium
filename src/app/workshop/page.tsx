@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
 import FloorNav from "@/components/shell/FloorNav";
 import PageHeader from "@/components/ui/PageHeader";
 import Alert from "@/components/ui/Alert";
 import EmptyState from "@/components/ui/EmptyState";
+import Loading from "@/components/ui/Loading";
 import { ButtonLink } from "@/components/ui/Button";
 import WorkshopList from "@/components/workshop/WorkshopList";
 import { listDemos, type DemoItem } from "@/lib/demos";
@@ -13,7 +15,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "工坊" };
 
 /** 工坊：接入的组件项目与展品陈列（分区 + 即时搜索 + 楼层目录） */
-export default async function WorkshopPage() {
+async function WorkshopFloor() {
   const { projects, items, errors } = await listDemos();
   const multi = projects.length > 1;
 
@@ -31,6 +33,48 @@ export default async function WorkshopPage() {
   const urlProjects = projects.filter((p) => p.kind === "url");
   const total = items.length + urlProjects.length;
 
+  if (projects.length === 0) {
+    return (
+      <>
+        <EmptyState
+          title="工坊还没进料。"
+          sub="到设置里接入你的组件仓库，这里就会摆出来。"
+        />
+        <p className="text-center">
+          <ButtonLink href="/connect" variant="secondary">
+            去设置
+          </ButtonLink>
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {errors.length > 0 ? (
+        <div className="mb-5 space-y-2">
+          {errors.map((error) => (
+            <Alert key={error} tone="error" size="sm">
+              {error}
+            </Alert>
+          ))}
+        </div>
+      ) : null}
+
+      {total === 0 ? (
+        <EmptyState
+          variant="search"
+          title="还没有可陈列的展品。"
+          sub="往接入的仓库里放组件，或检查展品清单。"
+        />
+      ) : (
+        <WorkshopList sections={sections} urlProjects={urlProjects} />
+      )}
+    </>
+  );
+}
+
+export default function WorkshopPage() {
   return (
     <>
       <div className="mb-[72px]">
@@ -40,41 +84,9 @@ export default async function WorkshopPage() {
           subtitle="自留的组件与用法。从仓库取件，现场装配。"
         />
 
-        {projects.length === 0 ? (
-          <>
-            <EmptyState
-              title="工坊还没进料。"
-              sub="到设置里接入你的组件仓库，这里就会摆出来。"
-            />
-            <p className="text-center">
-              <ButtonLink href="/connect" variant="secondary">
-                去设置
-              </ButtonLink>
-            </p>
-          </>
-        ) : (
-          <>
-            {errors.length > 0 ? (
-              <div className="mb-5 space-y-2">
-                {errors.map((error) => (
-                  <Alert key={error} tone="error" size="sm">
-                    {error}
-                  </Alert>
-                ))}
-              </div>
-            ) : null}
-
-            {total === 0 ? (
-              <EmptyState
-                variant="search"
-                title="还没有可陈列的展品。"
-                sub="往接入的仓库里放组件，或检查展品清单。"
-              />
-            ) : (
-              <WorkshopList sections={sections} urlProjects={urlProjects} />
-            )}
-          </>
-        )}
+        <Suspense fallback={<Loading className="my-24" />}>
+          <WorkshopFloor />
+        </Suspense>
       </div>
       <FloorNav />
       <Footer />

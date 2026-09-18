@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import DoorBand from "@/components/home/DoorBand";
 import Greeting from "@/components/home/Greeting";
 import QuickLinks from "@/components/home/QuickLinks";
@@ -5,19 +6,31 @@ import RecentPosts from "@/components/home/RecentPosts";
 import RecentShots from "@/components/home/RecentShots";
 import Skylight from "@/components/home/Skylight";
 import Footer from "@/components/shell/Footer";
+import Loading from "@/components/ui/Loading";
 import { getRecentPosts } from "@/lib/content";
 import { recentShots } from "@/lib/shots";
 import { githubProfileUrl, readPublicConfig } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
+async function RecentPostsBlock() {
+  const { items, reason } = await getRecentPosts(4);
+  return (
+    <RecentPosts
+      items={items}
+      reason={reason}
+      className="motion-safe:animate-rise [animation-delay:240ms]"
+    />
+  );
+}
+
+async function RecentShotsBlock() {
+  const { shots } = await recentShots(8).catch(() => ({ shots: [] }));
+  return <RecentShots shots={shots} className="motion-safe:animate-rise [animation-delay:280ms]" />;
+}
+
 export default async function HomePage() {
-  const [{ items, reason }, { shots }, githubUrl, cfg] = await Promise.all([
-    getRecentPosts(4),
-    recentShots(8).catch(() => ({ shots: [] })),
-    githubProfileUrl(),
-    readPublicConfig(),
-  ]);
+  const [githubUrl, cfg] = await Promise.all([githubProfileUrl(), readPublicConfig()]);
 
   return (
     <>
@@ -29,16 +42,13 @@ export default async function HomePage() {
 
         <DoorBand className="motion-safe:animate-rise [animation-delay:150ms]" />
 
-        <RecentPosts
-          items={items}
-          reason={reason}
-          className="motion-safe:animate-rise [animation-delay:240ms]"
-        />
+        <Suspense fallback={<Loading className="my-16" />}>
+          <RecentPostsBlock />
+        </Suspense>
 
-        <RecentShots
-          shots={shots}
-          className="motion-safe:animate-rise [animation-delay:280ms]"
-        />
+        <Suspense fallback={<Loading className="my-16" />}>
+          <RecentShotsBlock />
+        </Suspense>
 
         <QuickLinks
           githubUrl={githubUrl}

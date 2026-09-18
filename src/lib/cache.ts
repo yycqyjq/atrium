@@ -4,6 +4,9 @@ import path from "node:path";
 /**
  * 两级缓存（内存 + 磁盘 JSON），项目内置、零服务依赖：
  * - 读：内存 → 磁盘 → 回源；回源失败时端出旧数据（哪怕过期），页面不开天窗
+ * - 自然过期（TTL 到点、未经写失效）：立即端出旧数据，后台悄悄刷新（stale-while-revalidate），
+ *   避免切页面时被整轮回源的耗时卡住；写操作后的失效（水位抬高）与 force 仍阻塞重取，
+ *   保证「发布后立刻可见」。
  * - 写：原子落盘（临时文件 + rename），崩溃不产生坏文件
  * - 并发防抖：同一键同时只发起一次回源
  * - 失效：invalidateCache(key) / invalidateCachePrefix(prefix)（写操作后调用）
@@ -101,20 +104,25 @@ export async function cacheThrough<T>(
   // 失效水位：早于它的条目（内存或磁盘）都不算数，必须回源
   const floor = invalidationFloor(key);
   const memHit = store.mem.get(key) as Envelope<T> | undefined;
-  const memUsable = memHit && memHit.at >= floor;
+  const memUsable = !!memHit && memHit.at >= floor;
   let previous: T | null = memHit?.value ?? null;
+  // SWR 快照：过期但未经写失效的可用数据，可先端出去、后台再刷
+  let swrSnap: Envelope<T> | null = memUsable && memHit ? memHit : null;
 
-  if (!opts.force && memUsable && Date.now() - memHit.at < ttl) {
+  if (!opts.force && memUsable && memHit && Date.now() - memHit.at < ttl) {
     return { value: memHit.value, stale: false };
   }
 
-  if (!memHit || !memUsable || opts.force) {
+  if (!memUsable || opts.force) {
     const disk = await readDisk<T>(key);
     if (disk) {
       if (disk.at >= floor) {
         if (!memHit) store.mem.set(key, disk);
         if (previous == null || opts.force) previous = disk.value;
-        if (!opts.force && Date.now() - disk.at < ttl) return { value: disk.value, stale: false };
+        if (!opts.force) {
+          if (Date.now() - disk.at < ttl) return { value: disk.value, stale: false };
+          if (!swrSnap) swrSnap = disk;
+        }
       } else if (previous == null) {
         // 已失效的旧条目：不能直接返回，但仍可作为回源失败时的兜底
         previous = disk.value;
@@ -123,35 +131,43 @@ export async function cacheThrough<T>(
   }
 
   const running = store.inflight.get(key) as Promise<CacheResult<T>> | undefined;
-  if (running) return running;
+  const work: Promise<CacheResult<T>> =
+    running ??
+    (async (): Promise<CacheResult<T>> => {
+      try {
+        console.log("[cache] 回源", key);
+        const value = await fetcher();
+        if (opts.shouldCache && !opts.shouldCache(value)) {
+          return previous != null ? { value: previous, stale: true } : { value, stale: false };
+        }
+        if (previous != null && opts.suspicious?.(value, previous)) {
+          console.warn(`[cache] ${key} 结果可疑（疑似为空），沿用旧数据`);
+          return { value: previous, stale: true };
+        }
+        const env: Envelope<T> = { at: Date.now(), value };
+        store.mem.set(key, env);
+        await writeDisk(key, env);
+        return { value, stale: false };
+      } catch (err) {
+        if (opts.hardError?.(err)) throw err;
+        if (previous != null) {
+          console.warn(`[cache] ${key} 回源失败，端出旧数据：`, err instanceof Error ? err.message : err);
+          return { value: previous, stale: true };
+        }
+        throw err;
+      } finally {
+        store.inflight.delete(key);
+      }
+    })();
+  if (!running) store.inflight.set(key, work);
 
-  const work = (async (): Promise<CacheResult<T>> => {
-    try {
-      console.log("[cache] 回源", key);
-      const value = await fetcher();
-      if (opts.shouldCache && !opts.shouldCache(value)) {
-        return previous != null ? { value: previous, stale: true } : { value, stale: false };
-      }
-      if (previous != null && opts.suspicious?.(value, previous)) {
-        console.warn(`[cache] ${key} 结果可疑（疑似为空），沿用旧数据`);
-        return { value: previous, stale: true };
-      }
-      const env: Envelope<T> = { at: Date.now(), value };
-      store.mem.set(key, env);
-      await writeDisk(key, env);
-      return { value, stale: false };
-    } catch (err) {
-      if (opts.hardError?.(err)) throw err;
-      if (previous != null) {
-        console.warn(`[cache] ${key} 回源失败，端出旧数据：`, err instanceof Error ? err.message : err);
-        return { value: previous, stale: true };
-      }
-      throw err;
-    } finally {
-      store.inflight.delete(key);
-    }
-  })();
-  store.inflight.set(key, work);
+  // 自然过期且手上有旧数据：先端出去，刷新在后台继续
+  if (!opts.force && swrSnap) {
+    work.catch(() => {
+      /* 失败兜底已在 work 内部处理，这里只防后台任务惊动 unhandled rejection */
+    });
+    return { value: swrSnap.value, stale: true };
+  }
   return work;
 }
 

@@ -1,9 +1,11 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
 import FloorNav from "@/components/shell/FloorNav";
 import GalleryBrowser from "@/components/gallery/GalleryBrowser";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
 import EmptyState from "@/components/ui/EmptyState";
+import Loading from "@/components/ui/Loading";
 import PageHeader from "@/components/ui/PageHeader";
 import { listGallerySections, type ContentReason } from "@/lib/gallery";
 import { resolveGalleryConfig } from "@/lib/config";
@@ -32,18 +34,40 @@ function emptyCopy(reason: ContentReason, dir: string) {
 }
 
 /** 画廊：按相册（子目录）逐卷铺开 + 即时搜索；灯箱沿用 ?album=&view= 深链 */
-export default async function GalleryPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ album?: string; view?: string }>;
-}) {
-  const { album, view } = await searchParams;
+async function GalleryFloor({ album, view }: { album?: string; view?: string }) {
   const { sections, dir, reason } = await listGallerySections();
   const viewNum = view != null ? Number.parseInt(view, 10) : Number.NaN;
   const copy = emptyCopy(reason, dir);
   const galleryCfg = await resolveGalleryConfig();
   const canUpload = Boolean(galleryCfg.token);
   const total = sections.reduce((n, section) => n + section.images.length, 0);
+
+  return (
+    <>
+      {canUpload ? (
+        <GalleryUpload dir="" albums={sections.filter((s) => s.key !== "__root__").map((s) => s.name)} />
+      ) : null}
+
+      {total === 0 ? (
+        <EmptyState title={copy.title} sub={copy.sub} />
+      ) : (
+        <GalleryBrowser
+          sections={sections}
+          canEdit={canUpload}
+          initialAlbum={album}
+          initialView={Number.isInteger(viewNum) ? viewNum : undefined}
+        />
+      )}
+    </>
+  );
+}
+
+export default async function GalleryPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ album?: string; view?: string }>;
+}) {
+  const { album, view } = await searchParams;
 
   return (
     <>
@@ -54,20 +78,9 @@ export default async function GalleryPage({
           subtitle="照片与影像。存放目光的地方。"
         />
 
-        {canUpload ? (
-          <GalleryUpload dir="" albums={sections.filter((s) => s.key !== "__root__").map((s) => s.name)} />
-        ) : null}
-
-        {total === 0 ? (
-          <EmptyState title={copy.title} sub={copy.sub} />
-        ) : (
-          <GalleryBrowser
-            sections={sections}
-            canEdit={canUpload}
-            initialAlbum={album}
-            initialView={Number.isInteger(viewNum) ? viewNum : undefined}
-          />
-        )}
+        <Suspense fallback={<Loading className="my-24" />}>
+          <GalleryFloor album={album} view={view} />
+        </Suspense>
       </div>
       <FloorNav />
       <Footer />

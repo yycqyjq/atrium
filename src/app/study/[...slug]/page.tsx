@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,6 +8,7 @@ import Toc from "@/components/study/Toc";
 import StudyBrowser, { type BrowserSection } from "@/components/study/StudyBrowser";
 import FloorNav from "@/components/shell/FloorNav";
 import PageHeader from "@/components/ui/PageHeader";
+import Loading from "@/components/ui/Loading";
 import Breadcrumb, { type Crumb } from "@/components/ui/Breadcrumb";
 import BackLink from "@/components/ui/BackLink";
 import { ButtonLink } from "@/components/ui/Button";
@@ -104,7 +106,15 @@ function studyCrumbs(segments: string[]): Crumb[] {
   ];
 }
 
-export default async function StudySlugPage({ params }: Props) {
+export default function StudySlugPage({ params }: Props) {
+  return (
+    <Suspense fallback={<Loading className="my-24" />}>
+      <StudySlugBody params={params} />
+    </Suspense>
+  );
+}
+
+async function StudySlugBody({ params }: Props) {
   const { slug } = await params;
 
   // 1) 先按文章解析
@@ -235,7 +245,7 @@ export default async function StudySlugPage({ params }: Props) {
           <StudyBrowser
             sections={sections}
             allPosts={dir.allPosts.map(toBrowserPost)}
-            placeholder="全量搜索文章（标题、摘要、标签、目录）…"
+            placeholder="全量搜索文章（标题、摘要、目录）…"
             manageable={isWriteEnabled()}
           />
         </div>
