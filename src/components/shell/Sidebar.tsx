@@ -49,13 +49,13 @@ export default function Sidebar() {
   const active = activeKey(pathname);
 
   return (
-    <aside className="sticky top-0 flex h-screen flex-col overflow-y-auto overflow-x-hidden border-r border-line-strong bg-surface-sidebar px-5 pt-7 pb-[22px] max-lg:static max-lg:h-auto max-lg:flex-row max-lg:items-center max-lg:gap-4 max-lg:overflow-x-auto max-lg:overflow-y-hidden max-lg:border-r-0 max-lg:border-b max-lg:border-line max-lg:px-5 max-lg:pt-3 max-lg:pb-3 max-xs:flex-wrap max-xs:content-start max-xs:gap-y-2">
+    <aside className="sticky top-0 flex h-screen flex-col overflow-y-auto overflow-x-hidden border-r border-line-strong bg-surface-sidebar px-5 pt-7 pb-[22px] max-shell:static max-shell:h-auto max-shell:flex-row max-shell:items-center max-shell:gap-4 max-shell:overflow-x-auto max-shell:overflow-y-hidden max-shell:border-r-0 max-shell:border-b max-shell:border-line max-shell:px-5 max-shell:pt-3 max-shell:pb-3 max-xs:flex-wrap max-xs:content-start max-xs:gap-y-2">
       <Link
         href="/"
-        className="flex shrink-0 items-center gap-[10px] px-2 pb-[26px] max-lg:p-0 max-lg:pb-0"
+        className="flex shrink-0 items-center gap-[10px] px-2 pb-[26px] max-shell:p-0 max-shell:pb-0"
       >
-        <IconMark className="h-[26px] w-[26px] text-accent max-lg:h-[22px] max-lg:w-[22px]" />
-        <span className="font-serif text-[20px] font-semibold tracking-[0.12em] text-ink mr-[-0.12em] max-lg:text-[17px] max-xs:hidden">
+        <IconMark className="h-[26px] w-[26px] text-accent max-shell:h-[22px] max-shell:w-[22px]" />
+        <span className="font-serif text-[20px] font-semibold tracking-[0.12em] text-ink mr-[-0.12em] max-shell:text-[17px] max-xs:hidden">
           中庭
         </span>
       </Link>
@@ -63,18 +63,18 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={() => window.dispatchEvent(new Event("atrium:search"))}
-        className="mb-3 flex items-center gap-2.5 rounded-ctl px-2.5 py-2 text-[13px] tracking-[0.02em] text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-ink max-lg:mb-0 max-lg:shrink-0"
+        className="mb-3 flex items-center gap-2.5 rounded-ctl px-2.5 py-2 text-[13px] tracking-[0.02em] text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-ink max-shell:mb-0 max-shell:shrink-0"
       >
         <IconSearch className="h-[15px] w-[15px] shrink-0" />
         <span>搜索</span>
-        <span className="ml-auto rounded border border-line px-1.5 py-px text-[10.5px] max-lg:hidden">
+        <span className="ml-auto rounded border border-line px-1.5 py-px text-[10.5px] max-shell:hidden">
           ⌘K
         </span>
       </button>
 
       <nav
         aria-label="房间导航"
-        className="flex grow flex-col gap-[2px] max-lg:flex-row max-lg:grow max-lg:overflow-x-auto max-xs:order-3 max-xs:basis-full"
+        className="flex grow flex-col gap-[2px] max-shell:flex-row max-shell:grow max-shell:overflow-x-auto max-xs:order-3 max-xs:basis-full"
       >
         {rooms.map((room) => {
           const isActive = room.key === active;
@@ -84,7 +84,7 @@ export default function Sidebar() {
               key={room.key}
               href={room.href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-[11px] rounded-ctl px-[10px] py-[9px] text-sm transition-colors duration-150 max-lg:whitespace-nowrap max-lg:px-3 max-lg:py-[7px] ${
+              className={`flex items-center gap-[11px] rounded-ctl px-[10px] py-[9px] text-sm transition-colors duration-150 max-shell:whitespace-nowrap max-shell:px-3 max-shell:py-[7px] ${
                 isActive
                   ? "bg-accent-soft font-medium text-accent-ink"
                   : "text-ink-2 hover:bg-wash hover:text-ink"
@@ -95,10 +95,10 @@ export default function Sidebar() {
                   isActive ? "opacity-100" : "opacity-80"
                 }`}
               />
-              <span className="tracking-[0.03em] max-lg:tracking-normal">{room.label}</span>
+              <span className="tracking-[0.03em] max-shell:tracking-normal">{room.label}</span>
               {"sub" in room && (
                 <span
-                  className={`ml-auto text-[12.5px] tracking-[0.02em] max-lg:hidden ${
+                  className={`ml-auto text-[12.5px] tracking-[0.02em] max-shell:hidden ${
                     isActive ? "text-accent-ink opacity-70" : "text-ink-3"
                   }`}
                 >
@@ -110,7 +110,7 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-5 flex shrink-0 items-center justify-between gap-2 border-t border-line pt-4 max-lg:mt-0 max-lg:border-0 max-lg:p-0 max-xs:order-2 max-xs:ml-auto">
+      <div className="mt-5 flex shrink-0 items-center justify-between gap-2 border-t border-line pt-4 max-shell:mt-0 max-shell:border-0 max-shell:p-0 max-xs:order-2 max-xs:ml-auto">
         <Link
           href="/connect"
           title={account.connected ? `已连接 ${account.owner || "账号"}，点击管理` : "未连接，点击配置账号与仓库"}
@@ -126,7 +126,7 @@ export default function Sidebar() {
           >
             {account.connected ? (account.owner ? account.owner.charAt(0).toUpperCase() : "·") : "·"}
           </span>
-          <span className="truncate text-[12.5px] text-ink-2 max-lg:hidden">
+          <span className="truncate text-[12.5px] text-ink-2 max-shell:hidden">
             {account.connected ? account.owner || "已连接" : "连接仓库"}
           </span>
         </Link>

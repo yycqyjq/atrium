@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type FloorItem = { id: string; title: string; level: number; el: HTMLElement };
 
@@ -84,6 +84,24 @@ export default function FloorNav() {
     };
   }, [items]);
 
+  // 底部楼层条：当前楼层变化时把对应按钮滚进可视区（只动容器，不带动页面）
+  const stripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const strip = stripRef.current;
+    const btn = strip?.children[current] as HTMLElement | undefined;
+    if (!strip || !btn) return;
+    const b = btn.getBoundingClientRect();
+    const s = strip.getBoundingClientRect();
+    const pad = 8;
+    let dx = 0;
+    if (b.left < s.left + pad) dx = b.left - s.left - pad;
+    else if (b.right > s.right - pad) dx = b.right - s.right + pad;
+    if (dx !== 0) {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      strip.scrollBy({ left: dx, behavior: reduced ? "auto" : "smooth" });
+    }
+  }, [current]);
+
   // 点击跳转：平滑滚动 + 立即高亮 + 地址栏同步（不跳页）
   const jump = useCallback(
     (index: number) => {
@@ -118,7 +136,7 @@ export default function FloorNav() {
 
   return (
     <>
-    <nav aria-label="楼层目录" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 xl:block">
+    <nav aria-label="楼层目录" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 shell:block">
       <ul className="flex flex-col items-end">
         {items.map((item, i) => {
           const isCurrent = i === current;
@@ -174,12 +192,16 @@ export default function FloorNav() {
       </ul>
     </nav>
 
-    {/* 移动端（<xl）：底部横向楼层条，桌面右侧导轨的紧凑替代 */}
+    {/* 窄屏（<shell 断点）：底部横向楼层条，桌面右侧导轨的紧凑替代。
+        容器 inset-x-0 全宽但必须 pointer-events-none：否则透明区域会盖住页面底部、拦截侧栏按钮等点击；药丸本体再收回。 */}
     <nav
       aria-label="楼层目录·移动端"
-      className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 xl:hidden"
+      className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 shell:hidden"
     >
-      <div className="flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-raised/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm">
+      <div
+        ref={stripRef}
+        className="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-raised/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      >
         {items.map((item, i) => {
           const isCurrent = i === current;
           return (

@@ -70,6 +70,8 @@
   --radius-ctl: 8px;
 
   --breakpoint-xs: 680px;
+  /* 外壳布局切换点：侧栏→顶部条、楼层目录→底部条，统一由 shell 断点收口，改这一处即可 */
+  --breakpoint-shell: 1024px;
   /* 文章侧边目录：与 Electron 窗口 minWidth(960) 对齐，窄屏时目录收窄至 176px */
   --breakpoint-toc: 960px;
 

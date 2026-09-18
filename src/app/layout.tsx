@@ -34,11 +34,11 @@ export default function RootLayout({
         <a className="skip-link" href="#main">
           跳到内容
         </a>
-        <div className="grid min-h-screen grid-cols-[248px_minmax(0,1fr)] max-lg:min-h-0 max-lg:grid-cols-1">
+        <div className="grid min-h-screen grid-cols-[248px_minmax(0,1fr)] max-shell:min-h-0 max-shell:grid-cols-1">
           <Sidebar />
           <main
             id="main"
-            className="flex min-h-dvh w-full max-w-[1120px] flex-col justify-self-center px-[clamp(26px,4.2vw,64px)] pt-[52px] pb-10 max-lg:min-h-0 max-lg:px-5 max-lg:pt-7 max-lg:pb-24"
+            className="flex min-h-dvh w-full max-w-[1120px] flex-col justify-self-center px-[clamp(26px,4.2vw,64px)] pt-[52px] pb-10 max-shell:min-h-0 max-shell:px-5 max-shell:pt-7 max-shell:pb-24"
           >
             {children}
           </main>
