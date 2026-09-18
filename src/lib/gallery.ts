@@ -20,6 +20,23 @@ export function bustGalleryCache() {
   void invalidateCache("gallery");
 }
 
+/**
+ * 图床文件在「文章正文」里的引用地址。
+ *
+ * 用 jsDelivr（与 provider.rawUrl 的主源一致），**不要**换成 GitHub raw：
+ * 实测本机网络下 raw.githubusercontent.com 直接超时（25s 无响应），
+ * jsDelivr 的 gcore 线路 2s 内 200。既有文章用的是 raw 形式，那些图大概率一直是坏的。
+ *
+ * 注意 jsDelivr 对 @branch 有缓存，刚上传的文件可能有短暂延迟。
+ */
+export function galleryArticleUrl(
+  cfg: { owner: string; repo: string; branch: string },
+  filePath: string,
+): string {
+  const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
+  return `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`;
+}
+
 /* 每张图的提交时间（卡片日期）：单独缓存 60 分钟，避免反复占用限额 */
 const commitDateCache = new Map<string, { at: number; value: number | null }>();
 const COMMIT_DATE_TTL = 60 * 60_000;

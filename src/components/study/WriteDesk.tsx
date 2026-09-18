@@ -1,14 +1,28 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Button, { ButtonLink } from "@/components/ui/Button";
 import { Input, Textarea, FieldLabel } from "@/components/ui/Field";
 import Combobox from "@/components/ui/Combobox";
 import Card from "@/components/ui/Card";
 import Alert from "@/components/ui/Alert";
+import { collectImageRefs, replaceImageUrls } from "@/lib/markdown-images";
 
 type WriteState = "edit" | "saving" | "saved" | "error";
+
+/** 转存时同时抓几张，别把源站和 GitHub API 一起冲垮 */
+const TRANSFER_CONCURRENCY = 3;
+
+/** 失败提示里用的短地址：主机名 + 文件名，够定位就行 */
+function shortUrl(raw: string): string {
+  try {
+    const { hostname, pathname } = new URL(raw);
+    return `${hostname}/…/${pathname.split("/").pop() ?? ""}`;
+  } catch {
+    return raw.length > 48 ? `${raw.slice(0, 48)}…` : raw;
+  }
+}
 
 /** 文件名自动识别：标题去掉路径不安全字符后即为文件名 */
 export function fileNameFromTitle(title: string): string {
@@ -44,8 +58,18 @@ export default function WriteDesk({
   const [savedSlug, setSavedSlug] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+  const [transferDone, setTransferDone] = useState(0);
+  const [transferTotal, setTransferTotal] = useState(0);
+  const [transferMsg, setTransferMsg] = useState("");
+  const [transferFailed, setTransferFailed] = useState(false);
 
   const isEdit = Boolean(initial?.slug);
+  // 正文里出现的图片张数（按地址去重，同一张图引两次只算一次）
+  const imageCount = useMemo(
+    () => new Set(collectImageRefs(body).map((ref) => ref.url)).size,
+    [body],
+  );
   const initialFolder = initial?.slug?.includes("/")
     ? initial.slug.slice(0, initial.slug.lastIndexOf("/"))
     : "";
@@ -56,7 +80,81 @@ export default function WriteDesk({
     : fileNameFromTitle(title);
   const folderPath = folder === ROOT_FOLDER ? "" : folder.trim().replace(/^\/+|\/+$/g, "");
   const fullSlug = folderPath ? `${folderPath}/${fileBase}` : fileBase;
-  const canSave = title.trim() !== "" && body.trim() !== "" && state !== "saving";
+  const canSave =
+    title.trim() !== "" && body.trim() !== "" && state !== "saving" && !transferring;
+
+  /**
+   * 转存外链图片：把正文里的第三方图片抓进图床仓库，再把正文里的地址换成自己的。
+   * 逐张独立处理——单张失败只保留它的原链，不连累其它张。
+   */
+  async function transferImages() {
+    const unique = [...new Set(collectImageRefs(body).map((ref) => ref.url))];
+    if (unique.length === 0) return;
+
+    setTransferring(true);
+    setTransferFailed(false);
+    setTransferMsg("");
+    setTransferDone(0);
+    setTransferTotal(unique.length);
+
+    const mapping = new Map<string, string>();
+    const failed: string[] = [];
+    let skipped = 0;
+    let cursor = 0;
+
+    const worker = async () => {
+      while (cursor < unique.length) {
+        const url = unique[cursor];
+        cursor += 1;
+        try {
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ sourceUrl: url }),
+          });
+          const data = (await res.json()) as {
+            ok?: boolean;
+            skipped?: boolean;
+            url?: string;
+            error?: string;
+          };
+          if (!res.ok || !data.ok) {
+            failed.push(`${shortUrl(url)}（${data.error ?? "转存失败"}）`);
+          } else if (data.skipped) {
+            skipped += 1;
+          } else if (data.url) {
+            mapping.set(url, data.url);
+          }
+        } catch {
+          failed.push(`${shortUrl(url)}（网络异常）`);
+        } finally {
+          setTransferDone((n) => n + 1);
+        }
+      }
+    };
+
+    try {
+      await Promise.all(
+        Array.from({ length: Math.min(TRANSFER_CONCURRENCY, unique.length) }, worker),
+      );
+
+      // 基于「当前正文」重新定位再替换：转存期间用户接着改字也不会错位
+      if (mapping.size > 0) setBody((prev) => replaceImageUrls(prev, mapping));
+
+      const parts: string[] = [];
+      if (mapping.size > 0) parts.push(`已转存 ${mapping.size} 张到图床，正文链接已替换`);
+      if (skipped > 0) parts.push(`${skipped} 张本来就在图床，跳过`);
+      if (failed.length > 0) {
+        const shown = failed.slice(0, 3).join("；");
+        parts.push(`${failed.length} 张失败，保留原链：${shown}${failed.length > 3 ? " 等" : ""}`);
+      }
+      setTransferFailed(failed.length > 0);
+      setTransferMsg(parts.join("。") || "没有需要转存的图片。");
+    } finally {
+      // 无论中途出什么岔子，都要把按钮从「转存中」放出来
+      setTransferring(false);
+    }
+  }
 
   async function save() {
     setState("saving");
@@ -202,7 +300,26 @@ export default function WriteDesk({
       </p>
 
       <div className="mb-4">
-        <FieldLabel htmlFor="write-body">正文（Markdown）*</FieldLabel>
+        <FieldLabel
+          htmlFor="write-body"
+          action={
+            imageCount > 0 || transferring ? (
+              <Button
+                variant="quiet"
+                size="sm"
+                disabled={transferring || imageCount === 0}
+                onClick={transferImages}
+                title="把正文里的外链图片抓进图床仓库，并替换成自己的图片链接"
+              >
+                {transferring
+                  ? `转存中 ${transferDone}/${transferTotal}`
+                  : `转存外链图片（${imageCount}）`}
+              </Button>
+            ) : null
+          }
+        >
+          正文（Markdown）*
+        </FieldLabel>
         <Textarea
           id="write-body"
           mono
@@ -211,6 +328,15 @@ export default function WriteDesk({
           onChange={(e) => setBody(e.target.value)}
           placeholder={"## 小标题\n\n正文…"}
         />
+        {transferMsg ? (
+          <p
+            className={`mt-2 text-[12px] leading-relaxed ${
+              transferFailed ? "text-accent-ink" : "text-ink-3"
+            }`}
+          >
+            {transferMsg}
+          </p>
+        ) : null}
       </div>
 
       <div className="mb-5">

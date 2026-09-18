@@ -14,11 +14,37 @@ export function fieldClasses(
   return `w-full rounded-ctl border border-line bg-raised outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent ${sizeCls}${monoCls} ${extra}`.trim();
 }
 
-export function FieldLabel({ htmlFor, children }: { htmlFor?: string; children: React.ReactNode }) {
+/**
+ * 字段标签。`action` 为可选的右侧插槽（如字段级的操作按钮），
+ * 传了就和标签排成一行，不传则与原来完全一致。
+ */
+export function FieldLabel({
+  htmlFor,
+  action,
+  children,
+}: {
+  htmlFor?: string;
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  const labelCls = "text-[11.5px] tracking-[0.1em] text-ink-3";
+
+  // 无插槽时保持原样（单个 label），避免给既有调用点多套一层容器
+  if (!action) {
+    return (
+      <label className={`mb-1.5 block ${labelCls}`} htmlFor={htmlFor}>
+        {children}
+      </label>
+    );
+  }
+
   return (
-    <label className="mb-1.5 block text-[11.5px] tracking-[0.1em] text-ink-3" htmlFor={htmlFor}>
-      {children}
-    </label>
+    <div className="mb-1.5 flex items-center justify-between gap-3">
+      <label className={`block ${labelCls}`} htmlFor={htmlFor}>
+        {children}
+      </label>
+      {action}
+    </div>
   );
 }
 
