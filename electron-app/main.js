@@ -12,7 +12,7 @@
  *   pnpm desktop          # 打开中庭桌面窗口
  *   pnpm desktop:smoke    # 自检
  */
-const { app, BrowserWindow, shell, Menu } = require("electron");
+const { app, BrowserWindow, shell, Menu, dialog } = require("electron");
 const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -22,6 +22,8 @@ const IS_PACKAGED = app.isPackaged;
 const PORT = Number(process.env.ATRIUM_PORT || 3299);
 const SMOKE = process.env.ATRIUM_SMOKE === "1";
 const READY_TIMEOUT_MS = 30000;
+/** 安装包存档所在的应用仓库（GitHub Releases） */
+const APP_REPO = "yycqyjq/atrium";
 
 let serverProc = null;
 let win = null;
@@ -121,6 +123,67 @@ function startServer() {
   });
 }
 
+/** 语义化版本比较：a > b 返回 1，相等 0，小于 -1 */
+function compareVersions(a, b) {
+  const pa = String(a).split(".").map((n) => Number(n) || 0);
+  const pb = String(b).split(".").map((n) => Number(n) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i += 1) {
+    const diff = (pa[i] || 0) - (pb[i] || 0);
+    if (diff !== 0) return diff > 0 ? 1 : -1;
+  }
+  return 0;
+}
+
+/**
+ * 更新检测：查 Releases latest，比本机版本新则弹窗引导去下载页。
+ * 未签名 mac 做不到静默自更，这里只做提示；interactive=false 为启动后台检查，失败静默。
+ */
+async function checkForUpdate(interactive) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${APP_REPO}/releases/latest`, {
+      headers: { "User-Agent": "atrium-desktop", Accept: "application/vnd.github+json" },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const release = (await res.json());
+    const latest = String(release.tag_name || "").replace(/^v/, "");
+    const current = app.getVersion();
+    if (!latest || compareVersions(latest, current) <= 0) {
+      if (interactive) {
+        await dialog.showMessageBox(win ?? undefined, {
+          type: "info",
+          title: "中庭",
+          message: `已是最新版本 v${current}`,
+          buttons: ["好"],
+        });
+      }
+      return;
+    }
+    const { response } = await dialog.showMessageBox(win ?? undefined, {
+      type: "info",
+      title: "发现新版本",
+      message: `中庭 v${latest} 已发布（当前 v${current}）`,
+      detail: "可到发布页下载最新安装包，安装后数据自动保留。",
+      buttons: ["前往下载", "以后再说"],
+      defaultId: 0,
+      cancelId: 1,
+    });
+    if (response === 0 && release.html_url) shell.openExternal(release.html_url);
+  } catch (err) {
+    if (interactive) {
+      await dialog.showMessageBox(win ?? undefined, {
+        type: "warning",
+        title: "中庭",
+        message: "检查更新失败，请稍后再试",
+        detail: err instanceof Error ? err.message : String(err),
+        buttons: ["好"],
+      });
+    } else {
+      console.warn("[electron] 更新检查失败（静默）：", err instanceof Error ? err.message : err);
+    }
+  }
+}
+
 async function createWindow() {
   win = new BrowserWindow({
     width: 1280,
@@ -156,6 +219,7 @@ function buildMenu() {
       label: "中庭",
       submenu: [
         { label: "关于中庭", role: "about" },
+        { label: "检查更新…", click: () => checkForUpdate(true) },
         { type: "separator" },
         { label: "隐藏中庭", role: "hide" },
         { label: "隐藏其他", role: "hideOthers" },
@@ -208,6 +272,11 @@ app.whenReady().then(async () => {
     await createWindow();
     buildMenu();
     console.log("[electron] 页面加载完成：", win.webContents.getURL());
+
+    // 打包版启动后静默查一次更新（3 秒后，避开首屏资源竞争；失败不打扰）
+    if (IS_PACKAGED && !SMOKE) {
+      setTimeout(() => checkForUpdate(false), 3000);
+    }
 
     // 调试/自检用：将窗口实际渲染结果保存为截图（先等入场动画结束）
     const shotPath = process.env.ATRIUM_SHOT_PATH;
