@@ -7,6 +7,7 @@ import { Input, Textarea, FieldLabel } from "@/components/ui/Field";
 import Combobox from "@/components/ui/Combobox";
 import Card from "@/components/ui/Card";
 import Alert from "@/components/ui/Alert";
+import BackLink from "@/components/ui/BackLink";
 import { collectImageRefs, replaceImageUrls } from "@/lib/markdown-images";
 
 type WriteState = "edit" | "saving" | "saved" | "error";
@@ -265,11 +266,21 @@ export default function WriteDesk({
 
   return (
     <Card className="bg-raised">
-      <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
-        {isEdit
-          ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；改文件夹 = 移动文章；参考资源已提取，可在此修改）`
-          : "新文章以 Markdown 存入内容仓库，文件名自动取标题；可指定文件夹（支持多级，如 技术/前端）。"}
-      </p>
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <p className="text-[12.5px] leading-relaxed text-ink-3">
+          {isEdit
+            ? `正在编辑：${initial?.slug}.md（标题与文件名已自动识别；改文件夹 = 移动文章；参考资源已提取，可在此修改）`
+            : "新文章以 Markdown 存入内容仓库，文件名自动取标题；可指定文件夹（支持多级，如 技术/前端）。"}
+        </p>
+        {isEdit && initial?.slug ? (
+          <BackLink
+            href={`/study/${initial.slug.split("/").map(encodeURIComponent).join("/")}`}
+            className="shrink-0 pt-0.5"
+          >
+            回到这篇
+          </BackLink>
+        ) : null}
+      </div>
 
       <div className="mb-3 grid gap-4 md:grid-cols-2">
         <div>
