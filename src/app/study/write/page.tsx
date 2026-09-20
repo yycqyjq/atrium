@@ -27,7 +27,7 @@ export default async function WritePage({
     folders = [];
   }
 
-  let initial: { slug: string; title: string; body: string; refs?: string } | undefined;
+  let initial: { slug: string; title: string; body: string; refs?: string; date?: string } | undefined;
   if (edit) {
     try {
       const provider = await getProvider();
@@ -46,7 +46,8 @@ export default async function WritePage({
       const fileName = (edit.split("/").pop() ?? edit).replace(/\.mdx?$/i, "");
       const title = pick("title") || fileName;
 
-      initial = { slug: edit, title, body, refs };
+      // 原日期透传：保存时带回，避免编辑把 date 刷成当天
+      initial = { slug: edit, title, body, refs, date: pick("date") || undefined };
     } catch {
       initial = undefined; // 找不到就当新建
     }

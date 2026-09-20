@@ -46,7 +46,7 @@ export default function WriteDesk({
   initial,
   folders = [],
 }: {
-  initial?: { slug: string; title: string; body: string; refs?: string };
+  initial?: { slug: string; title: string; body: string; refs?: string; date?: string };
   /** 现有文件夹路径（树结构，如 "技术/前端"） */
   folders?: string[];
 }) {
@@ -179,6 +179,8 @@ export default function WriteDesk({
           slug: fullSlug,
           ...(isEdit && initial?.slug ? { from: initial.slug } : {}),
           title: title.trim(),
+          // 编辑透传原日期（缺省会被服务端刷成当天）；新建不传，由服务端填今天
+          ...(isEdit && initial?.date ? { date: initial.date } : {}),
           body: finalBody,
         }),
       });
