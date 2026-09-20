@@ -248,6 +248,25 @@
     font-size: 13px;
     line-height: 1.7;
   }
+  /* mermaid 流程图：SVG 现场渲染容器（客户端组件 MermaidBlock） */
+  .md-body .mermaid-host {
+    margin: 1.4em 0;
+    padding: 14px 10px;
+    overflow-x: auto;
+    text-align: center;
+  }
+  .md-body .mermaid-host svg {
+    max-width: 100%;
+    height: auto;
+  }
+  .md-body .mermaid-fallback {
+    margin: 1.1em 0;
+    padding: 12px 16px;
+    background: color-mix(in srgb, var(--accent) 3%, var(--surface-raised));
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow-x: auto;
+  }
   .md-body img {
     max-width: 100%;
     height: auto;
