@@ -6,6 +6,7 @@ import GalleryBrowser from "@/components/gallery/GalleryBrowser";
 import GalleryUpload from "@/components/gallery/GalleryUpload";
 import EmptyState from "@/components/ui/EmptyState";
 import Loading from "@/components/ui/Loading";
+import SetupGuide from "@/components/ui/SetupGuide";
 import PageHeader from "@/components/ui/PageHeader";
 import { listGallerySections, type ContentReason } from "@/lib/gallery";
 import { resolveGalleryConfig } from "@/lib/config";
@@ -41,6 +42,21 @@ async function GalleryFloor({ album, view }: { album?: string; view?: string }) 
   const galleryCfg = await resolveGalleryConfig();
   const canUpload = Boolean(galleryCfg.token);
   const total = sections.reduce((n, section) => n + section.images.length, 0);
+
+  if (reason === "not-configured") {
+    return (
+      <SetupGuide
+        title="画廊还没接通图片源。"
+        sub="连好仓库，照片就有了落脚的地方。"
+        steps={[
+          "点侧栏底部的头像或 ⚙ 齿轮，打开「设置」页。",
+          "填入 GitHub 用户名、仓库名与令牌（上传照片必须有令牌）。",
+          `图片放进仓库的 ${dir}/ 目录；想和文章分家，也可以单独指定一个图床仓库。`,
+          "保存后回画廊：相册自动铺开，之后还能直接在页面上上传。",
+        ]}
+      />
+    );
+  }
 
   return (
     <>

@@ -6,6 +6,7 @@ import PageHeader from "@/components/ui/PageHeader";
 import Alert from "@/components/ui/Alert";
 import EmptyState from "@/components/ui/EmptyState";
 import Loading from "@/components/ui/Loading";
+import SetupGuide from "@/components/ui/SetupGuide";
 import { ButtonLink } from "@/components/ui/Button";
 import WorkshopList from "@/components/workshop/WorkshopList";
 import { listDemos, type DemoItem } from "@/lib/demos";
@@ -35,17 +36,37 @@ async function WorkshopFloor() {
 
   if (projects.length === 0) {
     return (
-      <>
-        <EmptyState
-          title="工坊还没进料。"
-          sub="到设置里接入你的组件仓库，这里就会摆出来。"
-        />
-        <p className="text-center">
-          <ButtonLink href="/connect" variant="secondary">
-            去设置
-          </ButtonLink>
-        </p>
-      </>
+      <SetupGuide
+        title="工坊还没进料。"
+        sub="接入你的组件仓库，展品会从仓库取件、现场装配。"
+        steps={[
+          "点侧栏底部的头像或 ⚙ 齿轮，打开「设置」页。",
+          "找到「组件项目」分区，添加一条：类型选「仓库」，填 owner/仓库名（如 your-name/bricks），分支 main。",
+          "仓库根目录放一份 atrium.json 展品清单（下方有格式示例；砖瓦 bricks 模板仓库自带）。",
+          "保存后进工坊：展品按清单自动收编，真实运行在页面上。",
+        ]}
+        examples={[
+          {
+            label: "atrium.json 展品清单格式",
+            code: `{
+  "exhibits": [
+    {
+      "id": "toast",                  // 必填：字母数字开头，与构建产物同名
+      "title": "Toast 提示",
+      "desc": "轻量反馈提示，自动排队",
+      "group": "反馈",                 // 分区展示（可选）
+      "entry": "dist/exhibits/toast.js",   // 必填：ESM 产物路径
+      "styles": ["dist/exhibits/toast.css"],
+      "usage": "mount(el, { duration: 2800 })",
+      "props": [
+        { "name": "duration", "type": "number", "default": "2800", "note": "停留毫秒数" }
+      ]
+    }
+  ]
+}`,
+          },
+        ]}
+      />
     );
   }
 
