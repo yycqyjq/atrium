@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
-import { bustContentCache } from "@/lib/content";
+import { bustContentCache, bustPostFileCache } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +41,7 @@ export async function DELETE(request: Request) {
     }
 
     await provider.deleteFile(filePath, `docs(study): 移除《${slug}》`, sha);
-    await bustContentCache();
+    await Promise.all([bustContentCache(), bustPostFileCache(filePath)]);
     return NextResponse.json({ ok: true, path: filePath, requestId: randomUUID() });
   } catch (err) {
     const status = (err as { status?: number }).status;
@@ -152,9 +152,10 @@ export async function POST(request: Request) {
       } catch {
         // 旧文件不存在：忽略
       }
+      await bustPostFileCache(oldPath);
     }
 
-    await bustContentCache();
+    await Promise.all([bustContentCache(), bustPostFileCache(filePath)]);
 
     return NextResponse.json({
       ok: true,

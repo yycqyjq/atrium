@@ -1,5 +1,6 @@
+import { createHash } from "node:crypto";
 import { getProvider } from "@/lib/providers";
-import { cacheThrough, invalidateCachePrefix } from "@/lib/cache";
+import { cacheThrough, invalidateCache, invalidateCachePrefix } from "@/lib/cache";
 import { ProviderError, type RepoEntry, type RepoProvider } from "@/lib/providers/types";
 
 export type PostMeta = {
@@ -31,8 +32,8 @@ const FILE_CAP = 400;
 const DIR_CAP = 120;
 /** 最大下钻深度 */
 const MAX_DEPTH = 6;
-/** 无 front-matter 日期时回退查询提交时间的文件数上限 */
-const DATE_FALLBACK_CAP = 12;
+/** 无 front-matter 日期时回退查询提交时间的文件数上限（SWR 摊薄了回源代价，可放宽） */
+const DATE_FALLBACK_CAP = 50;
 
 class NotConfiguredError extends Error {}
 
@@ -223,14 +224,33 @@ async function walkRepo(
 
 const parentDir = (p: string) => (p.includes("/") ? p.slice(0, p.lastIndexOf("/")) : "");
 
+/**
+ * 单文件正文缓存（contentfile- 前缀，独立于 content- 索引命名空间）：
+ * 打开文章、索引重建都先读缓存；写操作按精确路径失效（bustPostFileCache），
+ * 所以前缀不被 bustContentCache 扫到——改一篇只回源一篇。
+ */
+const fileCacheKey = (filePath: string) =>
+  `contentfile-${createHash("sha1").update(filePath).digest("hex").slice(0, 16)}`;
+
+export function bustPostFileCache(filePath: string) {
+  return invalidateCache(fileCacheKey(filePath));
+}
+
+/** 读仓库文本文件（带缓存）；404 等错误原样抛出，由调用方决定降级 */
+async function getFileText(provider: RepoProvider, filePath: string): Promise<string> {
+  const { value } = await cacheThrough(fileCacheKey(filePath), CONTENT_TTL, async () => {
+    const raw = await provider.getFile(filePath);
+    return Buffer.from(raw.content, "base64").toString("utf8");
+  });
+  return value;
+}
+
 async function loadOne(
   provider: RepoProvider,
   filePath: string,
 ): Promise<{ fm: Record<string, unknown>; body: string }> {
   try {
-    const raw = await provider.getFile(filePath);
-    const text = Buffer.from(raw.content, "base64").toString("utf8");
-    const { data, content } = parseFrontMatter(text);
+    const { data, content } = parseFrontMatter(await getFileText(provider, filePath));
     return { fm: data, body: content };
   } catch {
     return { fm: {}, body: "" };
@@ -412,9 +432,7 @@ export async function getPostBySlug(
 
   for (const filePath of tryPaths) {
     try {
-      const raw = await provider.getFile(filePath);
-      const text = Buffer.from(raw.content, "base64").toString("utf8");
-      const { data, content } = parseFrontMatter(text);
+      const { data, content } = parseFrontMatter(await getFileText(provider, filePath));
       const meta = found ?? metaFromData(filePath, data, content);
       if (!found) meta.dateLabel = toLabel(meta.lastModified);
       return { meta, body: content };
