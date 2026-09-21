@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { guardedFetch, isUrlGuardError } from "@/lib/url-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -7,13 +8,6 @@ type SiteInfo = { title: string; description: string; host: string };
 const cache = new Map<string, { at: number; data: SiteInfo }>();
 const TTL = 10 * 60 * 1000;
 const MAX_BYTES = 512 * 1024;
-
-function isPrivateHost(host: string) {
-  if (/^(localhost|127\.|10\.|192\.168\.|169\.254\.|0\.)/i.test(host)) return true;
-  if (/^172\.(1[6-9]|2\d|3[01])\./.test(host)) return true;
-  if (host === "::1" || host.endsWith(".local")) return true;
-  return false;
-}
 
 function decodeEntities(input: string) {
   return input
@@ -49,10 +43,6 @@ export async function GET(request: Request) {
   } catch {
     return NextResponse.json({ ok: false, error: "网址不合法" }, { status: 400 });
   }
-  if (isPrivateHost(target.hostname)) {
-    return NextResponse.json({ ok: false, error: "不支持本地或内网地址" }, { status: 400 });
-  }
-
   const key = target.href;
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < TTL) {
@@ -60,14 +50,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    const res = await fetch(target.href, {
+    const res = await guardedFetch(target.href, {
       headers: {
         "User-Agent": "Mozilla/5.0 (compatible; Atrium/1.0)",
         Accept: "text/html,application/xhtml+xml",
       },
-      redirect: "follow",
-      signal: AbortSignal.timeout(8000),
-      cache: "no-store",
+      timeoutMs: 8000,
     });
     if (!res.ok) {
       return NextResponse.json({ ok: false, error: `目标站点返回 ${res.status}` }, { status: 502 });
@@ -109,7 +97,11 @@ export async function GET(request: Request) {
     if (cache.size > 120) cache.clear();
     cache.set(key, { at: Date.now(), data });
     return NextResponse.json({ ok: true, ...data });
-  } catch {
+  } catch (err) {
+    if (isUrlGuardError(err)) {
+      return NextResponse.json({ ok: false, error: err.message }, { status: 400 });
+    }
+    console.warn("[site-info] 解析失败：", String(err));
     return NextResponse.json({ ok: false, error: "解析失败，请检查网址或稍后再试" }, { status: 502 });
   }
 }

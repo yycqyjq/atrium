@@ -4,6 +4,7 @@ import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig } from "@/lib/config";
 import { bustGalleryCache, galleryArticleUrl } from "@/lib/gallery";
+import { guardedFetch, fetchFailureReason, isUrlGuardError, assertPublicUrl } from "@/lib/url-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -30,64 +31,9 @@ class UploadError extends Error {
   }
 }
 
-/**
- * 只允许公网 http(s)。这个接口是「给个地址，服务端去取」，不加限制就成了内网探测跳板，
- * 本机/内网地址一律拒掉。
- */
-function assertPublicUrl(raw: string): URL {
-  let url: URL;
-  try {
-    url = new URL(raw);
-  } catch {
-    throw new UploadError("图片地址不合法");
-  }
-  if (url.protocol !== "http:" && url.protocol !== "https:") {
-    throw new UploadError("只支持 http/https 图片地址");
-  }
-  const host = url.hostname.toLowerCase();
-  const isPrivateV4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.test(host)
-    ? (() => {
-        const [a, b] = host.split(".").map(Number);
-        return (
-          a === 0 ||
-          a === 10 ||
-          a === 127 ||
-          (a === 192 && b === 168) ||
-          (a === 172 && b >= 16 && b <= 31) ||
-          (a === 169 && b === 254)
-        );
-      })()
-    : false;
-  if (
-    host === "localhost" ||
-    host.endsWith(".localhost") ||
-    host.endsWith(".local") ||
-    host.endsWith(".internal") ||
-    host.startsWith("[") || // IPv6 字面量（含 ::1）
-    isPrivateV4
-  ) {
-    throw new UploadError("不支持本机 / 内网地址");
-  }
-  return url;
-}
-
 /** 已经在图床仓库里的图不用再转一次 */
 function isOwnGalleryUrl(raw: string, cfg: { owner: string; repo: string }): boolean {
   return raw.includes(`${cfg.owner}/${cfg.repo}`);
-}
-
-/**
- * 把 fetch 的失败原因挖出来。Node 的 fetch 只抛 `TypeError: fetch failed`，
- * 真正有用的信息（证书、超时、DNS）在 cause 里——不挖出来，界面只能显示「网络不通」，
- * 排查时等于没有线索。
- */
-function fetchFailureReason(err: unknown): string {
-  const cause = (err as { cause?: unknown } | null)?.cause;
-  const raw =
-    (cause instanceof Error && cause.message) ||
-    (err instanceof Error && err.message) ||
-    String(err);
-  return raw.length > 80 ? `${raw.slice(0, 80)}…` : raw;
 }
 
 /** 从 URL 路径里取文件名；取不到或不带图片扩展名时按 content-type 兜底 */
@@ -163,16 +109,17 @@ export async function POST(request: Request) {
       if (isOwnGalleryUrl(sourceUrl, gallery)) {
         return NextResponse.json({ ok: true, skipped: true, reason: "图片已在图床仓库" });
       }
-      const url = assertPublicUrl(sourceUrl);
-
       let res: Response;
+      let url: URL;
       try {
-        res = await fetch(url, {
-          redirect: "follow",
-          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        // 护栏抓取：不自动跟随重定向，逐跳过字面量与解析检查（防 302 跳内网 / DNS 解析绕过）
+        url = assertPublicUrl(sourceUrl);
+        res = await guardedFetch(sourceUrl, {
           headers: { Accept: "image/*", "User-Agent": "atrium-image-transfer" },
+          timeoutMs: FETCH_TIMEOUT_MS,
         });
       } catch (err) {
+        if (isUrlGuardError(err)) throw new UploadError(err.message, 400);
         const reason = fetchFailureReason(err);
         console.warn("[upload] 抓取失败：", sourceUrl, reason);
         throw new UploadError(`抓取失败：${reason}`, 502);
