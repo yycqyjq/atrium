@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
  * 首帧前决定主题，避免闪烁：
  * 优先级 URL 参数 ?theme=dark|light（调试 / 分享用） > localStorage 记忆 > 系统偏好。
  */
-const themeInit = `(function(){try{var q=new URLSearchParams(location.search).get("theme");var s=localStorage.getItem("atrium-theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=(q==="dark"||q==="light")?q:((s==="light"||s==="dark")?s:(d?"dark":"light"));}catch(e){document.documentElement.dataset.theme="light";}})();`;
+const themeInit = `(function(){try{var q=new URLSearchParams(location.search).get("theme");var s=localStorage.getItem("atrium-theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=t;var m=function(){var c=document.querySelector('meta[name="theme-color"]');if(c)c.setAttribute("content",document.documentElement.dataset.theme==="dark"?"#1a1814":"#f6f4ee")};m();new MutationObserver(m).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});}catch(e){document.documentElement.dataset.theme="light";}})();`;
 
 export default function RootLayout({
   children,
@@ -28,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#f6f4ee" />
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body>

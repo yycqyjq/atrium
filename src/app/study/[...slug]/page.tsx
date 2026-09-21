@@ -17,6 +17,7 @@ import { getPostBySlug, getStudyDir, type PostMeta } from "@/lib/content";
 import { splitReferenceLinks } from "@/lib/reference-links";
 import { extractToc } from "@/lib/toc";
 import { isWriteEnabled } from "@/lib/write-guard";
+import ReadingProgress from "@/components/study/ReadingProgress";
 
 export const dynamic = "force-dynamic";
 
@@ -128,11 +129,13 @@ async function StudySlugBody({ params }: Props) {
   if (post) {
     const { meta } = post;
     const { body, links } = splitReferenceLinks(post.body);
+    const minutes = Math.max(1, Math.round(body.length / 400));
     const toc = extractToc(body);
     const folderSegments = meta.slug.split("/").slice(0, -1);
 
     return (
       <>
+        <ReadingProgress />
         <div className="mb-[72px]">
           <header className="pt-4 pb-9">
             <Breadcrumb items={studyCrumbs(folderSegments)} className="mb-3" />
@@ -143,6 +146,7 @@ async function StudySlugBody({ params }: Props) {
               {meta.lastModified ? (
                 <span className="tabular-nums">{fullDate(meta.lastModified)}</span>
               ) : null}
+              <span className="tabular-nums">约 {minutes} 分钟读完</span>
               {meta.tags.length > 0 ? (
                 <span className="tracking-[0.03em]">
                   {meta.tags.map((tag) => `#${tag}`).join("  ")}
