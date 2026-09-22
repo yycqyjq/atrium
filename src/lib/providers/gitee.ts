@@ -150,17 +150,13 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
 
     rawUrl(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
-      const primary = `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`;
-      return primary;
+      // Gitee 仓库不走 jsDelivr（其 gh 线路只服务 GitHub），直连 Gitee raw
+      return `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`;
     },
 
     rawUrlCandidates(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
-      return [
-        // 主源：jsDelivr 国内线路；备用：Gitee raw
-        `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`,
-        `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`,
-      ];
+      return [`https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`];
     },
   };
 }
