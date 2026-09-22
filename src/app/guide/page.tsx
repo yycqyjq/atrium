@@ -127,7 +127,7 @@ export default function GuidePage() {
             <Bullets
               items={[
                 "配置只保存在本机（userData/data/config.json），不会上传到任何地方。",
-                "内容源已抽象成统一接口：除 GitHub 外也内置了 Gitee 适配（实验性——切换需在本机 config.json 里加 "defaultProvider": "gitee"，仓库结构保持一致即可）。",
+                "内容源已抽象成统一接口：除 GitHub 外也内置了 Gitee 适配（实验性；切换需在本机 config.json 里把 defaultProvider 设为 gitee，仓库结构保持一致即可）。",
                 "写操作（发文、上传、删除）仅桌面端开放——部署到公网的网页版默认只读。",
               ]}
             />
