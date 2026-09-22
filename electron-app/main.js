@@ -12,7 +12,7 @@
  *   pnpm desktop          # 打开中庭桌面窗口
  *   pnpm desktop:smoke    # 自检
  */
-const { app, BrowserWindow, shell, Menu, dialog } = require("electron");
+const { app, BrowserWindow, shell, Menu, dialog, net } = require("electron");
 const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
 const path = require("node:path");
@@ -24,6 +24,59 @@ const SMOKE = process.env.ATRIUM_SMOKE === "1";
 const READY_TIMEOUT_MS = 30000;
 /** 安装包存档所在的应用仓库（GitHub Releases） */
 const APP_REPO = "yycqyjq/atrium";
+
+// 收集系统信任的证书（macOS：钥匙串全量导出；Windows：本机+用户根证书导出为 PEM）。
+// 任何代理工具「一键安装证书到系统」后都会进入这里——应用自动跟随，无需手动配置。
+function collectSystemCerts() {
+  try {
+    if (process.platform === "darwin") {
+      return execFileSync("/usr/bin/security", ["find-certificate", "-a", "-p"], {
+        encoding: "utf8",
+        timeout: 15000,
+        maxBuffer: 32 * 1024 * 1024,
+      });
+    }
+    if (process.platform === "win32") {
+      const ps =
+        "$ErrorActionPreference='SilentlyContinue'; Get-ChildItem Cert:\\LocalMachine\\Root, Cert:\\CurrentUser\\Root | ForEach-Object { '-----BEGIN CERTIFICATE-----'; [System.Convert]::ToBase64String($_.RawData, [System.Base64FormattingOptions]::InsertLineBreaks); '-----END CERTIFICATE-----' }";
+      return execFileSync("powershell", ["-NoProfile", "-Command", ps], {
+        encoding: "utf8",
+        timeout: 30000,
+        maxBuffer: 32 * 1024 * 1024,
+      });
+    }
+  } catch (err) {
+    console.warn("[electron] 系统证书导出失败（忽略）:", err?.message ?? err);
+  }
+  return "";
+}
+
+/** 手动放置的 pem + 系统信任证书 → 合并成一个 CA bundle（供 NODE_EXTRA_CA_CERTS 使用） */
+function buildCaBundle() {
+  const parts = [];
+  try {
+    const dir = app.isPackaged
+      ? path.join(app.getPath("userData"), "certs")
+      : path.join(ROOT, "certs");
+    if (fs.existsSync(dir)) {
+      for (const f of fs.readdirSync(dir)) {
+        if (/\.pem$/i.test(f) && !f.startsWith("_")) {
+          const content = fs.readFileSync(path.join(dir, f), "utf8");
+          if (content.includes("BEGIN CERTIFICATE")) parts.push(content);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[electron] 手动证书读取失败（忽略）:", err?.message ?? err);
+  }
+  const sys = collectSystemCerts();
+  if (sys.includes("BEGIN CERTIFICATE")) parts.push(sys);
+  if (parts.length === 0) return "";
+  const bundle = path.join(app.getPath("userData"), "certs", "_ca-bundle.pem");
+  fs.mkdirSync(path.dirname(bundle), { recursive: true });
+  fs.writeFileSync(bundle, parts.join("\n"));
+  return bundle;
+}
 
 let serverProc = null;
 let win = null;
@@ -71,19 +124,14 @@ function startServer() {
       HOSTNAME: "127.0.0.1",
     };
 
-    // 证书：显式指定优先（相对路径转绝对）；没指定就按运行形态找默认位置——
-    // 开发态 = 项目 certs/，打包态 = userData/certs/（应用包只读，证书得放用户目录）。
-    // 文件不存在也不报错：没装 Watt Toolkit 这类加速工具时本来就不需要。
+    // 证书：显式指定优先；否则自动合并「手动放置的 pem + 系统信任的证书」。
+    // 系统信任的导出让任何代理工具「一键安装证书到系统」后都自动生效——无需手动放置文件。
     if (env.NODE_EXTRA_CA_CERTS && !path.isAbsolute(env.NODE_EXTRA_CA_CERTS)) {
       env.NODE_EXTRA_CA_CERTS = path.resolve(plan.cwd, env.NODE_EXTRA_CA_CERTS);
     }
     if (!env.NODE_EXTRA_CA_CERTS) {
-      const cert = path.join(
-        IS_PACKAGED ? app.getPath("userData") : ROOT,
-        "certs",
-        "watt-toolkit.pem",
-      );
-      if (fs.existsSync(cert)) env.NODE_EXTRA_CA_CERTS = cert;
+      const bundle = buildCaBundle();
+      if (bundle) env.NODE_EXTRA_CA_CERTS = bundle;
     }
 
     // 数据目录：开发=项目 data/；打包=系统 userData（应用包保持只读）
@@ -140,10 +188,12 @@ function compareVersions(a, b) {
  */
 async function checkForUpdate(interactive) {
   try {
-    const res = await fetch(`https://api.github.com/repos/${APP_REPO}/releases/latest`, {
-      headers: { "User-Agent": "atrium-desktop", Accept: "application/vnd.github+json" },
-      signal: AbortSignal.timeout(10000),
-    });
+    const res = await Promise.race([
+      net.fetch(`https://api.github.com/repos/${APP_REPO}/releases/latest`, {
+        headers: { "User-Agent": "atrium-desktop", Accept: "application/vnd.github+json" },
+      }),
+      new Promise((_, rej) => setTimeout(() => rej(new Error("查询超时")), 10000)),
+    ]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const release = (await res.json());
     const latest = String(release.tag_name || "").replace(/^v/, "");
