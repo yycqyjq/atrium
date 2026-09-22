@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import SourceStage from "@/components/atelier/SourceStage";
 import Footer from "@/components/shell/Footer";
 import FloorNav from "@/components/shell/FloorNav";
 import PageHeader from "@/components/ui/PageHeader";
@@ -40,6 +43,19 @@ import {
 } from "@/components/icons";
 
 export const metadata: Metadata = { title: "陈列廊" };
+
+/** 构建期读取组件源文件（带文件头标注，多文件合并展示） */
+function readSrc(...files: string[]): string {
+  return files
+    .map((f) => {
+      try {
+        return `// ── src/${f} ──\n` + readFileSync(join(process.cwd(), "src", f), "utf8");
+      } catch {
+        return `// ── src/${f} ──（读取失败）`;
+      }
+    })
+    .join("\n\n");
+}
 
 const swatches: { name: string; token: string; className: string }[] = [
   { name: "纸面", token: "--surface", className: "bg-surface" },
@@ -83,10 +99,13 @@ function Section({
   title,
   note,
   children,
+  source,
 }: {
   title: string;
   note?: string;
   children: React.ReactNode;
+  /** 传入组件源码（构建期读取）后，示例区启用 预览/源码 双页签（源码在最后） */
+  source?: string;
 }) {
   return (
     <section className="mb-12 [[data-density=compact]_&]:mb-8">
@@ -94,7 +113,13 @@ function Section({
         <h2 className="font-serif text-[17px] tracking-[0.02em]">{title}</h2>
         {note ? <span className="text-right text-[12px] text-ink-3">{note}</span> : null}
       </div>
-      {children}
+      {source ? (
+        <SourceStage source={source} note="本页即实物：改组件源文件，此处同步">
+          {children}
+        </SourceStage>
+      ) : (
+        children
+      )}
     </section>
   );
 }
@@ -192,7 +217,7 @@ export default function AtelierPage() {
             </Card>
           </Section>
 
-          <Section title="交互控件" note="真实组件 · 本页可直接操作">
+          <Section title="交互控件" note="真实组件 · 本页可直接操作" source={readSrc("components/ui/Button.tsx", "components/ui/Chip.tsx", "components/search/SearchBox.tsx")}>
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">按钮</p>
@@ -221,7 +246,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="内容单元" note="工具卡片 / 文章行 · 与房间共用">
+          <Section title="内容单元" note="工具卡片 / 文章行 · 与房间共用" source={readSrc("components/tools/ToolCard.tsx", "components/study/PostRow.tsx")}>
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <a
                 href={demoTool.url}
@@ -268,7 +293,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="结构与导航" note="分组标题 / 楼层目录">
+          <Section title="结构与导航" note="分组标题 / 楼层目录" source={readSrc("components/ui/SectionHeading.tsx", "components/ui/Breadcrumb.tsx")}>
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm" data-floor-skip>
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">分组标题（SectionHeading）</p>
@@ -285,7 +310,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="状态与提示" note="空态 / 提示条 / 载入态">
+          <Section title="状态与提示" note="空态 / 提示条 / 载入态" source={readSrc("components/ui/EmptyState.tsx", "components/ui/Alert.tsx", "components/ui/Loading.tsx")}>
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="none">
                 <EmptyState title="房间级空态。" sub="衬线标题 + 副文案（EmptyState 组件）。" />
@@ -303,7 +328,7 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="表单与字段" note="输入框 / 文本域 / 标签 / 下拉 · 全站同款">
+          <Section title="表单与字段" note="输入框 / 文本域 / 标签 / 下拉 · 全站同款" source={readSrc("components/ui/Field.tsx", "components/ui/Combobox.tsx")}>
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">输入框（Input）</p>
