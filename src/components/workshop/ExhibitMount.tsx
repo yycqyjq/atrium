@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Alert from "@/components/ui/Alert";
+import Loading from "@/components/ui/Loading";
 
 type MountFn = (
   el: HTMLElement,
@@ -94,7 +95,9 @@ export default function ExhibitMount({
   return (
     <div>
       {state === "loading" ? (
-        <p className="py-8 text-center text-[12.5px] tracking-[0.04em] text-ink-3">取件中…</p>
+        <div className="py-10">
+          <Loading label="取件中…" />
+        </div>
       ) : null}
       {state === "error" ? (
         <Alert tone="error" size="sm" className="mb-3">
