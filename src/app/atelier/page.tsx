@@ -17,7 +17,13 @@ import Loading from "@/components/ui/Loading";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { ToolCardContent } from "@/components/tools/ToolCard";
 import PostRow from "@/components/study/PostRow";
-import { SearchDemo, ComboboxDemo } from "@/components/atelier/Demos";
+import {
+  SearchDemo,
+  ComboboxDemo,
+  ToastDemo,
+  ConfirmDialogDemo,
+  MasonryDemo,
+} from "@/components/atelier/Demos";
 import DensityToggle from "@/components/atelier/DensityToggle";
 import {
   IconMark,
@@ -325,6 +331,33 @@ export default function AtelierPage() {
             </div>
             <div className="mt-3 flex items-center justify-center rounded-ctl border border-line py-8 [[data-density=compact]_&]:py-6">
               <Loading label="载入中…（路由切换与等待时同款）" />
+            </div>
+          </Section>
+
+          <Section
+            title="微交互"
+            note="轻提示 / 确认弹窗 · 全站统一"
+            source={readSrc("components/ui/Toast.tsx", "components/ui/ConfirmDialog.tsx", "components/atelier/Demos.tsx")}
+          >
+            <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
+              <Card padding="sm">
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">轻提示（Toast）</p>
+                <ToastDemo />
+              </Card>
+              <Card padding="sm">
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">确认弹窗（ConfirmDialog）</p>
+                <ConfirmDialogDemo />
+              </Card>
+            </div>
+          </Section>
+
+          <Section
+            title="布局"
+            note="瀑布流 · 纯 CSS 多栏 · 列数可切换"
+            source={readSrc("components/ui/Masonry.tsx", "components/atelier/Demos.tsx")}
+          >
+            <div className="rounded-ctl border border-line bg-surface p-4">
+              <MasonryDemo />
             </div>
           </Section>
 
