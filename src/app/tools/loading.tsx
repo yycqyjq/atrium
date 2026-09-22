@@ -4,7 +4,7 @@ import Loading from "@/components/ui/Loading";
 /** 工具房路由级载入态：工具卡网格骨架。 */
 export default function ToolsLoading() {
   return (
-    <div className="mx-auto max-w-[1080px]">
+    <div>
       <div className="mb-6 h-8 w-32 animate-pulse rounded-[5px] bg-line" />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {[0, 1, 2, 3, 4, 5].map((i) => (

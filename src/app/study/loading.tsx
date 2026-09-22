@@ -4,7 +4,7 @@ import Loading from "@/components/ui/Loading";
 /** 书房路由级载入态：文章行列表骨架。 */
 export default function StudyLoading() {
   return (
-    <div className="mx-auto max-w-[760px]">
+    <div>
       <div className="mb-6 h-8 w-40 animate-pulse rounded-[5px] bg-line" />
       {[0, 1, 2].map((i) => (
         <Card key={i} className="mb-3">

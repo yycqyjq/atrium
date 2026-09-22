@@ -4,7 +4,7 @@ import Loading from "@/components/ui/Loading";
 /** 陈列廊路由级载入态：组件展示分区骨架。 */
 export default function AtelierLoading() {
   return (
-    <div className="mx-auto max-w-[880px]">
+    <div>
       <div className="mb-6 h-8 w-32 animate-pulse rounded-[5px] bg-line" />
       {[0, 1].map((i) => (
         <div key={i} className="mb-10">
