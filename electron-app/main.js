@@ -15,6 +15,7 @@
 const { app, BrowserWindow, shell, Menu, dialog, net } = require("electron");
 const { spawn, spawnSync } = require("node:child_process");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 
 const ROOT = path.join(__dirname, "..");
@@ -30,11 +31,23 @@ const APP_REPO = "yycqyjq/atrium";
 function collectSystemCerts() {
   try {
     if (process.platform === "darwin") {
-      return execFileSync("/usr/bin/security", ["find-certificate", "-a", "-p"], {
-        encoding: "utf8",
-        timeout: 15000,
-        maxBuffer: 32 * 1024 * 1024,
-      });
+      const opts = { encoding: "utf8", timeout: 15000, maxBuffer: 32 * 1024 * 1024 };
+      const run = (kc) => execFileSync("/usr/bin/security", ["find-certificate", "-a", "-p", kc], opts);
+      // 覆盖系统钥匙串（管理员/代理工具安装）+ 用户登录钥匙串（手动安装）
+      const results = [
+        "/Library/Keychains/System.keychain",
+        "/System/Library/Keychains/SystemRootCertificates.keychain",
+        path.join(os.homedir(), "Library/Keychains/login.keychain-db"),
+      ]
+        .map((kc) => {
+          try {
+            return run(kc);
+          } catch {
+            return "";
+          }
+        })
+        .join("\n");
+      return results;
     }
     if (process.platform === "win32") {
       const ps =
