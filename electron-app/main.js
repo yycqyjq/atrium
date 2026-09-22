@@ -32,7 +32,20 @@ function collectSystemCerts() {
   try {
     if (process.platform === "darwin") {
       const opts = { encoding: "utf8", timeout: 15000, maxBuffer: 32 * 1024 * 1024 };
-      const run = (kc) => execFileSync("/usr/bin/security", ["find-certificate", "-a", "-p", kc], opts);
+      const run = (kc) => {
+        try {
+          const result = spawnSync("/usr/bin/security", ["find-certificate", "-a", "-p", kc], opts);
+          if (result.error || result.status !== 0) {
+            console.warn(`[electron] 证书导出失败 ${kc}:`, result.error?.message ?? `exit ${result.status}`);
+            return "";
+          }
+          console.log(`[electron] 证书导出 ${kc}: ${result.stdout.length} 字节`);
+          return result.stdout;
+        } catch (err) {
+          console.warn(`[electron] 证书导出异常 ${kc}:`, err?.message ?? err);
+          return "";
+        }
+      };
       // 覆盖系统钥匙串（管理员/代理工具安装）+ 用户登录钥匙串（手动安装）
       const results = [
         "/Library/Keychains/System.keychain",
@@ -52,11 +65,16 @@ function collectSystemCerts() {
     if (process.platform === "win32") {
       const ps =
         "$ErrorActionPreference='SilentlyContinue'; Get-ChildItem Cert:\\LocalMachine\\Root, Cert:\\CurrentUser\\Root | ForEach-Object { '-----BEGIN CERTIFICATE-----'; [System.Convert]::ToBase64String($_.RawData, [System.Base64FormattingOptions]::InsertLineBreaks); '-----END CERTIFICATE-----' }";
-      return execFileSync("powershell", ["-NoProfile", "-Command", ps], {
+      const result = spawnSync("powershell", ["-NoProfile", "-Command", ps], {
         encoding: "utf8",
         timeout: 30000,
         maxBuffer: 32 * 1024 * 1024,
       });
+      if (result.error || result.status !== 0) {
+        console.warn("[electron] Windows 证书导出失败（忽略）:", result.error?.message ?? `exit ${result.status}`);
+        return "";
+      }
+      return result.stdout;
     }
   } catch (err) {
     console.warn("[electron] 系统证书导出失败（忽略）:", err?.message ?? err);
@@ -83,7 +101,9 @@ function buildCaBundle() {
     console.warn("[electron] 手动证书读取失败（忽略）:", err?.message ?? err);
   }
   const sys = collectSystemCerts();
+  console.log(`[electron] 系统证书收集: ${sys.length} 字节`);
   if (sys.includes("BEGIN CERTIFICATE")) parts.push(sys);
+  console.log(`[electron] CA bundle 组成: ${parts.length} 部分`);
   if (parts.length === 0) return "";
   const bundle = path.join(app.getPath("userData"), "certs", "_ca-bundle.pem");
   fs.mkdirSync(path.dirname(bundle), { recursive: true });

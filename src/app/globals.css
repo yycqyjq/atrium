@@ -387,3 +387,11 @@
     scroll-behavior: smooth;
   }
 }
+
+/* 楼层导轨避让：≥shell 断点（1024px，见上方 --breakpoint-shell）时，
+   带楼层导轨的页面预留右侧空间——否则列表/卡片右缘会压在悬浮导轨下（实测重叠约 10px）。 */
+@media (min-width: 1024px) {
+  [data-floor-nav] {
+    padding-right: 24px;
+  }
+}
