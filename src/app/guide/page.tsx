@@ -283,11 +283,23 @@ export const backend = {
               items={[
                 "打包：pnpm desktop:dist 产出独立 .app 与 dmg；自检：desktop:smoke 隐藏窗口全链验证后自动退出。",
                 "云端发布：推送 v* 版本标签（或手动运行「发布安装包」），GitHub Actions 自动构建 macOS（arm64）与 Windows 安装包并发布到 Releases。",
-                "证书：本机网络加速工具（如 Watt Toolkit）的证书放到 userData/certs/ 自动加载；开发态自动读项目 certs/ 目录。",
+                "证书（只与网络加速有关）：如果本机开着 GitHub 加速工具（如 Watt Toolkit），把它导出的证书放到 userData/certs/watt-toolkit.pem，应用启动时自动信任；不装加速工具则完全不用管这一条。开发态会自动读项目 certs/ 目录。",
                 "数据位置：userData/data/ 下（config.json 配置、cache/ 缓存），升级与重装都不会动它。",
                 "检查更新：应用启动后台静默查询 Releases，菜单「检查更新」可手动触发；有新版会提示并跳转下载。",
               ]}
             />
+
+            <details className="group/why mt-4 max-w-[46em]">
+              <summary className="cursor-pointer list-none text-[12.5px] text-ink-3 transition-colors duration-150 hover:text-ink-2">
+                <span className="mr-1.5 inline-block transition-transform duration-150 group-open/why:rotate-90">▸</span>
+                为什么会需要一张证书？
+              </summary>
+              <div className="mt-2.5 space-y-2.5 rounded-ctl border border-line bg-wash px-4 py-3.5 text-[13px] leading-[1.85] text-ink-2">
+                <p>加速工具的工作方式是「中间人」：应用访问 github.com 时，请求先经过本机的加速代理，由它转发到 GitHub——这是它能加速的原因。</p>
+                <p>但 HTTPS 的规则是「对方必须出示可信证书」。GitHub 出示的是权威机构签发的证书；而加速代理要替 GitHub 回应，就只能出示<strong>它自己签发</strong>的证书——系统默认不认识这个签发者，所有 HTTPS 请求会被当作不安全直接拒绝。</p>
+                <p>所以加速工具提供了「导出证书」：把这张签发证书导出成文件，放到应用约定位置（userData/certs/），启动时自动注册进信任列表——等于告诉它「这个签发者是可信的」。只需要做一次；加速工具更新证书后需要重新导出替换。</p>
+              </div>
+            </details>
           </Section>
 
           <Section id="faq" no="10" title="常见问题">
