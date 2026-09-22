@@ -150,6 +150,98 @@ function sleep(ms: number): Promise<void> {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+/* ---------- Python 桥智能分发 ----------
+ * Python requests 的 TLS 指纹能过 ptlogin 扫码风控（Node 过不了），msglist 抓取 Node 可达。
+ * 策略：本机 18772 有 Python 桥在线 → 扫码/抓取全流程走 Python（扫码全自动）；
+ * 不在线 → 走上面的 Node 原生通道（Cookie 粘贴登录 + fetch 抓取）。展品对分发无感知。
+ */
+
+const PY_BRIDGE = "http://127.0.0.1:18772";
+const pyProbeCache: { at: number; ok: boolean } = { at: 0, ok: false };
+
+async function pyBridgeOnline(): Promise<boolean> {
+  if (Date.now() - pyProbeCache.at < 5000) return pyProbeCache.ok;
+  let ok = false;
+  try {
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 800);
+    const res = await fetch(`${PY_BRIDGE}/api/state`, { signal: ctl.signal });
+    clearTimeout(timer);
+    ok = res.ok;
+  } catch {
+    ok = false;
+  }
+  pyProbeCache.at = Date.now();
+  pyProbeCache.ok = ok;
+  return ok;
+}
+
+export interface ChannelSnapshot extends Record<string, unknown> {
+  via: "python-bridge" | "native";
+}
+
+export async function currentState(): Promise<ChannelSnapshot> {
+  if (await pyBridgeOnline()) {
+    try {
+      const res = await fetch(`${PY_BRIDGE}/api/state`);
+      if (res.ok) return { via: "python-bridge", ...(await res.json()) } as ChannelSnapshot;
+    } catch {
+      /* 落回原生 */
+    }
+  }
+  return { via: "native", ...snapshot() };
+}
+
+export async function doAction(
+  action: string,
+  extra: Record<string, unknown> = {},
+): Promise<ChannelSnapshot> {
+  const py = await pyBridgeOnline();
+  if (py) {
+    const path = action === "qr-start" ? "/api/qr/start" : action === "fetch-start" ? "/api/fetch/start" : "/api/stop";
+    try {
+      const res = await fetch(`${PY_BRIDGE}${path}`, { method: "POST" });
+      if (res.ok) return { via: "python-bridge", ...(await res.json()) } as ChannelSnapshot;
+    } catch {
+      /* 落回原生 */
+    }
+  }
+  if (action === "cookie") {
+    setCredentials(String(extra.p_skey ?? ""), String(extra.uin ?? ""));
+  } else if (action === "qr-start") {
+    startQr();
+  } else if (action === "fetch-start") {
+    startFetch();
+  } else if (action === "stop") {
+    stop();
+  }
+  return { via: "native", ...snapshot() };
+}
+
+export async function currentQrPng(): Promise<Uint8Array | null> {
+  if (await pyBridgeOnline()) {
+    try {
+      const res = await fetch(`${PY_BRIDGE}/api/qr.png`);
+      if (res.ok) return new Uint8Array(await res.arrayBuffer());
+    } catch {
+      /* 落回原生 */
+    }
+  }
+  return qrPng();
+}
+
+export async function currentData(): Promise<{ msglist: unknown[]; meta: Record<string, unknown> } | null> {
+  if (await pyBridgeOnline()) {
+    try {
+      const res = await fetch(`${PY_BRIDGE}/api/data`);
+      if (res.ok) return (await res.json()) as { msglist: unknown[]; meta: Record<string, unknown> };
+    } catch {
+      /* 落回原生 */
+    }
+  }
+  return dataPayload();
+}
+
 /** 二维码生成 + 登录轮询线程 */
 export function startQr(): void {
   if (["qr", "confirm", "fetching"].includes(qzoneState.phase)) return;
