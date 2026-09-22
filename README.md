@@ -153,5 +153,4 @@ atrium/
 - [x] 工坊：组件仓库取件渲染（atrium.json 清单标准）
 - [x] 两级缓存：内存 + 磁盘，源站失败时保旧数据
 - [x] 自动体检：推送即跑类型检查与构建（GitHub Actions）
-- [ ] 部署上线（见 docs/DEPLOY.md，一次点击可完成）
 - [x] 桌面安装包（独立 .app + 应用图标；本地 `desktop:dist`，云端一键发布 mac 与 Windows 安装包）
