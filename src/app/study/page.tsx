@@ -8,7 +8,7 @@ import Loading from "@/components/ui/Loading";
 import { ButtonLink } from "@/components/ui/Button";
 import { IconArrowRight } from "@/components/icons";
 import EmptyState from "@/components/ui/EmptyState";
-import SetupGuide from "@/components/ui/SetupGuide";
+import SetupTeaser from "@/components/ui/SetupTeaser";
 import { studyIndex, type ContentReason, type PostMeta } from "@/lib/content";
 import { isWriteEnabled } from "@/lib/write-guard";
 
@@ -55,15 +55,9 @@ async function StudyFloor() {
 
   if (reason === "not-configured") {
     return (
-      <SetupGuide
-        title="书房还没接通内容源。"
-        sub="几分钟连好仓库，之后写文章、读文章都在这里。"
-        steps={[
-          "点侧栏底部的头像或 ⚙ 齿轮，打开「设置」页。",
-          "填入 GitHub 用户名、仓库名与分支——任何仓库都行，文章会以 Markdown 直接存进去。",
-          "粘贴一个带 repo 权限的访问令牌（写文章必需；仓库公开时不填也能读，但匿名额度很低）。",
-          "保存后回书房：列表立刻点亮，写作台也就能用了。",
-        ]}
+      <SetupTeaser
+        title='书房还没接通内容源。'
+        sub='几分钟连好仓库，之后写文章、读文章都在这里。'
       />
     );
   }

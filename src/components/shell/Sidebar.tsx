@@ -132,6 +132,14 @@ export default function Sidebar() {
         </Link>
         <span className="flex items-center gap-0.5">
           <Link
+            href="/guide"
+            title="使用教程"
+            aria-label="使用教程"
+            className="rounded-ctl p-1.5 text-ink-3 transition-colors duration-150 hover:bg-wash hover:text-ink-2"
+          >
+            <IconBook className="size-[15px]" />
+          </Link>
+                    <Link
             href="/connect"
             title="账号与设置"
             aria-label="账号与设置"
