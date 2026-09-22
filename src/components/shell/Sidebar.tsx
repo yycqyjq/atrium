@@ -21,8 +21,8 @@ const rooms = [
   { key: "study", href: "/study", label: "书房", sub: "读", icon: IconBook },
   { key: "gallery", href: "/gallery", label: "画廊", sub: "看", icon: IconFrame },
   { key: "tools", href: "/tools", label: "工具房", sub: "用", icon: IconToolbox },
-  { key: "atelier", href: "/atelier", label: "陈列廊", sub: "造", icon: IconColumns },
   { key: "workshop", href: "/workshop", label: "工坊", sub: "试", icon: IconCraft },
+  { key: "atelier", href: "/atelier", label: "陈列廊", sub: "造", icon: IconColumns },
 ];
 
 function activeKey(pathname: string): string {

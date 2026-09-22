@@ -396,3 +396,10 @@
     padding-right: calc(clamp(26px, 4.2vw, 64px) + 24px);
   }
 }
+
+
+/* 展品舞台宽屏模式：ExhibitStage 宽屏开关控制，放宽主容器给展品更多空间 */
+main[data-wide="1"] {
+  max-width: min(1760px, 97vw);
+  transition: max-width 0.25s ease;
+}
