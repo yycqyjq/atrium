@@ -225,6 +225,34 @@ export default function GuidePage() {
   ]
 }`}
             />
+            <p className="mt-6 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
+              展品可以自带服务端逻辑（<b>声明式后端</b>）：在展品目录放一个 backend.ts，导出 backend.handle(req)，
+              构建时生成 dist/exhibits/&lt;id&gt;.backend.js（Node ESM）。中庭后端会把它挂到同源路由
+              /api/exhibit/&lt;id&gt;/* 下，展品前端直接 fetch 同源地址即可——登录态维护、定时任务、需要绕过浏览器沙箱的网络请求都在服务端完成，
+              数据不落盘不出本机。清单条目声明 "backend": true 即开启；设置 ATRIUM_EXHIBIT_BACKEND=0 可全局关闭。
+            </p>
+            <Code
+              label="展品后端契约（backend.ts，运行在中庭的 Node 服务里）"
+              code={`// src/exhibits/<id>/backend.ts
+export const backend = {
+  async handle(req: {
+    method: string;                       // GET / POST / ...
+    path: string;                         // 展品内相对路径，如 "state"
+    query: Record<string, string>;
+    body: unknown;                        // JSON 请求体
+  }) {
+    if (req.path === "state") return { json: readState() };
+    if (req.path === "data") return { json: readData() };
+    if (req.path === "action" && req.method === "POST") {
+      return { json: doAction((req.body as any).action) };
+    }
+    return { status: 404, json: { error: "not found" } };
+  },
+};
+
+// 展品前端直接同源调用：
+// fetch("/api/exhibit/<id>/state")`}
+            />
             <p className="mt-4 text-[13px] text-ink-3">
               动手试：<Cross href="/workshop" label="打开工坊" />。
             </p>
