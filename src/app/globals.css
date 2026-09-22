@@ -389,9 +389,10 @@
 }
 
 /* 楼层导轨避让：≥shell 断点（1024px，见上方 --breakpoint-shell）时，
-   带楼层导轨的页面预留右侧空间——否则列表/卡片右缘会压在悬浮导轨下（实测重叠约 10px）。 */
+   外壳内容层统一预留右侧空间——所有页面基础布局一致，列表/卡片不压在悬浮导轨下。
+   右侧 padding 与 #main 的 px-[clamp(26px,4.2vw,64px)] 保持同步（改 px 时这里跟着改）。 */
 @media (min-width: 1024px) {
-  [data-floor-nav] {
-    padding-right: 24px;
+  #main {
+    padding-right: calc(clamp(26px, 4.2vw, 64px) + 24px);
   }
 }
