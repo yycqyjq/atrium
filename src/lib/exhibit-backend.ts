@@ -84,16 +84,21 @@ async function loadFromRepos(id: string): Promise<ExhibitBackendModule | null> {
     if (!owner || !repo) continue;
     try {
       const stored = await readStoredConfig();
-    const token = stored.repos?.github?.token ?? "";
-    const provider = await githubProvider({ owner, repo, branch: p.branch || "main", token });
+      const token = stored.repos?.github?.token ?? "";
+      const provider = await githubProvider({ owner, repo, branch: p.branch || "main", token });
       const filePath = `dist/exhibits/${id}.backend.js`;
       const file = await provider.getFile(filePath);
-      const code = Buffer.from(file.content ?? "", file.encoding === "base64" ? "base64" : "utf8").toString("utf8");
+      const code = Buffer.from(
+        file.content ?? "",
+        file.encoding === "base64" ? "base64" : "utf8",
+      ).toString("utf8");
       const cacheDir = join(cacheRoot(), owner, repo, p.branch || "main");
       mkdirSync(cacheDir, { recursive: true });
       const cached = join(cacheDir, `${id}.backend.js`);
       writeFileSync(cached, code, "utf8");
-      const mod = (await dynamicImport(pathToFileURL(cached).href)) as { backend?: ExhibitBackendModule };
+      const mod = (await dynamicImport(pathToFileURL(cached).href)) as {
+        backend?: ExhibitBackendModule;
+      };
       if (mod.backend) return mod.backend;
     } catch {
       // 该项目没有这件展品或拉取失败：继续下一个项目
@@ -119,5 +124,8 @@ export function hasBackend(id: string): boolean {
   return registry.has(id);
 }
 
-/** 分发器统一超时（长任务类接口自行在展品内限速，这里防挂死） */
-const HANDLE_TIMEOUT_MS = 120_000;
+/**
+ * 分发器统一超时：长任务类接口自行在展品内限速，这里防挂死——
+ * handle 无响应时也要让 HTTP 请求返回（由 app/api/exhibit/[id] 的分发路由消费）。
+ */
+export const HANDLE_TIMEOUT_MS = 120_000;
