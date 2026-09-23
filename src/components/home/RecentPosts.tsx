@@ -34,9 +34,7 @@ export default function RecentPosts({ items, reason, className = "" }: Props) {
   return (
     <section className={`mt-14 ${className}`}>
       <div className="mb-2 flex items-baseline justify-between gap-5">
-        <h2 className="font-serif text-[21px] font-semibold tracking-[0.04em]">
-          最近在写
-        </h2>
+        <h2 className="font-serif text-[21px] font-semibold tracking-[0.04em]">最近在写</h2>
         {!empty && (
           <Link
             href="/study"

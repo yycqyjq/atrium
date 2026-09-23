@@ -20,7 +20,9 @@ export default function SetupTeaser({ title, sub }: { title: string; sub: string
           </Link>
           ，或直接去设置。
         </p>
-        <ButtonLink href="/connect" variant="secondary">去设置</ButtonLink>
+        <ButtonLink href="/connect" variant="secondary">
+          去设置
+        </ButtonLink>
       </div>
     </div>
   );

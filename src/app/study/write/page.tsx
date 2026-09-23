@@ -27,7 +27,8 @@ export default async function WritePage({
     folders = [];
   }
 
-  let initial: { slug: string; title: string; body: string; refs?: string; date?: string } | undefined;
+  let initial:
+    { slug: string; title: string; body: string; refs?: string; date?: string } | undefined;
   if (edit) {
     try {
       const provider = await getProvider();
@@ -36,11 +37,14 @@ export default async function WritePage({
       const m = text.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
       const fm = m?.[1] ?? "";
       const rawBody = (m?.[2] ?? text).replace(/^\n+/, "");
-      const pick = (key: string) => new RegExp(`^${key}:\\s*(.+)$`, "m").exec(fm)?.[1]?.trim().replace(/^"|"$/g, "") ?? "";
+      const pick = (key: string) =>
+        new RegExp(`^${key}:\\s*(.+)$`, "m").exec(fm)?.[1]?.trim().replace(/^"|"$/g, "") ?? "";
 
       // 参考链接：从正文尾部提取，回填到输入框（编辑后原样写回）
       const { body, links } = splitReferenceLinks(rawBody);
-      const refs = links.map((l) => (l.label === l.url ? l.url : `[${l.label}](${l.url})`)).join("\n");
+      const refs = links
+        .map((l) => (l.label === l.url ? l.url : `[${l.label}](${l.url})`))
+        .join("\n");
 
       // 标题自动识别：front-matter 优先，缺省回退文件名（去扩展名）
       const fileName = (edit.split("/").pop() ?? edit).replace(/\.mdx?$/i, "");
@@ -57,7 +61,11 @@ export default async function WritePage({
     <>
       <div className="mb-[72px]">
         <PageHeader
-          crumbs={[{ label: "中庭", href: "/" }, { label: "书房", href: "/study" }, { label: "写作台" }]}
+          crumbs={[
+            { label: "中庭", href: "/" },
+            { label: "书房", href: "/study" },
+            { label: "写作台" },
+          ]}
           title="写作台"
           subtitle="写完直接存回仓库。没有中间商。"
         />

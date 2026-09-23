@@ -89,12 +89,12 @@ atrium/
 
 读取公开仓库可匿名访问，但额度很低（GitHub 匿名约 60 次/小时，建议配置令牌提升到 5000 次/小时）；写入（发文章、传图）必须配置令牌。优先级：**环境变量 > `data/config.json`**。
 
-| 内容源 | 环境变量 |
-| --- | --- |
-| GitHub | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN` |
-| Gitee | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN` |
+| 内容源               | 环境变量                                                                                                  |
+| -------------------- | --------------------------------------------------------------------------------------------------------- |
+| GitHub               | `GITHUB_OWNER` `GITHUB_REPO` `GITHUB_BRANCH` `GITHUB_TOKEN`                                               |
+| Gitee                | `GITEE_OWNER` `GITEE_REPO` `GITEE_BRANCH` `GITEE_TOKEN`                                                   |
 | 画廊（可选独立仓库） | `GITHUB_GALLERY_OWNER` `GITHUB_GALLERY_REPO` `GITHUB_GALLERY_BRANCH`（Gitee 前缀替换为 `GITEE_GALLERY_`） |
-| 工具清单（可选） | `ATRIUM_TOOLS_FILE`（缺省 `admin/tools.json`，兼容旧版 ark-admin 格式；以 `/` 或 `./` 开头时读本地文件） |
+| 工具清单（可选）     | `ATRIUM_TOOLS_FILE`（缺省 `admin/tools.json`，兼容旧版 ark-admin 格式；以 `/` 或 `./` 开头时读本地文件）  |
 
 用 `ATRIUM_DEFAULT_PROVIDER` 可指定默认内容源（缺省 `github`），例如切到 Gitee：`ATRIUM_DEFAULT_PROVIDER=gitee`。
 画廊目录可用 `ATRIUM_GALLERY_DIR` 指定（缺省 `images/`）；不设 `GITHUB_GALLERY_*` 时画廊跟随主仓库。

@@ -29,7 +29,9 @@ export default function DensityToggle() {
       aria-pressed={density === value}
       onClick={() => setDensity(value)}
       className={`rounded-[5px] px-2.5 py-1 text-[12px] tracking-[0.03em] transition-colors duration-150 ${
-        density === value ? "bg-accent-soft font-medium text-accent-ink" : "text-ink-3 hover:text-ink-2"
+        density === value
+          ? "bg-accent-soft font-medium text-accent-ink"
+          : "text-ink-3 hover:text-ink-2"
       }`}
     >
       {label}

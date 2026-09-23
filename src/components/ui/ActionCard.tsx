@@ -34,7 +34,9 @@ export default function ActionCard({
       {actions.length > 0 && !confirming ? <CardActions actions={actions} /> : null}
       {confirming ? (
         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-2.5 rounded-ctl border border-line-strong bg-raised/95 px-4 text-center backdrop-blur-[1px]">
-          {confirmText ? <p className="text-[12.5px] leading-relaxed text-ink-2">{confirmText}</p> : null}
+          {confirmText ? (
+            <p className="text-[12.5px] leading-relaxed text-ink-2">{confirmText}</p>
+          ) : null}
           <div className="flex items-center gap-2">
             <Button size="sm" onClick={onConfirm}>
               {confirmLabel}

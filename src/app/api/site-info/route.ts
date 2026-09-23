@@ -70,7 +70,9 @@ export async function GET(request: Request) {
     }
     let html: string;
     try {
-      html = new TextDecoder(charset && charset !== "utf8" ? charset : "utf-8", { fatal: false }).decode(buf);
+      html = new TextDecoder(charset && charset !== "utf8" ? charset : "utf-8", {
+        fatal: false,
+      }).decode(buf);
     } catch {
       html = buf.toString("utf8");
     }
@@ -102,6 +104,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ ok: false, error: err.message }, { status: 400 });
     }
     console.warn("[site-info] 解析失败：", String(err));
-    return NextResponse.json({ ok: false, error: "解析失败，请检查网址或稍后再试" }, { status: 502 });
+    return NextResponse.json(
+      { ok: false, error: "解析失败，请检查网址或稍后再试" },
+      { status: 502 },
+    );
   }
 }

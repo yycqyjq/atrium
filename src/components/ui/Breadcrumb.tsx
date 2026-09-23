@@ -11,7 +11,9 @@ export default function Breadcrumb({
   className?: string;
 }) {
   return (
-    <p className={`flex flex-wrap items-center gap-x-1 text-[12.5px] tracking-[0.1em] text-ink-3 ${className}`}>
+    <p
+      className={`flex flex-wrap items-center gap-x-1 text-[12.5px] tracking-[0.1em] text-ink-3 ${className}`}
+    >
       {items.map((item, i) => (
         <span key={`${item.label}-${i}`} className="inline-flex items-center gap-x-1">
           {i > 0 ? <span> / </span> : null}

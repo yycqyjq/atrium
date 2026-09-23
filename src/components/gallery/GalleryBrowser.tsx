@@ -31,7 +31,10 @@ export default function GalleryBrowser({
     return sections
       .map((section) => {
         if (section.name.toLowerCase().includes(q)) return section;
-        return { ...section, images: section.images.filter((image) => image.name.toLowerCase().includes(q)) };
+        return {
+          ...section,
+          images: section.images.filter((image) => image.name.toLowerCase().includes(q)),
+        };
       })
       .filter((section) => section.images.length > 0);
   }, [sections, q]);
@@ -39,7 +42,13 @@ export default function GalleryBrowser({
   const total = filtered.reduce((n, section) => n + section.images.length, 0);
   const grandTotal = sections.reduce((n, section) => n + section.images.length, 0);
   const flat = filtered.flatMap((section) => section.images);
-  let cursor = 0;
+  // 每个 section 在 flat 中的起始下标（预计算：渲染期改写外部变量在 StrictMode 双渲染下会错位）
+  const starts: number[] = [];
+  let acc = 0;
+  for (const section of filtered) {
+    starts.push(acc);
+    acc += section.images.length;
+  }
 
   return (
     <>
@@ -53,9 +62,8 @@ export default function GalleryBrowser({
         />
       ) : (
         <div data-floor-nav>
-          {filtered.map((section) => {
-            const contextStart = cursor;
-            cursor += section.images.length;
+          {filtered.map((section, i) => {
+            const contextStart = starts[i];
             return (
               <section key={section.key} className="mb-10">
                 <SectionHeading
@@ -68,7 +76,9 @@ export default function GalleryBrowser({
                   images={section.images}
                   contextImages={flat}
                   contextStart={contextStart}
-                  initialView={initialAlbum === section.name && initialView != null ? initialView : undefined}
+                  initialView={
+                    initialAlbum === section.name && initialView != null ? initialView : undefined
+                  }
                   canEdit={canEdit}
                 />
               </section>

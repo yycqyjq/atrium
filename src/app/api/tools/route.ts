@@ -3,7 +3,6 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { getProvider } from "@/lib/providers";
-import { ProviderError } from "@/lib/providers/types";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { bustToolsCache } from "@/lib/tools";
 
@@ -43,13 +42,23 @@ async function loadToolsData(): Promise<{ data: ToolsData; sha?: string }> {
   if (!(await provider.isConfigured())) throw new Error("not-configured");
   try {
     const f = await provider.getFile(file);
-    return { data: parseTools(Buffer.from(f.content, "base64").toString("utf8")) ?? { categories: [], items: [] }, sha: f.sha || undefined };
+    return {
+      data: parseTools(Buffer.from(f.content, "base64").toString("utf8")) ?? {
+        categories: [],
+        items: [],
+      },
+      sha: f.sha || undefined,
+    };
   } catch {
     return { data: { categories: [], items: [] } }; // 文件不存在 → 首次创建
   }
 }
 
-async function saveToolsData(data: ToolsData, sha?: string, message = "chore(tools): 更新清单"): Promise<void> {
+async function saveToolsData(
+  data: ToolsData,
+  sha?: string,
+  message = "chore(tools): 更新清单",
+): Promise<void> {
   const file = (process.env.ATRIUM_TOOLS_FILE ?? DEFAULT_FILE).trim() || DEFAULT_FILE;
   const content = `${JSON.stringify(data, null, 2)}\n`;
   if (isLocalPath(file)) {
@@ -77,14 +86,20 @@ export async function POST(request: Request) {
   const name = typeof payload.name === "string" ? payload.name.trim() : "";
   const url = typeof payload.url === "string" ? payload.url.trim() : "";
   const description = typeof payload.description === "string" ? payload.description.trim() : "";
-  const category = typeof payload.category === "string" && payload.category.trim() ? payload.category.trim() : "未分类";
+  const category =
+    typeof payload.category === "string" && payload.category.trim()
+      ? payload.category.trim()
+      : "未分类";
 
   if (!name) return NextResponse.json({ error: "缺少名称" }, { status: 400 });
-  if (!/^https?:\/\//i.test(url)) return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
+  if (!/^https?:\/\//i.test(url))
+    return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
 
   try {
     const { data, sha } = await loadToolsData();
-    const exists = data.items.some((t) => String(t.name ?? "") === name && String(t.url ?? "") === url);
+    const exists = data.items.some(
+      (t) => String(t.name ?? "") === name && String(t.url ?? "") === url,
+    );
     if (exists) return NextResponse.json({ error: "同名同地址的工具已存在" }, { status: 409 });
 
     if (!data.categories.includes(category)) data.categories.push(category);
@@ -120,7 +135,9 @@ export async function DELETE(request: Request) {
   try {
     const { data, sha } = await loadToolsData();
     const before = data.items.length;
-    data.items = data.items.filter((t) => !(String(t.name ?? "") === name && String(t.url ?? "") === url));
+    data.items = data.items.filter(
+      (t) => !(String(t.name ?? "") === name && String(t.url ?? "") === url),
+    );
     if (data.items.length === before) {
       return NextResponse.json({ error: "未找到匹配的书签" }, { status: 404 });
     }
@@ -174,16 +191,24 @@ export async function PATCH(request: Request) {
     if (kind === "tool") {
       const oldName = typeof payload.oldName === "string" ? payload.oldName.trim() : "";
       const oldUrl = typeof payload.oldUrl === "string" ? payload.oldUrl.trim() : "";
-      const name = typeof payload.name === "string" && payload.name.trim() ? payload.name.trim() : oldName;
-      const url = typeof payload.url === "string" && payload.url.trim() ? payload.url.trim() : oldUrl;
+      const name =
+        typeof payload.name === "string" && payload.name.trim() ? payload.name.trim() : oldName;
+      const url =
+        typeof payload.url === "string" && payload.url.trim() ? payload.url.trim() : oldUrl;
       const description = typeof payload.description === "string" ? payload.description.trim() : "";
-      const category = typeof payload.category === "string" && payload.category.trim() ? payload.category.trim() : "未分类";
+      const category =
+        typeof payload.category === "string" && payload.category.trim()
+          ? payload.category.trim()
+          : "未分类";
 
       if (!oldName || !oldUrl) return NextResponse.json({ error: "缺少定位信息" }, { status: 400 });
       if (!name) return NextResponse.json({ error: "缺少名称" }, { status: 400 });
-      if (!/^https?:\/\//i.test(url)) return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
+      if (!/^https?:\/\//i.test(url))
+        return NextResponse.json({ error: "URL 需以 http(s):// 开头" }, { status: 400 });
 
-      const idx = data.items.findIndex((t) => String(t.name ?? "") === oldName && String(t.url ?? "") === oldUrl);
+      const idx = data.items.findIndex(
+        (t) => String(t.name ?? "") === oldName && String(t.url ?? "") === oldUrl,
+      );
       if (idx === -1) return NextResponse.json({ error: "未找到匹配的书签" }, { status: 404 });
 
       const dup = data.items.some(
@@ -205,8 +230,10 @@ export async function PATCH(request: Request) {
     const oldName = typeof payload.oldName === "string" ? payload.oldName.trim() : "";
     const newName = typeof payload.name === "string" ? payload.name.trim() : "";
     if (!oldName || !newName) return NextResponse.json({ error: "缺少分类名" }, { status: 400 });
-    if (!data.categories.includes(oldName)) return NextResponse.json({ error: "分类不存在" }, { status: 404 });
-    if (data.categories.includes(newName)) return NextResponse.json({ error: "新分类名已存在" }, { status: 409 });
+    if (!data.categories.includes(oldName))
+      return NextResponse.json({ error: "分类不存在" }, { status: 404 });
+    if (data.categories.includes(newName))
+      return NextResponse.json({ error: "新分类名已存在" }, { status: 409 });
 
     data.categories = data.categories.map((c) => (c === oldName ? newName : c));
     for (const item of data.items) {

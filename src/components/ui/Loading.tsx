@@ -23,7 +23,9 @@ export default function Loading({
           size === "sm" ? "size-4" : "size-5"
         }`}
       />
-      <span className={`tracking-[0.12em] ${size === "sm" ? "text-[12px]" : "text-[13px]"}`}>{label}</span>
+      <span className={`tracking-[0.12em] ${size === "sm" ? "text-[12px]" : "text-[13px]"}`}>
+        {label}
+      </span>
     </div>
   );
 }

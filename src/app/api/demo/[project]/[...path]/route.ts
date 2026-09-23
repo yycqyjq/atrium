@@ -37,7 +37,10 @@ export async function GET(
   headers.set("Cache-Control", "no-store");
   if (file.type.startsWith("text/html")) {
     // HTML 场景保底隔离（工坊不用 iframe，此处防直接打开被当作同源页面）
-    headers.set("Content-Security-Policy", "sandbox allow-scripts allow-forms allow-popups allow-modals");
+    headers.set(
+      "Content-Security-Policy",
+      "sandbox allow-scripts allow-forms allow-popups allow-modals",
+    );
   }
 
   return new NextResponse(file.buf as unknown as BodyInit, { status: 200, headers });

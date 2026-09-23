@@ -6,12 +6,17 @@ import type { ContentReason } from "@/lib/content";
 
 export type { ContentReason };
 
-export type GalleryImage = { name: string; path: string; url: string; fallbackUrls: string[]; date?: number };
+export type GalleryImage = {
+  name: string;
+  path: string;
+  url: string;
+  fallbackUrls: string[];
+  date?: number;
+};
 export type GalleryAlbum = { name: string; path: string };
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif|svg)$/i;
 const IMAGE_CAP = 240;
-const ALBUM_CAP = 60;
 const ALBUM_FETCH_CAP = 24;
 const SECTIONS_TTL = 30 * 60_000;
 
@@ -84,10 +89,15 @@ export async function listGallerySections(): Promise<{
 }> {
   const rootDir = await galleryDir();
   try {
-    const { value, stale } = await cacheThrough("gallery", SECTIONS_TTL, () => buildSections(rootDir), {
-      shouldCache: (v) => v.reason === "ok",
-      suspicious: (next, prev) => next.sections.length === 0 && (prev?.sections.length ?? 0) > 0,
-    });
+    const { value, stale } = await cacheThrough(
+      "gallery",
+      SECTIONS_TTL,
+      () => buildSections(rootDir),
+      {
+        shouldCache: (v) => v.reason === "ok",
+        suspicious: (next, prev) => next.sections.length === 0 && (prev?.sections.length ?? 0) > 0,
+      },
+    );
     if (stale) console.warn("[gallery] 使用缓存数据（可能不是最新）");
     return value;
   } catch (err) {
@@ -102,69 +112,79 @@ async function buildSections(rootDir: string): Promise<{
   dir: string;
   reason: ContentReason;
 }> {
-    const cfg = await resolveGalleryConfig();
-    const provider = await getProvider(cfg.provider, cfg);
-    if (!(await provider.isConfigured())) {
-      return { sections: [], dir: rootDir, reason: "not-configured" };
-    }
+  const cfg = await resolveGalleryConfig();
+  const provider = await getProvider(cfg.provider, cfg);
+  if (!(await provider.isConfigured())) {
+    return { sections: [], dir: rootDir, reason: "not-configured" };
+  }
 
-    let rootEntries;
-    try {
-      rootEntries = await provider.listDir(rootDir);
-    } catch (err) {
-      if (err instanceof ProviderError && err.status === 404) {
-        return { sections: [], dir: rootDir, reason: "ok" };
-      }
-      throw err;
+  let rootEntries;
+  try {
+    rootEntries = await provider.listDir(rootDir);
+  } catch (err) {
+    if (err instanceof ProviderError && err.status === 404) {
+      return { sections: [], dir: rootDir, reason: "ok" };
     }
+    throw err;
+  }
 
-    const toImage = (entry: { name: string; path: string }): GalleryImage => {
-      const candidates = provider.rawUrlCandidates(entry.path);
-      return { name: entry.name, path: entry.path, url: candidates[0], fallbackUrls: candidates.slice(1) };
+  const toImage = (entry: { name: string; path: string }): GalleryImage => {
+    const candidates = provider.rawUrlCandidates(entry.path);
+    return {
+      name: entry.name,
+      path: entry.path,
+      url: candidates[0],
+      fallbackUrls: candidates.slice(1),
     };
+  };
 
-    const albumDirs = rootEntries
-      .filter((e) => e.type === "dir" && !e.name.startsWith("."))
-      .slice(0, ALBUM_FETCH_CAP);
+  const albumDirs = rootEntries
+    .filter((e) => e.type === "dir" && !e.name.startsWith("."))
+    .slice(0, ALBUM_FETCH_CAP);
 
-    let albumFailures = 0;
-    const sections = (
-      await Promise.all(
-        albumDirs.map(async (dirEntry) => {
-          try {
-            const entries = await provider.listDir(dirEntry.path);
-            const images = entries
-              .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
-              .slice(0, IMAGE_CAP)
-              .map(toImage);
-            return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images };
-          } catch {
-            albumFailures += 1;
-            return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images: [] as GalleryImage[] };
-          }
-        }),
-      )
-    ).filter((s) => s.images.length > 0);
+  let albumFailures = 0;
+  const sections = (
+    await Promise.all(
+      albumDirs.map(async (dirEntry) => {
+        try {
+          const entries = await provider.listDir(dirEntry.path);
+          const images = entries
+            .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
+            .slice(0, IMAGE_CAP)
+            .map(toImage);
+          return { key: dirEntry.path, name: dirEntry.name, slug: dirEntry.name, images };
+        } catch {
+          albumFailures += 1;
+          return {
+            key: dirEntry.path,
+            name: dirEntry.name,
+            slug: dirEntry.name,
+            images: [] as GalleryImage[],
+          };
+        }
+      }),
+    )
+  ).filter((s) => s.images.length > 0);
 
-    // 全部相册都读失败：视为整体失败（交给缓存层回退）
-    if (albumDirs.length > 0 && albumFailures === albumDirs.length && sections.length === 0) {
-      throw new Error("相册读取全部失败");
-    }
+  // 全部相册都读失败：视为整体失败（交给缓存层回退）
+  if (albumDirs.length > 0 && albumFailures === albumDirs.length && sections.length === 0) {
+    throw new Error("相册读取全部失败");
+  }
 
-    const rootImages = rootEntries
-      .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
-      .slice(0, IMAGE_CAP)
-      .map(toImage);
-    if (rootImages.length > 0) {
-      sections.push({ key: "__root__", name: "散张", slug: "root", images: rootImages });
-    }
+  const rootImages = rootEntries
+    .filter((e) => e.type === "file" && IMAGE_RE.test(e.name))
+    .slice(0, IMAGE_CAP)
+    .map(toImage);
+  if (rootImages.length > 0) {
+    sections.push({ key: "__root__", name: "散张", slug: "root", images: rootImages });
+  }
 
-    // 补齐每张图的提交时间（失败静默，不影响出图）
-    const allImages = sections.flatMap((section) => section.images);
-    await mapLimit(allImages, 5, async (image) => {
-      const ts = await imageCommitDate(provider, image.path);
-      if (ts) image.date = ts;
-    });
+  // 补齐每张图的提交时间（失败静默，不影响出图）
+  const allImages = sections.flatMap((section) => section.images);
+  await mapLimit(allImages, 5, async (image) => {
+    const ts = await imageCommitDate(provider, image.path);
+    if (ts) image.date = ts;
+  });
 
-    return { sections, dir: rootDir, reason: "ok" as ContentReason };
+  return { sections, dir: rootDir, reason: "ok" as ContentReason };
 }

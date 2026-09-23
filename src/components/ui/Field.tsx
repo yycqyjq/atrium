@@ -1,9 +1,7 @@
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 /** 表单字段统一样式（输入框 / 文本域 / 标签）。 */
-export function fieldClasses(
-  opts: { size?: "md" | "sm"; mono?: boolean; extra?: string } = {},
-) {
+export function fieldClasses(opts: { size?: "md" | "sm"; mono?: boolean; extra?: string } = {}) {
   const { size = "md", mono = false, extra = "" } = opts;
   const sizeCls =
     size === "sm"
@@ -52,7 +50,10 @@ export function Input({
   size = "md",
   className = "",
   ...rest
-}: { size?: "md" | "sm"; className?: string } & Omit<InputHTMLAttributes<HTMLInputElement>, "size">) {
+}: { size?: "md" | "sm"; className?: string } & Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "size"
+>) {
   return <input className={fieldClasses({ size, extra: className })} {...rest} />;
 }
 

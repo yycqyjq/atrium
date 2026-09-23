@@ -113,7 +113,11 @@ export default function Sidebar() {
       <div className="mt-5 flex shrink-0 items-center justify-between gap-2 border-t border-line pt-4 max-shell:mt-0 max-shell:border-0 max-shell:p-0 max-xs:order-2 max-xs:ml-auto">
         <Link
           href="/connect"
-          title={account.connected ? `已连接 ${account.owner || "账号"}，点击管理` : "未连接，点击配置账号与仓库"}
+          title={
+            account.connected
+              ? `已连接 ${account.owner || "账号"}，点击管理`
+              : "未连接，点击配置账号与仓库"
+          }
           className="flex min-w-0 items-center gap-[9px] rounded-ctl px-1 py-0.5 transition-colors duration-150 hover:bg-wash"
         >
           <span
@@ -124,7 +128,11 @@ export default function Sidebar() {
                 : "border border-dashed border-line-strong text-ink-3"
             }`}
           >
-            {account.connected ? (account.owner ? account.owner.charAt(0).toUpperCase() : "·") : "·"}
+            {account.connected
+              ? account.owner
+                ? account.owner.charAt(0).toUpperCase()
+                : "·"
+              : "·"}
           </span>
           <span className="truncate text-[12.5px] text-ink-2 max-shell:hidden">
             {account.connected ? account.owner || "已连接" : "连接仓库"}
@@ -139,7 +147,7 @@ export default function Sidebar() {
           >
             <IconBook className="size-[15px]" />
           </Link>
-                    <Link
+          <Link
             href="/connect"
             title="账号与设置"
             aria-label="账号与设置"

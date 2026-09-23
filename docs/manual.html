@@ -1,217 +1,593 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>中庭 · 使用手册</title>
-<style>
-  /* 视觉方向：暖人文编辑（与中庭本体同源）——暖纸 #f6f4ee、墨色 #1f1c17、accent 绿 #224c36 */
-  :root {
-    --paper: #f6f4ee;
-    --paper-2: #efede4;
-    --ink: #1f1c17;
-    --ink-2: #4a463e;
-    --ink-3: #6b665c;
-    --line: #ddd9cf;
-    --accent: #224c36;
-    --accent-soft: #e6ede7;
-    --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
-    --serif: "Songti SC", "Noto Serif SC", Georgia, serif;
-    --sans: -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--paper); color: var(--ink); font-family: var(--sans); font-size: 15px; line-height: 1.7; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>中庭 · 使用手册</title>
+    <style>
+      /* 视觉方向：暖人文编辑（与中庭本体同源）——暖纸 #f6f4ee、墨色 #1f1c17、accent 绿 #224c36 */
+      :root {
+        --paper: #f6f4ee;
+        --paper-2: #efede4;
+        --ink: #1f1c17;
+        --ink-2: #4a463e;
+        --ink-3: #6b665c;
+        --line: #ddd9cf;
+        --accent: #224c36;
+        --accent-soft: #e6ede7;
+        --mono: "SF Mono", ui-monospace, Menlo, Consolas, monospace;
+        --serif: "Songti SC", "Noto Serif SC", Georgia, serif;
+        --sans: -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--paper);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.7;
+      }
 
-  .page { max-width: 760px; margin: 0 auto; padding: 64px 24px 96px; }
+      .page {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 64px 24px 96px;
+      }
 
-  /* 封面 */
-  .cover { border-bottom: 1px solid var(--line); padding-bottom: 48px; margin-bottom: 40px; }
-  .kicker { font-size: 12px; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 18px; }
-  .mark { width: 44px; height: 44px; margin-bottom: 26px; }
-  h1 { font-family: var(--serif); font-size: 46px; font-weight: 600; letter-spacing: 0.02em; line-height: 1.15; margin-bottom: 14px; }
-  .lede { font-size: 16.5px; color: var(--ink-2); max-width: 34em; }
-  .meta { margin-top: 28px; font-family: var(--mono); font-size: 11.5px; color: var(--ink-3); letter-spacing: 0.04em; }
+      /* 封面 */
+      .cover {
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 48px;
+        margin-bottom: 40px;
+      }
+      .kicker {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+        color: var(--ink-3);
+        margin-bottom: 18px;
+      }
+      .mark {
+        width: 44px;
+        height: 44px;
+        margin-bottom: 26px;
+      }
+      h1 {
+        font-family: var(--serif);
+        font-size: 46px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        line-height: 1.15;
+        margin-bottom: 14px;
+      }
+      .lede {
+        font-size: 16.5px;
+        color: var(--ink-2);
+        max-width: 34em;
+      }
+      .meta {
+        margin-top: 28px;
+        font-family: var(--mono);
+        font-size: 11.5px;
+        color: var(--ink-3);
+        letter-spacing: 0.04em;
+      }
 
-  /* 目录 */
-  .toc { border: 1px solid var(--line); padding: 22px 26px; margin-bottom: 56px; background: var(--paper-2); }
-  .toc-title { font-size: 11.5px; letter-spacing: 0.14em; color: var(--ink-3); margin-bottom: 12px; }
-  .toc ol { list-style: none; margin-left: 0; }
-  .toc li { display: flex; align-items: baseline; gap: 12px; padding: 5px 0; }
-  .toc .n { font-family: var(--mono); font-size: 12px; color: var(--accent); min-width: 2em; }
-  .toc a { color: var(--ink); text-decoration: none; }
-  .toc a:hover { color: var(--accent); }
-  .toc .dots { flex: 1; border-bottom: 1px dotted var(--line); transform: translateY(-4px); }
+      /* 目录 */
+      .toc {
+        border: 1px solid var(--line);
+        padding: 22px 26px;
+        margin-bottom: 56px;
+        background: var(--paper-2);
+      }
+      .toc-title {
+        font-size: 11.5px;
+        letter-spacing: 0.14em;
+        color: var(--ink-3);
+        margin-bottom: 12px;
+      }
+      .toc ol {
+        list-style: none;
+        margin-left: 0;
+      }
+      .toc li {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        padding: 5px 0;
+      }
+      .toc .n {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--accent);
+        min-width: 2em;
+      }
+      .toc a {
+        color: var(--ink);
+        text-decoration: none;
+      }
+      .toc a:hover {
+        color: var(--accent);
+      }
+      .toc .dots {
+        flex: 1;
+        border-bottom: 1px dotted var(--line);
+        transform: translateY(-4px);
+      }
 
-  /* 章节 */
-  section { margin-bottom: 64px; }
-  .sec-head { display: flex; align-items: baseline; gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 24px; }
-  .sec-n { font-family: var(--mono); font-size: 13px; color: var(--accent); }
-  h2 { font-family: var(--serif); font-size: 24px; font-weight: 600; letter-spacing: 0.02em; }
-  h3 { font-size: 15px; font-weight: 600; margin: 26px 0 10px; }
-  p { margin-bottom: 14px; color: var(--ink-2); max-width: 68ch; }
-  p strong, li strong { color: var(--ink); font-weight: 600; }
-  a { color: var(--accent); }
+      /* 章节 */
+      section {
+        margin-bottom: 64px;
+      }
+      .sec-head {
+        display: flex;
+        align-items: baseline;
+        gap: 16px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 12px;
+        margin-bottom: 24px;
+      }
+      .sec-n {
+        font-family: var(--mono);
+        font-size: 13px;
+        color: var(--accent);
+      }
+      h2 {
+        font-family: var(--serif);
+        font-size: 24px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      h3 {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 26px 0 10px;
+      }
+      p {
+        margin-bottom: 14px;
+        color: var(--ink-2);
+        max-width: 68ch;
+      }
+      p strong,
+      li strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      a {
+        color: var(--accent);
+      }
 
-  /* 步骤列表 */
-  .steps { list-style: none; margin: 16px 0 20px; }
-  .steps li { display: flex; gap: 14px; padding: 9px 0; border-bottom: 1px dashed var(--line); }
-  .steps li:last-child { border-bottom: 0; }
-  .steps .no { font-family: var(--mono); font-size: 12px; color: var(--accent); padding-top: 3px; min-width: 1.6em; }
-  .steps .tx { color: var(--ink-2); }
-  .steps .tx code { color: var(--ink); }
+      /* 步骤列表 */
+      .steps {
+        list-style: none;
+        margin: 16px 0 20px;
+      }
+      .steps li {
+        display: flex;
+        gap: 14px;
+        padding: 9px 0;
+        border-bottom: 1px dashed var(--line);
+      }
+      .steps li:last-child {
+        border-bottom: 0;
+      }
+      .steps .no {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--accent);
+        padding-top: 3px;
+        min-width: 1.6em;
+      }
+      .steps .tx {
+        color: var(--ink-2);
+      }
+      .steps .tx code {
+        color: var(--ink);
+      }
 
-  code { font-family: var(--mono); font-size: 0.86em; background: var(--paper-2); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--ink); }
-  pre { font-family: var(--mono); font-size: 12.5px; line-height: 1.65; background: var(--paper-2); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 0; padding: 14px 18px; overflow-x: auto; margin: 14px 0 20px; color: var(--ink); }
-  pre code { background: none; border: 0; padding: 0; }
+      code {
+        font-family: var(--mono);
+        font-size: 0.86em;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-radius: 3px;
+        padding: 1px 5px;
+        color: var(--ink);
+      }
+      pre {
+        font-family: var(--mono);
+        font-size: 12.5px;
+        line-height: 1.65;
+        background: var(--paper-2);
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--accent);
+        border-radius: 0;
+        padding: 14px 18px;
+        overflow-x: auto;
+        margin: 14px 0 20px;
+        color: var(--ink);
+      }
+      pre code {
+        background: none;
+        border: 0;
+        padding: 0;
+      }
 
-  table { width: 100%; border-collapse: collapse; margin: 14px 0 20px; font-size: 13.5px; }
-  th { text-align: left; font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--ink-3); padding: 8px 10px; white-space: nowrap; }
-  td { border-bottom: 1px solid var(--line); padding: 9px 10px; color: var(--ink-2); vertical-align: top; }
-  tr:last-child td { border-bottom: 0; }
-  td:first-child { white-space: nowrap; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0 20px;
+        font-size: 13.5px;
+      }
+      th {
+        text-align: left;
+        font-weight: 600;
+        color: var(--ink);
+        border-bottom: 1px solid var(--ink-3);
+        padding: 8px 10px;
+        white-space: nowrap;
+      }
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 9px 10px;
+        color: var(--ink-2);
+        vertical-align: top;
+      }
+      tr:last-child td {
+        border-bottom: 0;
+      }
+      td:first-child {
+        white-space: nowrap;
+      }
 
-  .note { border: 1px solid var(--line); border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 16px; margin: 16px 0 20px; font-size: 13.5px; color: var(--ink-2); border-radius: 0; }
-  .note b { color: var(--accent); }
+      .note {
+        border: 1px solid var(--line);
+        border-left: 3px solid var(--accent);
+        background: var(--accent-soft);
+        padding: 12px 16px;
+        margin: 16px 0 20px;
+        font-size: 13.5px;
+        color: var(--ink-2);
+        border-radius: 0;
+      }
+      .note b {
+        color: var(--accent);
+      }
 
-  /* 房间卡（两列结构） */
-  .rooms { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0 8px; }
-  .room { border: 1px solid var(--line); padding: 16px 18px; background: var(--paper); }
-  .room .r-name { font-family: var(--serif); font-size: 17px; font-weight: 600; margin-bottom: 4px; }
-  .room .r-tag { font-size: 11px; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 8px; }
-  .room p { font-size: 13.5px; line-height: 1.65; margin: 0; }
+      /* 房间卡（两列结构） */
+      .rooms {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin: 16px 0 8px;
+      }
+      .room {
+        border: 1px solid var(--line);
+        padding: 16px 18px;
+        background: var(--paper);
+      }
+      .room .r-name {
+        font-family: var(--serif);
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .room .r-tag {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .room p {
+        font-size: 13.5px;
+        line-height: 1.65;
+        margin: 0;
+      }
 
-  /* colophon */
-  .colophon { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 24px; font-size: 12px; color: var(--ink-3); display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+      /* colophon */
+      .colophon {
+        border-top: 1px solid var(--line);
+        margin-top: 8px;
+        padding-top: 24px;
+        font-size: 12px;
+        color: var(--ink-3);
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
 
-  @media (max-width: 640px) {
-    .rooms { grid-template-columns: 1fr; }
-    h1 { font-size: 36px; }
-    .page { padding: 40px 18px 72px; }
-  }
-</style>
-</head>
-<body>
-<div class="page">
+      @media (max-width: 640px) {
+        .rooms {
+          grid-template-columns: 1fr;
+        }
+        h1 {
+          font-size: 36px;
+        }
+        .page {
+          padding: 40px 18px 72px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="cover">
+        <div class="mark">
+          <svg
+            viewBox="0 0 32 32"
+            fill="none"
+            stroke="#224c36"
+            stroke-width="1.6"
+            aria-hidden="true"
+          >
+            <rect x="4.5" y="4.5" width="23" height="23" />
+            <rect x="13" y="13" width="6" height="6" />
+            <path d="M16 4.5 V13 M16 19 V27.5 M4.5 16 H13 M19 16 H27.5" />
+          </svg>
+        </div>
+        <p class="kicker">ATRIUM · 使用手册</p>
+        <h1>中庭使用手册</h1>
+        <p class="lede">
+          一个中心，五间房：书房读、画廊看、工具房用、工坊试、陈列廊造。数据存你自己的 GitHub
+          仓库，桌面与网页同一份内容。这本手册讲怎么日常使用、怎么配置、出了问题去哪查。
+        </p>
+        <p class="meta">v1.2.24 · 2026-09-22 · 适用 atrium-dist/release/mac-arm64 与后续版本</p>
+      </header>
 
-  <header class="cover">
-    <div class="mark">
-      <svg viewBox="0 0 32 32" fill="none" stroke="#224c36" stroke-width="1.6" aria-hidden="true">
-        <rect x="4.5" y="4.5" width="23" height="23"/>
-        <rect x="13" y="13" width="6" height="6"/>
-        <path d="M16 4.5 V13 M16 19 V27.5 M4.5 16 H13 M19 16 H27.5"/>
-      </svg>
-    </div>
-    <p class="kicker">ATRIUM · 使用手册</p>
-    <h1>中庭使用手册</h1>
-    <p class="lede">一个中心，五间房：书房读、画廊看、工具房用、工坊试、陈列廊造。数据存你自己的 GitHub 仓库，桌面与网页同一份内容。这本手册讲怎么日常使用、怎么配置、出了问题去哪查。</p>
-    <p class="meta">v1.2.24 · 2026-09-22 · 适用 atrium-dist/release/mac-arm64 与后续版本</p>
-  </header>
+      <nav class="toc" aria-label="目录">
+        <p class="toc-title">目 录</p>
+        <ol>
+          <li><span class="n">01</span><a href="#s1">开始使用</a><span class="dots"></span></li>
+          <li><span class="n">02</span><a href="#s2">五间房</a><span class="dots"></span></li>
+          <li>
+            <span class="n">03</span><a href="#s3">写作：从一句话到一篇文章</a
+            ><span class="dots"></span>
+          </li>
+          <li>
+            <span class="n">04</span><a href="#s4">图片：直传图床</a><span class="dots"></span>
+          </li>
+          <li>
+            <span class="n">05</span><a href="#s5">连接仓库（登录）</a><span class="dots"></span>
+          </li>
+          <li><span class="n">06</span><a href="#s6">配置参考</a><span class="dots"></span></li>
+          <li>
+            <span class="n">07</span><a href="#s7">部署到 Vercel</a><span class="dots"></span>
+          </li>
+          <li><span class="n">08</span><a href="#s8">故障排查</a><span class="dots"></span></li>
+        </ol>
+      </nav>
 
-  <nav class="toc" aria-label="目录">
-    <p class="toc-title">目 录</p>
-    <ol>
-      <li><span class="n">01</span><a href="#s1">开始使用</a><span class="dots"></span></li>
-      <li><span class="n">02</span><a href="#s2">五间房</a><span class="dots"></span></li>
-      <li><span class="n">03</span><a href="#s3">写作：从一句话到一篇文章</a><span class="dots"></span></li>
-      <li><span class="n">04</span><a href="#s4">图片：直传图床</a><span class="dots"></span></li>
-      <li><span class="n">05</span><a href="#s5">连接仓库（登录）</a><span class="dots"></span></li>
-      <li><span class="n">06</span><a href="#s6">配置参考</a><span class="dots"></span></li>
-      <li><span class="n">07</span><a href="#s7">部署到 Vercel</a><span class="dots"></span></li>
-      <li><span class="n">08</span><a href="#s8">故障排查</a><span class="dots"></span></li>
-    </ol>
-  </nav>
-
-  <section id="s1">
-    <div class="sec-head"><span class="sec-n">01</span><h2>开始使用</h2></div>
-    <p><strong>桌面端</strong>是日常入口。打开 <code>~/Desktop/atrium-dist/release/mac-arm64/中庭.app</code>，首次启动会解压内置服务到系统数据目录，随后窗口直接打开中庭。之后每天双击即用。</p>
-    <p><strong>本机开发模式</strong>（改代码时用）：</p>
-    <pre><code>pnpm build        # 构建 standalone 产物
+      <section id="s1">
+        <div class="sec-head">
+          <span class="sec-n">01</span>
+          <h2>开始使用</h2>
+        </div>
+        <p>
+          <strong>桌面端</strong>是日常入口。打开
+          <code>~/Desktop/atrium-dist/release/mac-arm64/中庭.app</code
+          >，首次启动会解压内置服务到系统数据目录，随后窗口直接打开中庭。之后每天双击即用。
+        </p>
+        <p><strong>本机开发模式</strong>（改代码时用）：</p>
+        <pre><code>pnpm build        # 构建 standalone 产物
 pnpm desktop      # 打开桌面窗口
 pnpm desktop:smoke # 自检：全链路验证后自动退出
 pnpm smoke        # 冒烟巡检：六房 + 接口逐项体检</code></pre>
-    <p><strong>重新打包</strong>（改完代码想要新 App）：</p>
-    <pre><code>pnpm desktop:pack # 打包 .app
+        <p><strong>重新打包</strong>（改完代码想要新 App）：</p>
+        <pre><code>pnpm desktop:pack # 打包 .app
 pnpm desktop:dist # 额外产出 dmg</code></pre>
-    <div class="note"><b>快捷键</b>：⌘1–5 切换五个房间；⌘N 直达写作台；⌘K（或侧边栏「搜索」）唤起全局搜索，一搜直达文章、展品与书签；房间内的搜索框按 / 聚焦。</div>
-  </section>
+        <div class="note">
+          <b>快捷键</b>：⌘1–5 切换五个房间；⌘N
+          直达写作台；⌘K（或侧边栏「搜索」）唤起全局搜索，一搜直达文章、展品与书签；房间内的搜索框按
+          / 聚焦。
+        </div>
+      </section>
 
-  <section id="s2">
-    <div class="sec-head"><span class="sec-n">02</span><h2>五间房</h2></div>
-    <div class="rooms">
-      <div class="room">
-        <p class="r-tag">读 · READ</p>
-        <p class="r-name">书房</p>
-        <p>文章列表与阅读页。顶部搜索框即时过滤标题、摘要、标签、目录；每篇文章右上角有「编辑」直达写作台。</p>
-      </div>
-      <div class="room">
-        <p class="r-tag">看 · VIEW</p>
-        <p class="r-name">画廊</p>
-        <p>图片按相册（子目录）逐卷铺开，右侧楼层目录可跳转；顶部搜索框即时筛选图片名或相册；图片随滚动懒加载，每张图上方标注文件名与日期。点缩略图开灯箱：← → 可跨相册连续翻页、Esc 关闭、可分享单张深链（/gallery?album=ark&amp;view=3）。有令牌时可拖拽直传图片（目标相册用下拉选择或直接输入新相册名）；卡片悬停右下角浮出编辑 / 移除（与工具房同款：编辑走弹层、移除原位确认、结果轻提示），灯箱里也能重命名。</p>
-      </div>
-      <div class="room">
-        <p class="r-tag">用 · USE</p>
-        <p class="r-name">工具房</p>
-        <p>书签墙，按分类分组，即时搜索；站点图标随滚动懒加载。有令牌时：添加与编辑共用同一弹层表单（粘贴网址自动带回标题、描述与站点图标）；卡片悬停右下角浮出编辑 / 移除，移除在原卡片上原位确认（高度不跳动）；结果以底部轻提示反馈——全部与旧版 tools.json 格式兼容。</p>
-      </div>
-      <div class="room">
-        <p class="r-tag">试 · TRY</p>
-        <p class="r-name">工坊</p>
-        <p>接入你自己的组件仓库（可多个），取件后在页面内现场渲染；按分组分区 + 楼层目录 + 即时搜索，卡片带来源与「最近更新」徽标。每件展品带用法、属性与源码视图，深色主题自动适配。也能挂线上站点。在设置页「组件项目」里增删（仓库填名字即可，自动用当前账号）。</p>
-      </div>
-      <div class="room">
-        <p class="r-tag">造 · MAKE</p>
-        <p class="r-name">陈列廊</p>
-        <p>设计系统活文档：色板、排印、组件、空态。想做新页面时先来这里取件；深浅双主题实时切换，右上角可切「默认 / 紧凑」两种密度。</p>
-      </div>
-    </div>
-  </section>
+      <section id="s2">
+        <div class="sec-head">
+          <span class="sec-n">02</span>
+          <h2>五间房</h2>
+        </div>
+        <div class="rooms">
+          <div class="room">
+            <p class="r-tag">读 · READ</p>
+            <p class="r-name">书房</p>
+            <p>
+              文章列表与阅读页。顶部搜索框即时过滤标题、摘要、标签、目录；每篇文章右上角有「编辑」直达写作台。
+            </p>
+          </div>
+          <div class="room">
+            <p class="r-tag">看 · VIEW</p>
+            <p class="r-name">画廊</p>
+            <p>
+              图片按相册（子目录）逐卷铺开，右侧楼层目录可跳转；顶部搜索框即时筛选图片名或相册；图片随滚动懒加载，每张图上方标注文件名与日期。点缩略图开灯箱：←
+              → 可跨相册连续翻页、Esc
+              关闭、可分享单张深链（/gallery?album=ark&amp;view=3）。有令牌时可拖拽直传图片（目标相册用下拉选择或直接输入新相册名）；卡片悬停右下角浮出编辑
+              / 移除（与工具房同款：编辑走弹层、移除原位确认、结果轻提示），灯箱里也能重命名。
+            </p>
+          </div>
+          <div class="room">
+            <p class="r-tag">用 · USE</p>
+            <p class="r-name">工具房</p>
+            <p>
+              书签墙，按分类分组，即时搜索；站点图标随滚动懒加载。有令牌时：添加与编辑共用同一弹层表单（粘贴网址自动带回标题、描述与站点图标）；卡片悬停右下角浮出编辑
+              / 移除，移除在原卡片上原位确认（高度不跳动）；结果以底部轻提示反馈——全部与旧版
+              tools.json 格式兼容。
+            </p>
+          </div>
+          <div class="room">
+            <p class="r-tag">试 · TRY</p>
+            <p class="r-name">工坊</p>
+            <p>
+              接入你自己的组件仓库（可多个），取件后在页面内现场渲染；按分组分区 + 楼层目录 +
+              即时搜索，卡片带来源与「最近更新」徽标。每件展品带用法、属性与源码视图，深色主题自动适配。也能挂线上站点。在设置页「组件项目」里增删（仓库填名字即可，自动用当前账号）。
+            </p>
+          </div>
+          <div class="room">
+            <p class="r-tag">造 · MAKE</p>
+            <p class="r-name">陈列廊</p>
+            <p>
+              设计系统活文档：色板、排印、组件、空态。想做新页面时先来这里取件；深浅双主题实时切换，右上角可切「默认
+              / 紧凑」两种密度。
+            </p>
+          </div>
+        </div>
+      </section>
 
-  <section id="s3">
-    <div class="sec-head"><span class="sec-n">03</span><h2>写作：从一句话到一篇文章</h2></div>
-    <p>书房标题旁点「<strong>写作台</strong>」（或按 ⌘N）。填标题（文件名自动取标题，实时预览）与正文（Markdown），可选填「参考资源」（每行一个，保存时自动附到文末）。点「发布到仓库」：</p>
-    <ol class="steps">
-      <li><span class="no">1</span><span class="tx">正文连同 front-matter 以 Markdown 写入内容仓库根目录，成为一次规范提交（如「新增《文章标题》」）。</span></li>
-      <li><span class="no">2</span><span class="tx">书房列表立刻出现这篇；点开就是排版好的阅读页（锚点、代码高亮、目录齐备）。</span></li>
-      <li><span class="no">3</span><span class="tx">要改？文章页点「编辑」：标题与文件名自动识别、参考资源自动提取为可编辑列表，全文回填；要删？编辑态底部「删除这篇文章」，二次确认后移除。</span></li>
-    </ol>
-    <div class="note"><b>外链图片</b>：正文里贴的第三方图片（别的图床、别人的站点）不会自动搬进你的仓库。正文标签行右侧的「<strong>转存外链图片（N）</strong>」会把它们抓进图床仓库，并把正文里的地址换成自己的链接；抓不下来的单张保留原链，并在正文下方说明是哪张、为什么。</div>
-    <div class="note"><b>回溯</b>：所有写操作都是 GitHub 提交，仓库历史里随时可以查看或回滚任何一次改动。</div>
-  </section>
+      <section id="s3">
+        <div class="sec-head">
+          <span class="sec-n">03</span>
+          <h2>写作：从一句话到一篇文章</h2>
+        </div>
+        <p>
+          书房标题旁点「<strong>写作台</strong>」（或按
+          ⌘N）。填标题（文件名自动取标题，实时预览）与正文（Markdown），可选填「参考资源」（每行一个，保存时自动附到文末）。点「发布到仓库」：
+        </p>
+        <ol class="steps">
+          <li>
+            <span class="no">1</span
+            ><span class="tx"
+              >正文连同 front-matter 以 Markdown
+              写入内容仓库根目录，成为一次规范提交（如「新增《文章标题》」）。</span
+            >
+          </li>
+          <li>
+            <span class="no">2</span
+            ><span class="tx"
+              >书房列表立刻出现这篇；点开就是排版好的阅读页（锚点、代码高亮、目录齐备）。</span
+            >
+          </li>
+          <li>
+            <span class="no">3</span
+            ><span class="tx"
+              >要改？文章页点「编辑」：标题与文件名自动识别、参考资源自动提取为可编辑列表，全文回填；要删？编辑态底部「删除这篇文章」，二次确认后移除。</span
+            >
+          </li>
+        </ol>
+        <div class="note">
+          <b>外链图片</b
+          >：正文里贴的第三方图片（别的图床、别人的站点）不会自动搬进你的仓库。正文标签行右侧的「<strong>转存外链图片（N）</strong>」会把它们抓进图床仓库，并把正文里的地址换成自己的链接；抓不下来的单张保留原链，并在正文下方说明是哪张、为什么。
+        </div>
+        <div class="note">
+          <b>回溯</b>：所有写操作都是 GitHub 提交，仓库历史里随时可以查看或回滚任何一次改动。
+        </div>
+      </section>
 
-  <section id="s4">
-    <div class="sec-head"><span class="sec-n">04</span><h2>图片：直传图床</h2></div>
-    <p>画廊页顶部的上传区支持<strong>拖拽或点选多张</strong>，上传前可选目标相册（相册 = 图床仓库的子目录）。单张不超过 20MB；重名文件自动加时间戳，永不覆盖已有图片。</p>
-    <p>上传完成刷新即见。画廊图片走 jsDelivr 线路加载，失败自动切回 GitHub raw 兜底——网络波动不需要你操心。刚上传的新图偶尔几分钟内缩略图未更新，是 CDN 缓存，稍后自愈。</p>
-  </section>
+      <section id="s4">
+        <div class="sec-head">
+          <span class="sec-n">04</span>
+          <h2>图片：直传图床</h2>
+        </div>
+        <p>
+          画廊页顶部的上传区支持<strong>拖拽或点选多张</strong>，上传前可选目标相册（相册 =
+          图床仓库的子目录）。单张不超过 20MB；重名文件自动加时间戳，永不覆盖已有图片。
+        </p>
+        <p>
+          上传完成刷新即见。画廊图片走 jsDelivr 线路加载，失败自动切回 GitHub raw
+          兜底——网络波动不需要你操心。刚上传的新图偶尔几分钟内缩略图未更新，是 CDN 缓存，稍后自愈。
+        </p>
+      </section>
 
-  <section id="s5">
-    <div class="sec-head"><span class="sec-n">05</span><h2>连接仓库（登录）</h2></div>
-    <p>中庭的「登录」= 连接你的 GitHub 仓库。侧边栏左下角的头像就是入口：未连接时显示虚线方块与「连接仓库」，已连接时显示用户名。</p>
-    <ol class="steps">
-      <li><span class="no">1</span><span class="tx">点击左下角用户条（或其旁的齿轮图标），进入设置页。</span></li>
-      <li><span class="no">2</span><span class="tx">填写 GitHub 用户名、内容仓库名（文章与书签所在）、分支，以及访问令牌（生成入口见页内链接，勾选 repo 权限即可）。</span></li>
-      <li><span class="no">3</span><span class="tx">可选：填画廊仓库名与目录（独立图床时）。不填则画廊跟随内容仓库。</span></li>
-      <li><span class="no">4</span><span class="tx">点「保存并连接」，书房、画廊、工具房、写作台与工坊立即点亮。</span></li>
-    </ol>
-    <div class="note"><b>安全</b>：令牌只保存在本机配置文件（权限 600），页面里只写不显；线上部署的站点对访客默认只读。</div>
-  </section>
+      <section id="s5">
+        <div class="sec-head">
+          <span class="sec-n">05</span>
+          <h2>连接仓库（登录）</h2>
+        </div>
+        <p>
+          中庭的「登录」= 连接你的 GitHub
+          仓库。侧边栏左下角的头像就是入口：未连接时显示虚线方块与「连接仓库」，已连接时显示用户名。
+        </p>
+        <ol class="steps">
+          <li>
+            <span class="no">1</span
+            ><span class="tx">点击左下角用户条（或其旁的齿轮图标），进入设置页。</span>
+          </li>
+          <li>
+            <span class="no">2</span
+            ><span class="tx"
+              >填写 GitHub
+              用户名、内容仓库名（文章与书签所在）、分支，以及访问令牌（生成入口见页内链接，勾选
+              repo 权限即可）。</span
+            >
+          </li>
+          <li>
+            <span class="no">3</span
+            ><span class="tx"
+              >可选：填画廊仓库名与目录（独立图床时）。不填则画廊跟随内容仓库。</span
+            >
+          </li>
+          <li>
+            <span class="no">4</span
+            ><span class="tx">点「保存并连接」，书房、画廊、工具房、写作台与工坊立即点亮。</span>
+          </li>
+        </ol>
+        <div class="note">
+          <b>安全</b>：令牌只保存在本机配置文件（权限
+          600），页面里只写不显；线上部署的站点对访客默认只读。
+        </div>
+      </section>
 
-  <section id="s6">
-    <div class="sec-head"><span class="sec-n">06</span><h2>配置参考</h2></div>
-    <p>配置有两处：<code>data/config.json</code>（桌面端在系统数据目录 <code>~/Library/Application Support/atrium-desktop/data/</code>）与环境变量。环境变量优先。</p>
-    <table>
-      <tr><th>作用</th><th>变量 / 字段</th></tr>
-      <tr><td>内容仓库</td><td><code>GITHUB_OWNER</code> <code>GITHUB_REPO</code> <code>GITHUB_BRANCH</code> <code>GITHUB_TOKEN</code></td></tr>
-      <tr><td>画廊仓库</td><td><code>galleryRepo</code> 字段或 <code>GITHUB_GALLERY_*</code> 变量（缺省跟随主仓库）</td></tr>
-      <tr><td>画廊目录</td><td><code>galleryDir</code> 字段或 <code>ATRIUM_GALLERY_DIR</code>（空串 = 仓库根）</td></tr>
-      <tr><td>组件项目</td><td><code>demoProjects</code> 字段或 <code>ATRIUM_DEMO_PROJECTS</code>（JSON 数组；仓库读 atrium.json 清单，取件渲染）</td></tr>
-      <tr><td>工具清单</td><td><code>ATRIUM_TOOLS_FILE</code>（缺省 admin/tools.json；/ 或 ./ 开头读本地文件）</td></tr>
-      <tr><td>备选内容源</td><td><code>GITEE_*</code> 同款四件套 + <code>ATRIUM_DEFAULT_PROVIDER=gitee</code></td></tr>
-      <tr><td>站点域名</td><td><code>NEXT_PUBLIC_SITE_URL</code>（部署时设，RSS/sitemap 用）</td></tr>
-      <tr><td>写开关</td><td><code>ATRIUM_ALLOW_WRITE=1</code>（本地与桌面自动注入；线上默认只读）</td></tr>
-    </table>
-    <p>config.json 示例（桌面端已写好，token 为你的 GitHub 令牌）：</p>
-    <pre><code>{
+      <section id="s6">
+        <div class="sec-head">
+          <span class="sec-n">06</span>
+          <h2>配置参考</h2>
+        </div>
+        <p>
+          配置有两处：<code>data/config.json</code>（桌面端在系统数据目录
+          <code>~/Library/Application Support/atrium-desktop/data/</code
+          >）与环境变量。环境变量优先。
+        </p>
+        <table>
+          <tr>
+            <th>作用</th>
+            <th>变量 / 字段</th>
+          </tr>
+          <tr>
+            <td>内容仓库</td>
+            <td>
+              <code>GITHUB_OWNER</code> <code>GITHUB_REPO</code> <code>GITHUB_BRANCH</code>
+              <code>GITHUB_TOKEN</code>
+            </td>
+          </tr>
+          <tr>
+            <td>画廊仓库</td>
+            <td>
+              <code>galleryRepo</code> 字段或 <code>GITHUB_GALLERY_*</code> 变量（缺省跟随主仓库）
+            </td>
+          </tr>
+          <tr>
+            <td>画廊目录</td>
+            <td><code>galleryDir</code> 字段或 <code>ATRIUM_GALLERY_DIR</code>（空串 = 仓库根）</td>
+          </tr>
+          <tr>
+            <td>组件项目</td>
+            <td>
+              <code>demoProjects</code> 字段或 <code>ATRIUM_DEMO_PROJECTS</code>（JSON 数组；仓库读
+              atrium.json 清单，取件渲染）
+            </td>
+          </tr>
+          <tr>
+            <td>工具清单</td>
+            <td><code>ATRIUM_TOOLS_FILE</code>（缺省 admin/tools.json；/ 或 ./ 开头读本地文件）</td>
+          </tr>
+          <tr>
+            <td>备选内容源</td>
+            <td><code>GITEE_*</code> 同款四件套 + <code>ATRIUM_DEFAULT_PROVIDER=gitee</code></td>
+          </tr>
+          <tr>
+            <td>站点域名</td>
+            <td><code>NEXT_PUBLIC_SITE_URL</code>（部署时设，RSS/sitemap 用）</td>
+          </tr>
+          <tr>
+            <td>写开关</td>
+            <td><code>ATRIUM_ALLOW_WRITE=1</code>（本地与桌面自动注入；线上默认只读）</td>
+          </tr>
+        </table>
+        <p>config.json 示例（桌面端已写好，token 为你的 GitHub 令牌）：</p>
+        <pre><code>{
   "defaultProvider": "github",
   "repos": { "github": { "owner": "你的账号", "repo": "你的内容仓库", "branch": "main", "token": "…" } },
   "galleryRepo": { "owner": "你的账号", "repo": "你的画廊仓库", "branch": "main" },
@@ -220,42 +596,118 @@ pnpm desktop:dist # 额外产出 dmg</code></pre>
     { "id": "bricks", "name": "砖瓦", "kind": "repo", "repo": "bricks", "branch": "main" }
   ]
 }</code></pre>
-  </section>
+      </section>
 
-  <section id="s7">
-    <div class="sec-head"><span class="sec-n">07</span><h2>部署到 Vercel</h2></div>
-    <ol class="steps">
-      <li><span class="no">1</span><span class="tx">打开 vercel.com/new，GitHub 登录，Import「atrium」。</span></li>
-      <li><span class="no">2</span><span class="tx">环境变量填：<code>GITHUB_OWNER=你的账号</code>、<code>GITHUB_REPO=你的内容仓库</code>、<code>GITHUB_TOKEN=你的令牌</code>（建议加 <code>GITHUB_GALLERY_REPO=你的画廊仓库</code>）。</span></li>
-      <li><span class="no">3</span><span class="tx">点 Deploy，一分钟出网址。</span></li>
-      <li><span class="no">4</span><span class="tx">部署后把 <code>NEXT_PUBLIC_SITE_URL</code> 设为正式域名并 Redeploy，RSS 与 sitemap 链接即指向正式地址。</span></li>
-    </ol>
-    <div class="note"><b>安全边界</b>：线上部署默认<strong>只读</strong>——写接口全部 403，访客无法改动你的仓库。这是机制保证，不依赖任何人记得配置。</div>
-  </section>
+      <section id="s7">
+        <div class="sec-head">
+          <span class="sec-n">07</span>
+          <h2>部署到 Vercel</h2>
+        </div>
+        <ol class="steps">
+          <li>
+            <span class="no">1</span
+            ><span class="tx">打开 vercel.com/new，GitHub 登录，Import「atrium」。</span>
+          </li>
+          <li>
+            <span class="no">2</span
+            ><span class="tx"
+              >环境变量填：<code>GITHUB_OWNER=你的账号</code>、<code>GITHUB_REPO=你的内容仓库</code>、<code>GITHUB_TOKEN=你的令牌</code>（建议加
+              <code>GITHUB_GALLERY_REPO=你的画廊仓库</code>）。</span
+            >
+          </li>
+          <li><span class="no">3</span><span class="tx">点 Deploy，一分钟出网址。</span></li>
+          <li>
+            <span class="no">4</span
+            ><span class="tx"
+              >部署后把 <code>NEXT_PUBLIC_SITE_URL</code> 设为正式域名并 Redeploy，RSS 与 sitemap
+              链接即指向正式地址。</span
+            >
+          </li>
+        </ol>
+        <div class="note">
+          <b>安全边界</b>：线上部署默认<strong>只读</strong>——写接口全部
+          403，访客无法改动你的仓库。这是机制保证，不依赖任何人记得配置。
+        </div>
+      </section>
 
-  <section id="s8">
-    <div class="sec-head"><span class="sec-n">08</span><h2>故障排查</h2></div>
-    <table>
-      <tr><th>现象</th><th>原因与处理</th></tr>
-      <tr><td>写作台/添加工具/上传入口不见了</td><td>未连接仓库。点侧边栏左下角「连接仓库」，配好令牌后入口全部出现。</td></tr>
-      <tr><td>令牌保存后输入框仍为空</td><td>设计如此：令牌只写本机配置、不再回显（留空表示保持不变）；保存成功会提示「已保存」。</td></tr>
-      <tr><td>画廊空但书房有文章</td><td>画廊仓库指向未配置（跟随了内容仓库）。在连接页填画廊仓库名，或配置文件写 galleryRepo。</td></tr>
-      <tr><td>书房 / 工具房空</td><td>检查 config.json 的仓库指向与令牌；<code>/api/providers</code> 返回 configured:true 即接入正常。</td></tr>
-      <tr><td>画廊 / 工具房 / 工坊空白（书房正常）</td><td>多半是网络证书问题：本机若在用 Watt Toolkit 等 GitHub 加速（HTTPS 中间人），需把其证书导出放到 <code>~/Library/Application Support/atrium-desktop/certs/watt-toolkit.pem</code>，重启应用即恢复；临时判断：暂停加速工具后重开应用能否加载。</td></tr>
-      <tr><td>画廊图片偶发破图</td><td>jsDelivr 对新文件有缓存延迟（数小时），会自动恢复；也可稍后刷新触发 raw 兜底。</td></tr>
-      <tr><td>写作 / 上传 403</td><td>本地出现即说明启动脚本未注入开关（正常不会发生）；线上 403 是设计行为。</td></tr>
-      <tr><td>保存提示「sha 过期」</td><td>仓库端在你编辑期间有新改动，刷新页面后重试即可。</td></tr>
-      <tr><td>额度 403 / 限流</td><td>匿名限额 60 次/小时；配 GITHUB_TOKEN 后为 5000 次/小时。</td></tr>
-      <tr><td>App 无法打开</td><td>本机构建无隔离属性，正常双击即用；若经 AirDrop 等渠道传输，右键 → 打开一次即可。</td></tr>
-      <tr><td>数据目录在哪</td><td><code>~/Library/Application Support/atrium-desktop/</code>（server 服务、data 配置、certs 证书）。</td></tr>
-    </table>
-  </section>
+      <section id="s8">
+        <div class="sec-head">
+          <span class="sec-n">08</span>
+          <h2>故障排查</h2>
+        </div>
+        <table>
+          <tr>
+            <th>现象</th>
+            <th>原因与处理</th>
+          </tr>
+          <tr>
+            <td>写作台/添加工具/上传入口不见了</td>
+            <td>未连接仓库。点侧边栏左下角「连接仓库」，配好令牌后入口全部出现。</td>
+          </tr>
+          <tr>
+            <td>令牌保存后输入框仍为空</td>
+            <td>
+              设计如此：令牌只写本机配置、不再回显（留空表示保持不变）；保存成功会提示「已保存」。
+            </td>
+          </tr>
+          <tr>
+            <td>画廊空但书房有文章</td>
+            <td>
+              画廊仓库指向未配置（跟随了内容仓库）。在连接页填画廊仓库名，或配置文件写 galleryRepo。
+            </td>
+          </tr>
+          <tr>
+            <td>书房 / 工具房空</td>
+            <td>
+              检查 config.json 的仓库指向与令牌；<code>/api/providers</code> 返回 configured:true
+              即接入正常。
+            </td>
+          </tr>
+          <tr>
+            <td>画廊 / 工具房 / 工坊空白（书房正常）</td>
+            <td>
+              多半是网络证书问题：本机若在用 Watt Toolkit 等 GitHub 加速（HTTPS
+              中间人），需把其证书导出放到
+              <code>~/Library/Application Support/atrium-desktop/certs/watt-toolkit.pem</code
+              >，重启应用即恢复；临时判断：暂停加速工具后重开应用能否加载。
+            </td>
+          </tr>
+          <tr>
+            <td>画廊图片偶发破图</td>
+            <td>jsDelivr 对新文件有缓存延迟（数小时），会自动恢复；也可稍后刷新触发 raw 兜底。</td>
+          </tr>
+          <tr>
+            <td>写作 / 上传 403</td>
+            <td>本地出现即说明启动脚本未注入开关（正常不会发生）；线上 403 是设计行为。</td>
+          </tr>
+          <tr>
+            <td>保存提示「sha 过期」</td>
+            <td>仓库端在你编辑期间有新改动，刷新页面后重试即可。</td>
+          </tr>
+          <tr>
+            <td>额度 403 / 限流</td>
+            <td>匿名限额 60 次/小时；配 GITHUB_TOKEN 后为 5000 次/小时。</td>
+          </tr>
+          <tr>
+            <td>App 无法打开</td>
+            <td>
+              本机构建无隔离属性，正常双击即用；若经 AirDrop 等渠道传输，右键 → 打开一次即可。
+            </td>
+          </tr>
+          <tr>
+            <td>数据目录在哪</td>
+            <td>
+              <code>~/Library/Application Support/atrium-desktop/</code>（server 服务、data
+              配置、certs 证书）。
+            </td>
+          </tr>
+        </table>
+      </section>
 
-  <footer class="colophon">
-    <span>中庭 Atrium · 个人数字空间</span>
-    <span>github.com/yycqyjq/atrium · MIT License</span>
-  </footer>
-
-</div>
-</body>
+      <footer class="colophon">
+        <span>中庭 Atrium · 个人数字空间</span>
+        <span>github.com/yycqyjq/atrium · MIT License</span>
+      </footer>
+    </div>
+  </body>
 </html>

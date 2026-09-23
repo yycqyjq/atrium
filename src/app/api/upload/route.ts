@@ -4,7 +4,12 @@ import { getProvider } from "@/lib/providers";
 import { isWriteEnabled, WRITE_DISABLED_MESSAGE } from "@/lib/write-guard";
 import { resolveGalleryConfig } from "@/lib/config";
 import { bustGalleryCache, galleryArticleUrl } from "@/lib/gallery";
-import { guardedFetch, fetchFailureReason, isUrlGuardError, assertPublicUrl } from "@/lib/url-guard";
+import {
+  guardedFetch,
+  fetchFailureReason,
+  isUrlGuardError,
+  assertPublicUrl,
+} from "@/lib/url-guard";
 
 export const dynamic = "force-dynamic";
 

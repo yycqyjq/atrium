@@ -59,7 +59,9 @@ export default function Combobox({
     const el = measureRef.current;
     if (!el) return;
     const extra = size === "sm" ? 46 : 66;
-    setAutoW(Math.max(size === "sm" ? 84 : 120, Math.ceil(el.getBoundingClientRect().width) + extra));
+    setAutoW(
+      Math.max(size === "sm" ? 84 : 120, Math.ceil(el.getBoundingClientRect().width) + extra),
+    );
   }, [autoWidth, value, placeholder, size]);
 
   const filtered = useMemo(() => {
@@ -83,7 +85,12 @@ export default function Combobox({
     const rect = el.getBoundingClientRect();
     const maxWidth = Math.max(rect.width, Math.min(440, window.innerWidth - rect.left - 16));
     if (window.innerHeight - rect.bottom < 256 && rect.top > 256) {
-      setPos({ left: rect.left, width: rect.width, maxWidth, bottom: window.innerHeight - rect.top + 6 });
+      setPos({
+        left: rect.left,
+        width: rect.width,
+        maxWidth,
+        bottom: window.innerHeight - rect.top + 6,
+      });
     } else {
       setPos({ left: rect.left, width: rect.width, maxWidth, top: rect.bottom + 6 });
     }
@@ -181,7 +188,11 @@ export default function Combobox({
                   onMouseEnter={() => setActive(i)}
                   onClick={() => pick(option)}
                   className={`flex w-full items-center gap-2 px-3 py-1.5 text-left text-[13px] transition-colors duration-100 ${
-                    isSelected ? "bg-accent-soft/70 font-medium text-accent-ink" : activeSafe === i ? "bg-wash text-ink" : "text-ink"
+                    isSelected
+                      ? "bg-accent-soft/70 font-medium text-accent-ink"
+                      : activeSafe === i
+                        ? "bg-wash text-ink"
+                        : "text-ink"
                   }`}
                 >
                   <span className="flex size-3.5 shrink-0 items-center justify-center">
@@ -205,7 +216,9 @@ export default function Combobox({
                 <span className="flex size-3.5 shrink-0 items-center justify-center">
                   <IconPlus className="size-3.5" />
                 </span>
-                <span className="truncate">{(customHint ?? ((input: string) => `使用新分类「${input}」`))(value.trim())}</span>
+                <span className="truncate">
+                  {(customHint ?? ((input: string) => `使用新分类「${input}」`))(value.trim())}
+                </span>
               </button>
             ) : null}
             {rows.length === 0 ? (
@@ -217,7 +230,11 @@ export default function Combobox({
       : null;
 
   return (
-    <div ref={rootRef} className={`relative ${className}`} style={autoW != null ? { width: autoW } : undefined}>
+    <div
+      ref={rootRef}
+      className={`relative ${className}`}
+      style={autoW != null ? { width: autoW } : undefined}
+    >
       {autoWidth ? (
         <span
           ref={measureRef}
@@ -263,7 +280,9 @@ export default function Combobox({
           size === "sm" ? "right-1.5 p-0.5" : "right-2 p-1"
         }`}
       >
-        <IconChevronDown className={`${size === "sm" ? "size-3.5" : "size-4"} transition-transform duration-150 ${open ? "rotate-180" : ""}`} />
+        <IconChevronDown
+          className={`${size === "sm" ? "size-3.5" : "size-4"} transition-transform duration-150 ${open ? "rotate-180" : ""}`}
+        />
       </button>
       {panel}
     </div>

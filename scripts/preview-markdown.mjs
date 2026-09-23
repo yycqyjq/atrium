@@ -9,7 +9,7 @@
  *   npx @tailwindcss/cli@4.3.3 -i src/app/globals.css -o <输出目录>/preview.css
  */
 import { readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { resolve } from "node:path";
 import { unified } from "unified";
 import remarkParse from "remark-parse";
 import remarkGfm from "remark-gfm";

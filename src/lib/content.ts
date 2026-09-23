@@ -141,18 +141,14 @@ function metaFromData(filePath: string, data: Record<string, unknown>, body: str
   const dateRaw = data.date ?? data.lastModified ?? data.updated;
   const ts = parseDateValue(dateRaw);
   return {
-    title:
-      typeof titleRaw === "string" && titleRaw.trim()
-        ? titleRaw.trim()
-        : prettifyName(name),
+    title: typeof titleRaw === "string" && titleRaw.trim() ? titleRaw.trim() : prettifyName(name),
     name,
     path: filePath,
     slug: filePath.replace(MD_RE, ""),
     category: filePath.includes("/") ? filePath.split("/")[0] : "",
     lastModified: ts,
     dateLabel: toLabel(ts),
-    description:
-      typeof descRaw === "string" && descRaw.trim() ? descRaw.trim() : excerptFrom(body),
+    description: typeof descRaw === "string" && descRaw.trim() ? descRaw.trim() : excerptFrom(body),
     tags: Array.isArray(data.tags)
       ? (data.tags as unknown[]).filter((t): t is string => typeof t === "string")
       : [],
@@ -309,10 +305,15 @@ export async function bustContentCache() {
 /** 读取仓库（含文件夹索引）：两级缓存（内存 + 磁盘），失败回退旧数据 */
 async function loadRepo(providerKey?: string) {
   const cacheKey = `content-${providerKey ?? "default"}`;
-  const { value, stale } = await cacheThrough(cacheKey, CONTENT_TTL, () => collectRepo(providerKey), {
-    hardError: (err) => err instanceof NotConfiguredError,
-    suspicious: (next, prev) => next.posts.length === 0 && (prev?.posts.length ?? 0) > 0,
-  });
+  const { value, stale } = await cacheThrough(
+    cacheKey,
+    CONTENT_TTL,
+    () => collectRepo(providerKey),
+    {
+      hardError: (err) => err instanceof NotConfiguredError,
+      suspicious: (next, prev) => next.posts.length === 0 && (prev?.posts.length ?? 0) > 0,
+    },
+  );
   if (stale) console.warn("[content] 使用缓存数据（可能不是最新）");
   return value;
 }

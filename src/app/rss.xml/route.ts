@@ -1,4 +1,3 @@
-import { getProvider } from "@/lib/providers";
 import { listPosts } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
@@ -22,7 +21,9 @@ export async function GET() {
   let itemsXml = "";
   try {
     const { items } = await listPosts();
-    const sorted = [...items].sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0)).slice(0, 200);
+    const sorted = [...items]
+      .sort((a, b) => (b.lastModified ?? 0) - (a.lastModified ?? 0))
+      .slice(0, 200);
     itemsXml = sorted
       .map((post) => {
         const url = `${base}/study/${post.slug
@@ -32,7 +33,9 @@ export async function GET() {
         const date = post.lastModified
           ? new Date(post.lastModified).toISOString()
           : new Date().toISOString();
-        const desc = post.description ? `<description>${escapeXml(post.description)}</description>` : "";
+        const desc = post.description
+          ? `<description>${escapeXml(post.description)}</description>`
+          : "";
         return `    <item>
       <title>${escapeXml(post.title)}</title>
       <link>${url}</link>

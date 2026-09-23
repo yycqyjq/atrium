@@ -47,7 +47,11 @@ export default function ConnectDesk({
           },
         },
         galleryRepo: galleryRepo.trim()
-          ? { owner: owner.trim(), repo: galleryRepo.trim(), branch: galleryBranch.trim() || "main" }
+          ? {
+              owner: owner.trim(),
+              repo: galleryRepo.trim(),
+              branch: galleryBranch.trim() || "main",
+            }
           : "",
       };
       const res = await fetch("/api/config", {
@@ -55,7 +59,10 @@ export default function ConnectDesk({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { repos?: Record<string, { tokenSet?: boolean }>; error?: string };
+      const data = (await res.json()) as {
+        repos?: Record<string, { tokenSet?: boolean }>;
+        error?: string;
+      };
       if (!res.ok || data.error) {
         setState("error");
         setMessage(data.error ?? "保存失败，请稍后再试");
@@ -79,7 +86,12 @@ export default function ConnectDesk({
       <div className="mb-4 grid gap-4 md:grid-cols-2">
         <div>
           <FieldLabel htmlFor="conn-owner">GitHub 用户名</FieldLabel>
-          <Input id="conn-owner" value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="你的账号" />
+          <Input
+            id="conn-owner"
+            value={owner}
+            onChange={(e) => setOwner(e.target.value)}
+            placeholder="你的账号"
+          />
         </div>
         <div>
           <FieldLabel htmlFor="conn-token">
@@ -96,11 +108,21 @@ export default function ConnectDesk({
         </div>
         <div>
           <FieldLabel htmlFor="conn-repo">内容仓库名</FieldLabel>
-          <Input id="conn-repo" value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="内容仓库名" />
+          <Input
+            id="conn-repo"
+            value={repo}
+            onChange={(e) => setRepo(e.target.value)}
+            placeholder="内容仓库名"
+          />
         </div>
         <div>
           <FieldLabel htmlFor="conn-branch">分支</FieldLabel>
-          <Input id="conn-branch" value={branch} onChange={(e) => setBranch(e.target.value)} placeholder="main" />
+          <Input
+            id="conn-branch"
+            value={branch}
+            onChange={(e) => setBranch(e.target.value)}
+            placeholder="main"
+          />
         </div>
         <div>
           <FieldLabel htmlFor="conn-gallery">画廊仓库名（可选）</FieldLabel>
@@ -136,7 +158,9 @@ export default function ConnectDesk({
       </p>
 
       {state === "error" || state === "ok" ? (
-        <Alert tone={state === "error" ? "error" : "ok"} className="mb-4">{message}</Alert>
+        <Alert tone={state === "error" ? "error" : "ok"} className="mb-4">
+          {message}
+        </Alert>
       ) : null}
 
       <Button onClick={save} disabled={state === "saving" || !owner.trim() || !repo.trim()}>

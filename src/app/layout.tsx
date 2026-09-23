@@ -22,9 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
  */
 const themeInit = `(function(){try{var q=new URLSearchParams(location.search).get("theme");var s=localStorage.getItem("atrium-theme");var d=window.matchMedia("(prefers-color-scheme: dark)").matches;document.documentElement.dataset.theme=t;var m=function(){var c=document.querySelector('meta[name="theme-color"]');if(c)c.setAttribute("content",document.documentElement.dataset.theme==="dark"?"#1a1814":"#f6f4ee")};m();new MutationObserver(m).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});}catch(e){document.documentElement.dataset.theme="light";}})();`;
 
-export default function RootLayout({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN" suppressHydrationWarning>
       <head>

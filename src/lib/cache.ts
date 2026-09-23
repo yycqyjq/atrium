@@ -151,7 +151,10 @@ export async function cacheThrough<T>(
       } catch (err) {
         if (opts.hardError?.(err)) throw err;
         if (previous != null) {
-          console.warn(`[cache] ${key} 回源失败，端出旧数据：`, err instanceof Error ? err.message : err);
+          console.warn(
+            `[cache] ${key} 回源失败，端出旧数据：`,
+            err instanceof Error ? err.message : err,
+          );
           return { value: previous, stale: true };
         }
         throw err;

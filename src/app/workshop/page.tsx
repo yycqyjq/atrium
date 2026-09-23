@@ -7,7 +7,6 @@ import Alert from "@/components/ui/Alert";
 import EmptyState from "@/components/ui/EmptyState";
 import Loading from "@/components/ui/Loading";
 import SetupTeaser from "@/components/ui/SetupTeaser";
-import { ButtonLink } from "@/components/ui/Button";
 import WorkshopList from "@/components/workshop/WorkshopList";
 import { listDemos, type DemoItem } from "@/lib/demos";
 
@@ -36,10 +35,7 @@ async function WorkshopFloor() {
 
   if (projects.length === 0) {
     return (
-      <SetupTeaser
-        title='工坊还没进料。'
-        sub='接入你的组件仓库，展品会从仓库取件、现场装配。'
-      />
+      <SetupTeaser title="工坊还没进料。" sub="接入你的组件仓库，展品会从仓库取件、现场装配。" />
     );
   }
 

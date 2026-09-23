@@ -83,7 +83,9 @@ export function MasonryDemo() {
             type="button"
             onClick={() => setCols(n)}
             className={`rounded-[5px] border px-2.5 py-0.5 text-[12px] transition-colors duration-150 ${
-              cols === n ? "border-accent bg-accent-soft font-medium text-accent-ink" : "border-line text-ink-3 hover:text-ink-2"
+              cols === n
+                ? "border-accent bg-accent-soft font-medium text-accent-ink"
+                : "border-line text-ink-3 hover:text-ink-2"
             }`}
           >
             {n}

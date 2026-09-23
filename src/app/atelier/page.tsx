@@ -172,10 +172,14 @@ export default function AtelierPage() {
             <div className="grid grid-cols-3 gap-3 md:grid-cols-4 xl:grid-cols-6 [[data-density=compact]_&]:gap-2">
               {swatches.map((swatch) => (
                 <div key={swatch.token} className="overflow-hidden rounded-ctl border border-line">
-                  <div className={`h-14 border-b border-line [[data-density=compact]_&]:h-12 ${swatch.className}`} />
+                  <div
+                    className={`h-14 border-b border-line [[data-density=compact]_&]:h-12 ${swatch.className}`}
+                  />
                   <div className="bg-raised px-3 py-2">
                     <p className="text-[13px]">{swatch.name}</p>
-                    <p className="font-mono text-[10.5px] tracking-[0.02em] text-ink-3">{swatch.token}</p>
+                    <p className="font-mono text-[10.5px] tracking-[0.02em] text-ink-3">
+                      {swatch.token}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -186,7 +190,9 @@ export default function AtelierPage() {
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">标题 · 宋　34 / 600</p>
-                <p className="font-serif text-[34px] font-semibold leading-tight tracking-[0.03em]">中庭</p>
+                <p className="font-serif text-[34px] font-semibold leading-tight tracking-[0.03em]">
+                  中庭
+                </p>
               </Card>
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">引文 · 宋　19</p>
@@ -195,7 +201,9 @@ export default function AtelierPage() {
                 </p>
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">正文 · 黑　14.5 / 1.75</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  正文 · 黑　14.5 / 1.75
+                </p>
                 <p className="text-[14.5px] leading-[1.75] text-ink-2">
                   中庭是个人空间，内容存放在你自己的仓库里。文字为先，安静，克制，留白充分。
                 </p>
@@ -223,17 +231,29 @@ export default function AtelierPage() {
             </Card>
           </Section>
 
-          <Section title="交互控件" note="真实组件 · 本页可直接操作" source={readSrc("components/ui/Button.tsx", "components/ui/Chip.tsx", "components/search/SearchBox.tsx")}>
+          <Section
+            title="交互控件"
+            note="真实组件 · 本页可直接操作"
+            source={readSrc(
+              "components/ui/Button.tsx",
+              "components/ui/Chip.tsx",
+              "components/search/SearchBox.tsx",
+            )}
+          >
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">按钮</p>
                 <div className="flex flex-wrap items-center gap-2.5">
                   <Button>主要操作</Button>
                   <Button variant="secondary">次要操作</Button>
-                  <Button variant="danger" size="sm">危险确认</Button>
+                  <Button variant="danger" size="sm">
+                    危险确认
+                  </Button>
                   <Button disabled>禁用状态</Button>
                   <Button variant="text">文字按钮</Button>
-                  <Button variant="quiet" size="sm">静默按钮</Button>
+                  <Button variant="quiet" size="sm">
+                    静默按钮
+                  </Button>
                 </div>
               </Card>
               <Card padding="sm">
@@ -246,13 +266,19 @@ export default function AtelierPage() {
                 </div>
               </Card>
               <Card padding="sm" className="md:col-span-2 xl:col-span-1">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">搜索框（SearchInput）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  搜索框（SearchInput）
+                </p>
                 <SearchDemo />
               </Card>
             </div>
           </Section>
 
-          <Section title="内容单元" note="工具卡片 / 文章行 · 与房间共用" source={readSrc("components/tools/ToolCard.tsx", "components/study/PostRow.tsx")}>
+          <Section
+            title="内容单元"
+            note="工具卡片 / 文章行 · 与房间共用"
+            source={readSrc("components/tools/ToolCard.tsx", "components/study/PostRow.tsx")}
+          >
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <a
                 href={demoTool.url}
@@ -260,7 +286,11 @@ export default function AtelierPage() {
                 rel="noreferrer"
                 className="group block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong [[data-density=compact]_&]:px-3.5 [[data-density=compact]_&]:py-3"
               >
-                <ToolCardContent name={demoTool.name} url={demoTool.url} description={demoTool.description} />
+                <ToolCardContent
+                  name={demoTool.name}
+                  url={demoTool.url}
+                  description={demoTool.description}
+                />
               </a>
               <Card padding="none" className="px-4 pb-1 pt-1">
                 <PostRow post={demoPost} showFolder />
@@ -280,7 +310,10 @@ export default function AtelierPage() {
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">代码</p>
                 <p className="mb-2 text-[13px] text-ink-2">
-                  行内代码 <code className="rounded bg-wash px-1.5 py-0.5 font-mono text-[12px] text-accent-ink">pnpm dev</code>
+                  行内代码{" "}
+                  <code className="rounded bg-wash px-1.5 py-0.5 font-mono text-[12px] text-accent-ink">
+                    pnpm dev
+                  </code>
                 </p>
                 <pre className="overflow-x-auto rounded-ctl border border-line bg-raised px-3.5 py-2.5 font-mono text-[12px] leading-relaxed text-ink-2 [[data-density=compact]_&]:px-3 [[data-density=compact]_&]:py-2">
                   {"$ git add -A\ngit commit -m 'feat: ...'"}
@@ -290,7 +323,12 @@ export default function AtelierPage() {
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">链接行</p>
                 <p className="text-[13.5px] leading-relaxed text-ink-2">
                   前往{" "}
-                  <a href="https://github.com" target="_blank" rel="noreferrer" className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors duration-150 hover:text-accent-hover">
+                  <a
+                    href="https://github.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-accent underline decoration-accent/40 underline-offset-4 transition-colors duration-150 hover:text-accent-hover"
+                  >
                     外部链接
                   </a>{" "}
                   或<span className="mx-0.5 text-accent">站内页面</span>，下划线随悬停加深。
@@ -299,15 +337,25 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="结构与导航" note="分组标题 / 楼层目录" source={readSrc("components/ui/SectionHeading.tsx", "components/ui/Breadcrumb.tsx")}>
+          <Section
+            title="结构与导航"
+            note="分组标题 / 楼层目录"
+            source={readSrc("components/ui/SectionHeading.tsx", "components/ui/Breadcrumb.tsx")}
+          >
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm" data-floor-skip>
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">分组标题（SectionHeading）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  分组标题（SectionHeading）
+                </p>
                 <SectionHeading title="示例分组" count="12 篇" href="#structure" />
-                <p className="mt-3 text-[12px] text-ink-3">书房目录与工具房分类同款；右缘「进入」可下钻。</p>
+                <p className="mt-3 text-[12px] text-ink-3">
+                  书房目录与工具房分类同款；右缘「进入」可下钻。
+                </p>
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">楼层目录（FloorNav）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  楼层目录（FloorNav）
+                </p>
                 <p className="text-[13px] leading-relaxed text-ink-2">
                   本页右侧即为实物：横杠列随滚动高亮；鼠标划过某根横杠，它在原位变成对应标题、其余保持横杠。
                   该组件同时用于工具房与书房。
@@ -316,18 +364,34 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="状态与提示" note="空态 / 提示条 / 载入态" source={readSrc("components/ui/EmptyState.tsx", "components/ui/Alert.tsx", "components/ui/Loading.tsx")}>
+          <Section
+            title="状态与提示"
+            note="空态 / 提示条 / 载入态"
+            source={readSrc(
+              "components/ui/EmptyState.tsx",
+              "components/ui/Alert.tsx",
+              "components/ui/Loading.tsx",
+            )}
+          >
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="none">
                 <EmptyState title="房间级空态。" sub="衬线标题 + 副文案（EmptyState 组件）。" />
               </Card>
               <Card padding="none">
-                <EmptyState variant="search" title="没有找到「示例词」。" sub="搜索无结果的轻量空态。" />
+                <EmptyState
+                  variant="search"
+                  title="没有找到「示例词」。"
+                  sub="搜索无结果的轻量空态。"
+                />
               </Card>
             </div>
             <div className="mt-3 flex flex-wrap items-center justify-center gap-3 rounded-ctl border border-line py-8 [[data-density=compact]_&]:py-6">
-              <Alert size="sm" tone="error">提示条：强调底色，用于错误与警告（Alert · error）。</Alert>
-              <Alert size="sm" tone="ok">提示条：描边浅面，用于常规告知（Alert · ok）。</Alert>
+              <Alert size="sm" tone="error">
+                提示条：强调底色，用于错误与警告（Alert · error）。
+              </Alert>
+              <Alert size="sm" tone="ok">
+                提示条：描边浅面，用于常规告知（Alert · ok）。
+              </Alert>
             </div>
             <div className="mt-3 flex items-center justify-center rounded-ctl border border-line py-8 [[data-density=compact]_&]:py-6">
               <Loading label="载入中…（路由切换与等待时同款）" />
@@ -337,7 +401,11 @@ export default function AtelierPage() {
           <Section
             title="微交互"
             note="轻提示 / 确认弹窗 · 全站统一"
-            source={readSrc("components/ui/Toast.tsx", "components/ui/ConfirmDialog.tsx", "components/atelier/Demos.tsx")}
+            source={readSrc(
+              "components/ui/Toast.tsx",
+              "components/ui/ConfirmDialog.tsx",
+              "components/atelier/Demos.tsx",
+            )}
           >
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
@@ -345,7 +413,9 @@ export default function AtelierPage() {
                 <ToastDemo />
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">确认弹窗（ConfirmDialog）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  确认弹窗（ConfirmDialog）
+                </p>
                 <ConfirmDialogDemo />
               </Card>
             </div>
@@ -361,7 +431,11 @@ export default function AtelierPage() {
             </div>
           </Section>
 
-          <Section title="表单与字段" note="输入框 / 文本域 / 标签 / 下拉 · 全站同款" source={readSrc("components/ui/Field.tsx", "components/ui/Combobox.tsx")}>
+          <Section
+            title="表单与字段"
+            note="输入框 / 文本域 / 标签 / 下拉 · 全站同款"
+            source={readSrc("components/ui/Field.tsx", "components/ui/Combobox.tsx")}
+          >
             <div className="grid gap-3 md:grid-cols-2 [[data-density=compact]_&]:gap-2">
               <Card padding="sm">
                 <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">输入框（Input）</p>
@@ -377,27 +451,44 @@ export default function AtelierPage() {
                 />
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">返回链接（BackLink）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  返回链接（BackLink）
+                </p>
                 <BackLink href="#structure">回到结构与导航</BackLink>
-                <p className="mt-3 text-[12px] text-ink-3">文章页尾部「回到书房」同款；悬停变主题色并向左位移。</p>
+                <p className="mt-3 text-[12px] text-ink-3">
+                  文章页尾部「回到书房」同款；悬停变主题色并向左位移。
+                </p>
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">面包屑（Breadcrumb）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  面包屑（Breadcrumb）
+                </p>
                 <Breadcrumb
-                  items={[{ label: "中庭", href: "/" }, { label: "书房", href: "/study" }, { label: "示例目录" }]}
+                  items={[
+                    { label: "中庭", href: "/" },
+                    { label: "书房", href: "/study" },
+                    { label: "示例目录" },
+                  ]}
                 />
-                <p className="mt-3 text-[12px] text-ink-3">页面头部与文章页同款；中间段可点击，末段为当前位置。</p>
+                <p className="mt-3 text-[12px] text-ink-3">
+                  页面头部与文章页同款；中间段可点击，末段为当前位置。
+                </p>
               </Card>
               <Card padding="sm">
-                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">可输入下拉（Combobox）</p>
+                <p className="mb-3 text-[11px] tracking-[0.12em] text-ink-3">
+                  可输入下拉（Combobox）
+                </p>
                 <ComboboxDemo />
-                <p className="mt-3 text-[12px] text-ink-3">输入即筛选候选、也可直接输入新值；上下键与回车可选，工具房「分类」同款。</p>
+                <p className="mt-3 text-[12px] text-ink-3">
+                  输入即筛选候选、也可直接输入新值；上下键与回车可选，工具房「分类」同款。
+                </p>
               </Card>
             </div>
           </Section>
 
           <p className="text-[12.5px] leading-relaxed tracking-[0.03em] text-ink-3">
-            本页是中庭的活文档：所有部件均直接引用应用内公共组件（位于 src/components），不做二次描摹；
+            本页是中庭的活文档：所有部件均直接引用应用内公共组件（位于
+            src/components），不做二次描摹；
             改一处、处处同步。新的组件与实验会先在这里亮相，稳定后再进入各个房间。
           </p>
         </div>

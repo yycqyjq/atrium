@@ -11,17 +11,17 @@
 2. Import 该仓库，Framework 自动识别为 Next.js，构建命令与输出**全部保持默认**（不用填）；
 3. 在 **Environment Variables** 中添加：
 
-| 变量 | 值（示例） | 说明 |
-| --- | --- | --- |
-| `GITHUB_OWNER` | `你的账号` | 内容仓库归属 |
-| `GITHUB_REPO` | `你的内容仓库` | 内容仓库名（文章 + admin/tools.json） |
-| `GITHUB_BRANCH` | `main` | 分支 |
-| `GITHUB_TOKEN` | `ghp_…`（可选但**强烈建议**） | 提升速率限制 60/h → 5000/h |
-| `ATRIUM_DEFAULT_PROVIDER` | `github` | 缺省即 github，可省略 |
-| `GITHUB_GALLERY_REPO` | `你的画廊仓库` | 画廊用独立仓库（不设则跟主仓库） |
-| `ATRIUM_GALLERY_DIR` | ``（留空 = 仓库根） | 画廊图片目录 |
-| `ATRIUM_DEMO_PROJECTS` | （可选，JSON 数组） | 工坊的组件项目；不设则读 data/config.json（部署版无本地文件，建议用这个变量） |
-| `NEXT_PUBLIC_SITE_URL` | `https://你的域名` | RSS / sitemap 里的站点地址；不设时为占位符 `https://atrium.local` |
+| 变量                      | 值（示例）                    | 说明                                                                          |
+| ------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| `GITHUB_OWNER`            | `你的账号`                    | 内容仓库归属                                                                  |
+| `GITHUB_REPO`             | `你的内容仓库`                | 内容仓库名（文章 + admin/tools.json）                                         |
+| `GITHUB_BRANCH`           | `main`                        | 分支                                                                          |
+| `GITHUB_TOKEN`            | `ghp_…`（可选但**强烈建议**） | 提升速率限制 60/h → 5000/h                                                    |
+| `ATRIUM_DEFAULT_PROVIDER` | `github`                      | 缺省即 github，可省略                                                         |
+| `GITHUB_GALLERY_REPO`     | `你的画廊仓库`                | 画廊用独立仓库（不设则跟主仓库）                                              |
+| `ATRIUM_GALLERY_DIR`      | ``（留空 = 仓库根）           | 画廊图片目录                                                                  |
+| `ATRIUM_DEMO_PROJECTS`    | （可选，JSON 数组）           | 工坊的组件项目；不设则读 data/config.json（部署版无本地文件，建议用这个变量） |
+| `NEXT_PUBLIC_SITE_URL`    | `https://你的域名`            | RSS / sitemap 里的站点地址；不设时为占位符 `https://atrium.local`             |
 
 4. 点 **Deploy**，一分钟内完成，得到 `https://atrium-<你的子域>.vercel.app`。
 

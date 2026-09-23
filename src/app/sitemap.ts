@@ -22,7 +22,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const { items } = await listPosts();
     const posts: MetadataRoute.Sitemap = items.map((post) => ({
-      url: `${base}/study/${post.slug.split("/").map((p) => encodeURIComponent(p)).join("/")}`,
+      url: `${base}/study/${post.slug
+        .split("/")
+        .map((p) => encodeURIComponent(p))
+        .join("/")}`,
       lastModified: post.lastModified ? new Date(post.lastModified) : now,
       changeFrequency: "monthly",
       priority: 0.8,

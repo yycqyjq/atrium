@@ -113,8 +113,10 @@ export default function DemoProjectsEditor({ initial }: { initial: DemoProject[]
         </Button>
       </div>
       <p className="mb-5 text-[12.5px] leading-relaxed text-ink-3">
-        「工坊」会读取组件仓库里的 atrium.json 展品清单，取件并在页面内现场渲染；也可以挂线上站点（新窗口打开）。
-        可添加多个项目。仓库一栏直接填仓库名即可（自动使用当前连接的 GitHub 账号），也可以写 owner/名字。
+        「工坊」会读取组件仓库里的 atrium.json
+        展品清单，取件并在页面内现场渲染；也可以挂线上站点（新窗口打开）。
+        可添加多个项目。仓库一栏直接填仓库名即可（自动使用当前连接的 GitHub 账号），也可以写
+        owner/名字。
       </p>
 
       {rows.length === 0 ? (

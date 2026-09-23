@@ -31,13 +31,22 @@ export async function recentShots(limit = 8): Promise<{ shots: Shot[]; album: st
       .map((e) => ({ name: e.name, path: e.path }));
     for (const image of rootImages.slice(0, 4)) {
       const candidates = provider.rawUrlCandidates(image.path);
-      collected.push({ name: image.name, path: image.path, url: candidates[0], fallbackUrls: candidates.slice(1), index: 0, album: null });
+      collected.push({
+        name: image.name,
+        path: image.path,
+        url: candidates[0],
+        fallbackUrls: candidates.slice(1),
+        index: 0,
+        album: null,
+      });
     }
 
     // 各相册：名字倒序遍历，每个相册取最新 2 张
     for (const album of albums) {
       if (collected.length >= limit) break;
-      const entries = await provider.listDir(`${rootDir ? `${rootDir}/` : ""}${album}`).catch(() => []);
+      const entries = await provider
+        .listDir(`${rootDir ? `${rootDir}/` : ""}${album}`)
+        .catch(() => []);
       const images = entries
         .filter((e) => e.type === "file" && /\.(jpe?g|png|webp|gif|avif|svg)$/i.test(e.name))
         .sort((a, b) => b.name.localeCompare(a.name))

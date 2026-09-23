@@ -16,7 +16,11 @@ if (process.env.ELECTRON_SKIP_BINARY_DOWNLOAD) {
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const electronDir = join(root, "node_modules", "electron");
 const distDir = join(electronDir, "dist");
-if (existsSync(distDir) && existsSync(join(distDir, "Electron.app")) && existsSync(join(distDir, "version"))) {
+if (
+  existsSync(distDir) &&
+  existsSync(join(distDir, "Electron.app")) &&
+  existsSync(join(distDir, "version"))
+) {
   process.exit(0);
 }
 const installer = join(electronDir, "install.js");

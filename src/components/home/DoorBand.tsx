@@ -30,9 +30,7 @@ export default function DoorBand({ className = "" }: { className?: string }) {
             >
               {door.plate}
             </span>
-            <span className="font-serif text-[20px] tracking-[0.05em] text-ink">
-              {door.name}
-            </span>
+            <span className="font-serif text-[20px] tracking-[0.05em] text-ink">{door.name}</span>
           </span>
           <span className="max-w-[15em] text-[13px] leading-[1.65] text-ink-3 text-balance [word-break:keep-all] max-xs:max-w-none">
             {door.desc}

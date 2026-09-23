@@ -54,10 +54,18 @@ export default function ExhibitStage({
     <Card padding="none" className="bg-raised">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
         <span className="inline-flex items-center gap-0.5 rounded-ctl border border-line p-0.5">
-          <button type="button" onClick={() => setTab("preview")} className={tabCls(tab === "preview")}>
+          <button
+            type="button"
+            onClick={() => setTab("preview")}
+            className={tabCls(tab === "preview")}
+          >
             预览
           </button>
-          <button type="button" onClick={() => setTab("source")} className={tabCls(tab === "source")}>
+          <button
+            type="button"
+            onClick={() => setTab("source")}
+            className={tabCls(tab === "source")}
+          >
             源码
           </button>
         </span>

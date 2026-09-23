@@ -33,15 +33,13 @@ async function ToolsFloor() {
       ? { title: "还没有接通内容源。", sub: "配置仓库后，这里会亮起来。" }
       : reason === "fetch-failed"
         ? { title: "工具清单暂时读不到。", sub: "检查网络或仓库访问，稍后再试。" }
-        : { title: "还没有工具清单。", sub: "把 tools.json 放进仓库的 admin/ 目录，刷新就能看到。" };
+        : {
+            title: "还没有工具清单。",
+            sub: "把 tools.json 放进仓库的 admin/ 目录，刷新就能看到。",
+          };
 
   if (reason === "not-configured") {
-    return (
-      <SetupTeaser
-        title='工具房还没接通内容源。'
-        sub='连好仓库，书签清单就有了数据。'
-      />
-    );
+    return <SetupTeaser title="工具房还没接通内容源。" sub="连好仓库，书签清单就有了数据。" />;
   }
 
   if (count === 0) return <EmptyState title={emptyCopy.title} sub={emptyCopy.sub} />;

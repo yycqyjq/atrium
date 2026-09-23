@@ -25,13 +25,19 @@ export default function SourceStage({
   return (
     <div>
       <div className="mb-3 inline-flex items-center gap-0.5 rounded-ctl border border-line p-0.5">
-        <button type="button" onClick={() => setTab("preview")} className={tabCls(tab === "preview")}>
+        <button
+          type="button"
+          onClick={() => setTab("preview")}
+          className={tabCls(tab === "preview")}
+        >
           预览
         </button>
         <button type="button" onClick={() => setTab("source")} className={tabCls(tab === "source")}>
           源码
         </button>
-        {note ? <span className="ml-2 pr-2 text-[11.5px] tracking-[0.04em] text-ink-3">{note}</span> : null}
+        {note ? (
+          <span className="ml-2 pr-2 text-[11.5px] tracking-[0.04em] text-ink-3">{note}</span>
+        ) : null}
       </div>
       {tab === "preview" ? (
         children

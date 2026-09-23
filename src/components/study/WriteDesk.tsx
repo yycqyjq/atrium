@@ -77,12 +77,11 @@ export default function WriteDesk({
   const [folder, setFolder] = useState(initialFolder || ROOT_FOLDER);
   // 文件名：编辑时保持原文件名；新建时随标题自动生成
   const fileBase = isEdit
-    ? ((initial?.slug?.split("/").pop() ?? "").replace(/\.mdx?$/i, ""))
+    ? (initial?.slug?.split("/").pop() ?? "").replace(/\.mdx?$/i, "")
     : fileNameFromTitle(title);
   const folderPath = folder === ROOT_FOLDER ? "" : folder.trim().replace(/^\/+|\/+$/g, "");
   const fullSlug = folderPath ? `${folderPath}/${fileBase}` : fileBase;
-  const canSave =
-    title.trim() !== "" && body.trim() !== "" && state !== "saving" && !transferring;
+  const canSave = title.trim() !== "" && body.trim() !== "" && state !== "saving" && !transferring;
 
   /**
    * 转存外链图片：把正文里的第三方图片抓进图床仓库，再把正文里的地址换成自己的。
@@ -207,7 +206,9 @@ export default function WriteDesk({
     setDeleting(true);
     setMessage("");
     try {
-      const res = await fetch(`/api/write?slug=${encodeURIComponent(initial.slug)}`, { method: "DELETE" });
+      const res = await fetch(`/api/write?slug=${encodeURIComponent(initial.slug)}`, {
+        method: "DELETE",
+      });
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) {
         setState("error");
@@ -365,7 +366,9 @@ export default function WriteDesk({
       </div>
 
       {state === "error" ? (
-        <Alert tone="error" className="mb-4">{message}</Alert>
+        <Alert tone="error" className="mb-4">
+          {message}
+        </Alert>
       ) : null}
 
       <div className="flex flex-wrap items-center gap-3">

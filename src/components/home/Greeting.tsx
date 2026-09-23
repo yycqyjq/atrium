@@ -22,15 +22,11 @@ export default function Greeting({ subtitle }: { subtitle?: string }) {
 
   return (
     <div>
-      <p className="mb-[14px] text-[12.5px] tracking-[0.08em] text-ink-3 tabular-nums">
-        {date}
-      </p>
+      <p className="mb-[14px] text-[12.5px] tracking-[0.08em] text-ink-3 tabular-nums">{date}</p>
       <h1 className="mb-[14px] font-serif text-[clamp(32px,4.6vw,44px)] font-semibold leading-[1.16]">
         {greet}
       </h1>
-      <p className="max-w-[32em] text-ink-2">
-        {subtitle?.trim() || "慢慢看，慢慢写。"}
-      </p>
+      <p className="max-w-[32em] text-ink-2">{subtitle?.trim() || "慢慢看，慢慢写。"}</p>
     </div>
   );
 }

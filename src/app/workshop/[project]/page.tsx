@@ -26,11 +26,7 @@ export async function generateMetadata({
 }
 
 /** 项目页：线上站点类型在此介绍并外链；仓库类型回列表筛选 */
-export default async function ProjectPage({
-  params,
-}: {
-  params: Promise<{ project: string }>;
-}) {
+export default async function ProjectPage({ params }: { params: Promise<{ project: string }> }) {
   const { project: pid } = await params;
   const { projects } = await listDemos();
   const project = projects.find((p) => p.id === pid);

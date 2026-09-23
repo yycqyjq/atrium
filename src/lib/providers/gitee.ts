@@ -1,10 +1,5 @@
 import { resolveRepoConfig, type ResolvedRepoConfig } from "@/lib/config";
-import {
-  ProviderError,
-  type RepoEntry,
-  type RepoFile,
-  type RepoProvider,
-} from "./types";
+import { ProviderError, type RepoEntry, type RepoFile, type RepoProvider } from "./types";
 
 /**
  * Gitee 实现【实验性】。
@@ -156,7 +151,9 @@ export async function giteeProvider(override?: ResolvedRepoConfig): Promise<Repo
 
     rawUrlCandidates(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
-      return [`https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`];
+      return [
+        `https://gitee.com/${cfg.owner}/${cfg.repo}/raw/${encodeURIComponent(cfg.branch)}/${encoded}`,
+      ];
     },
   };
 }

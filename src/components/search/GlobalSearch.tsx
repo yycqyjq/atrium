@@ -128,7 +128,9 @@ export default function GlobalSearch() {
       .slice(0, 6);
     const exhibits: Hit[] = data.exhibits
       .filter((item) =>
-        `${item.title} ${item.desc ?? ""} ${item.group ?? ""} ${item.projectName} ${item.origin ?? ""} ${item.id}`.toLowerCase().includes(q),
+        `${item.title} ${item.desc ?? ""} ${item.group ?? ""} ${item.projectName} ${item.origin ?? ""} ${item.id}`
+          .toLowerCase()
+          .includes(q),
       )
       .map((item) => ({
         key: `e:${item.projectId}/${item.id}`,
@@ -147,7 +149,9 @@ export default function GlobalSearch() {
       }))
       .slice(0, 6);
     const tools: Hit[] = data.tools
-      .filter((tool) => `${tool.name} ${tool.description} ${tool.category}`.toLowerCase().includes(q))
+      .filter((tool) =>
+        `${tool.name} ${tool.description} ${tool.category}`.toLowerCase().includes(q),
+      )
       .map((tool) => ({
         key: `t:${tool.name}|${tool.url}`,
         title: tool.name,
@@ -163,9 +167,7 @@ export default function GlobalSearch() {
 
   // 键盘高亮滚动进视野
   useEffect(() => {
-    listRef.current
-      ?.querySelector('[data-active="true"]')
-      ?.scrollIntoView({ block: "nearest" });
+    listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: "nearest" });
   }, [active]);
 
   const go = useCallback(
@@ -252,9 +254,7 @@ export default function GlobalSearch() {
                       </span>
                       <span className="block truncate text-[11.5px] text-ink-3">{hit.sub}</span>
                     </span>
-                    {hit.external ? (
-                      <IconExternal className="h-3 w-3 shrink-0 text-ink-3" />
-                    ) : null}
+                    {hit.external ? <IconExternal className="h-3 w-3 shrink-0 text-ink-3" /> : null}
                   </button>
                 </li>
               ))}

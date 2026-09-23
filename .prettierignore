@@ -1,0 +1,25 @@
+# 依赖与构建产物
+node_modules/
+.next/
+out/
+dist/
+release/
+*.tsbuildinfo
+
+# 本机数据与密钥：data/config.json 含访问令牌，data/ 下还有缓存与图标产物
+data/
+certs/
+
+# 设计稿：静态 HTML 参考稿，非项目源码（tsconfig 也已 exclude）
+design/
+
+# 二进制资源
+build/
+public/
+docs/screenshots/
+
+# AI 协作助手的本地工作日志
+.workbuddy-ai/
+
+# 锁定文件（由包管理器生成，格式化无意义且会干扰校验）
+pnpm-lock.yaml

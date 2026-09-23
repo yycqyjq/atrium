@@ -13,8 +13,7 @@ export default function ThemeToggle() {
   }, []);
 
   const toggle = () => {
-    const next =
-      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     try {
       localStorage.setItem(STORAGE_KEY, next);

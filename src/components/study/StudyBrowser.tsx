@@ -80,7 +80,9 @@ export default function StudyBrowser({
                     floorTitle={section.folder.name}
                     title={section.folder.name}
                     count={`${section.folder.total} 篇${
-                      section.folder.total !== section.posts.length ? ` · 本层 ${section.posts.length}` : ""
+                      section.folder.total !== section.posts.length
+                        ? ` · 本层 ${section.posts.length}`
+                        : ""
                     }`}
                     href={`/study/${encodeURIComponent(section.folder.path)}`}
                     className="mb-1"
@@ -108,7 +110,9 @@ export default function StudyBrowser({
       )}
 
       <p className="mt-7 text-[12.5px] tracking-[0.05em] text-ink-3">
-        {q ? `${filtered.length} / ${allPosts.length} 篇` : `本页 ${viewCount} 篇 · 书房全量 ${allPosts.length} 篇`}
+        {q
+          ? `${filtered.length} / ${allPosts.length} 篇`
+          : `本页 ${viewCount} 篇 · 书房全量 ${allPosts.length} 篇`}
       </p>
     </>
   );

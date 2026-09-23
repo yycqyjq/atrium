@@ -17,11 +17,23 @@ const TOC: Array<[string, string, string]> = [
   ["faq", "10", "常见问题"],
 ];
 
-function Section({ id, no, title, children }: { id: string; no: string; title: string; children: React.ReactNode }) {
+function Section({
+  id,
+  no,
+  title,
+  children,
+}: {
+  id: string;
+  no: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
     <section id={id} className="scroll-mt-6 border-t border-line pt-8 first:border-t-0 first:pt-0">
       <div className="mb-4 flex items-baseline gap-3">
-        <span aria-hidden className="font-mono text-[12px] tracking-[0.08em] text-accent">{no}</span>
+        <span aria-hidden className="font-mono text-[12px] tracking-[0.08em] text-accent">
+          {no}
+        </span>
         <h2 className="font-serif text-[21px] font-semibold tracking-[0.01em] text-ink">{title}</h2>
       </div>
       {children}
@@ -47,7 +59,9 @@ function Code({ label, code }: { label: string; code: string }) {
   return (
     <details className="group/code my-3">
       <summary className="cursor-pointer list-none text-[12.5px] text-ink-3 transition-colors duration-150 hover:text-ink-2">
-        <span className="mr-1.5 inline-block transition-transform duration-150 group-open/code:rotate-90">▸</span>
+        <span className="mr-1.5 inline-block transition-transform duration-150 group-open/code:rotate-90">
+          ▸
+        </span>
         {label}
       </summary>
       <pre className="mt-2 overflow-x-auto rounded-ctl border border-line bg-wash px-3.5 py-3 text-[12px] leading-[1.7] text-ink-2">
@@ -102,7 +116,9 @@ export default function GuidePage() {
 
       <main className="min-w-0 max-w-[760px]">
         <header className="pb-8">
-          <p className="mb-1.5 font-mono text-[11.5px] uppercase tracking-[0.14em] text-ink-3">中庭 · 使用教程</p>
+          <p className="mb-1.5 font-mono text-[11.5px] uppercase tracking-[0.14em] text-ink-3">
+            中庭 · 使用教程
+          </p>
           <h1 className="font-serif text-[34px] font-semibold leading-[1.2] tracking-[0.01em] text-ink">
             把每个功能用明白
           </h1>
@@ -114,13 +130,18 @@ export default function GuidePage() {
         <div className="space-y-12">
           <Section id="connect" no="01" title="接入内容源">
             <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
-              中庭的内容不存数据库——文章、图片、书签都以文件形式放在你自己的 GitHub 仓库里，应用只负责取用与呈现。因此第一步是把仓库「接」进来。
+              中庭的内容不存数据库——文章、图片、书签都以文件形式放在你自己的 GitHub
+              仓库里，应用只负责取用与呈现。因此第一步是把仓库「接」进来。
             </p>
             <ol className="space-y-3.5">
               <Step>点侧栏底部的头像或 ⚙ 齿轮，打开「设置」页。</Step>
-              <Step>填入 GitHub 用户名、内容仓库名与分支——文章会以 Markdown 直接存进这个仓库，任何仓库都行。</Step>
               <Step>
-                粘贴一个访问令牌：细粒度（Fine-grained）或 classic 均可，需要对内容仓库有读写权限。写文章必需；仓库公开时不填令牌也能读，但匿名额度很低，不推荐。
+                填入 GitHub 用户名、内容仓库名与分支——文章会以 Markdown
+                直接存进这个仓库，任何仓库都行。
+              </Step>
+              <Step>
+                粘贴一个访问令牌：细粒度（Fine-grained）或 classic
+                均可，需要对内容仓库有读写权限。写文章必需；仓库公开时不填令牌也能读，但匿名额度很低，不推荐。
               </Step>
               <Step>保存即生效——各房间的列表立刻点亮，写作台也随之可用。</Step>
             </ol>
@@ -134,7 +155,9 @@ export default function GuidePage() {
           </Section>
 
           <Section id="study" no="02" title="书房与阅读">
-            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">书房是文章的家：按文件夹归档，按修改时间排序，所有文章都是仓库里的 Markdown 文件。</p>
+            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
+              书房是文章的家：按文件夹归档，按修改时间排序，所有文章都是仓库里的 Markdown 文件。
+            </p>
             <Bullets
               items={[
                 "浏览：文件夹切换 + 页内全文搜索（标题、正文即时过滤），长列表可用楼层导航快速定位。",
@@ -143,12 +166,16 @@ export default function GuidePage() {
               ]}
             />
             <p className="mt-4 text-[13px] text-ink-3">
-              动手试：<Cross href="/study" label="打开书房" /> —— 任意点开一篇，感受一下阅读页。
+              动手试：
+              <Cross href="/study" label="打开书房" /> —— 任意点开一篇，感受一下阅读页。
             </p>
           </Section>
 
           <Section id="write" no="03" title="写作台">
-            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">侧栏的「写作台」是发文入口：标题、正文、文件夹三步成文，正文即 Markdown，所见即所得地存进仓库。</p>
+            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
+              侧栏的「写作台」是发文入口：标题、正文、文件夹三步成文，正文即
+              Markdown，所见即所得地存进仓库。
+            </p>
             <ol className="space-y-3.5">
               <Step>写标题与正文，选一个文件夹（也可现场新建多级目录）。</Step>
               <Step>正文里贴外链图片，发布时会自动转存到图床仓库——链接永不失效。</Step>
@@ -162,26 +189,36 @@ export default function GuidePage() {
               ]}
             />
             <p className="mt-4 text-[13px] text-ink-3">
-              动手试：<Cross href="/study/write" label="打开写作台" />。
+              动手试：
+              <Cross href="/study/write" label="打开写作台" />。
             </p>
           </Section>
 
           <Section id="gallery" no="04" title="画廊">
-            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">照片与影像的家。图片以文件形式存在图床仓库里，应用负责陈列。</p>
+            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
+              照片与影像的家。图片以文件形式存在图床仓库里，应用负责陈列。
+            </p>
             <ol className="space-y-3.5">
-              <Step>上传：拖拽或选择本地图片直传；也可以粘贴外链图片地址，服务端抓取后转存（自动防内网地址）。</Step>
+              <Step>
+                上传：拖拽或选择本地图片直传；也可以粘贴外链图片地址，服务端抓取后转存（自动防内网地址）。
+              </Step>
               <Step>管理：重命名、删除（原位确认）；默认按提交时间展示日期。</Step>
               <Step>浏览：点击进灯箱，← / → 切换，Esc 关闭；画廊页内按文件名即时检索。</Step>
             </ol>
             <p className="mt-4 text-[13px] text-ink-3">
-              动手试：<Cross href="/gallery" label="打开画廊" />。
+              动手试：
+              <Cross href="/gallery" label="打开画廊" />。
             </p>
           </Section>
 
           <Section id="tools" no="05" title="工具房">
-            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">书签与常用工具的收纳间：数据来自内容仓库的 admin/tools.json，页面上可以直接增删改。</p>
+            <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
+              书签与常用工具的收纳间：数据来自内容仓库的 admin/tools.json，页面上可以直接增删改。
+            </p>
             <ol className="space-y-3.5">
-              <Step>粘贴一个网址，标题与描述自动带回（服务端解析，带内网防护），不满意可手改。</Step>
+              <Step>
+                粘贴一个网址，标题与描述自动带回（服务端解析，带内网防护），不满意可手改。
+              </Step>
               <Step>分组、排序、编辑、删除都在原位完成。</Step>
               <Step>工具房页内搜索：名称与描述即时过滤。</Step>
             </ol>
@@ -200,13 +237,15 @@ export default function GuidePage() {
 }`}
             />
             <p className="mt-4 text-[13px] text-ink-3">
-              动手试：<Cross href="/tools" label="打开工具房" />。
+              动手试：
+              <Cross href="/tools" label="打开工具房" />。
             </p>
           </Section>
 
           <Section id="workshop" no="06" title="工坊">
             <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
-              工坊陈列「组件仓库」里的展品：仓库里放一份 atrium.json 展品清单与构建产物，工坊按清单现场取件、真实运行。自带的砖瓦（bricks）模板仓库可以直接参考。
+              工坊陈列「组件仓库」里的展品：仓库里放一份 atrium.json
+              展品清单与构建产物，工坊按清单现场取件、真实运行。自带的砖瓦（bricks）模板仓库可以直接参考。
             </p>
             <Code
               label="atrium.json 展品清单格式"
@@ -226,10 +265,12 @@ export default function GuidePage() {
 }`}
             />
             <p className="mt-6 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
-              展品可以自带服务端逻辑（<b>声明式后端</b>）：在展品目录放一个 backend.ts，导出 backend.handle(req)，
-              构建时生成 dist/exhibits/&lt;id&gt;.backend.js（Node ESM）。中庭后端会把它挂到同源路由
-              /api/exhibit/&lt;id&gt;/* 下，展品前端直接 fetch 同源地址即可——登录态维护、定时任务、需要绕过浏览器沙箱的网络请求都在服务端完成，
-              数据不落盘不出本机。清单条目声明 "backend": true 即开启；设置 ATRIUM_EXHIBIT_BACKEND=0 可全局关闭。
+              展品可以自带服务端逻辑（<b>声明式后端</b>）：在展品目录放一个 backend.ts，导出
+              backend.handle(req)， 构建时生成 dist/exhibits/&lt;id&gt;.backend.js（Node
+              ESM）。中庭后端会把它挂到同源路由 /api/exhibit/&lt;id&gt;/* 下，展品前端直接 fetch
+              同源地址即可——登录态维护、定时任务、需要绕过浏览器沙箱的网络请求都在服务端完成，
+              数据不落盘不出本机。清单条目声明 &quot;backend&quot;: true 即开启；设置
+              ATRIUM_EXHIBIT_BACKEND=0 可全局关闭。
             </p>
             <Code
               label="展品后端契约（backend.ts，运行在中庭的 Node 服务里）"
@@ -254,16 +295,19 @@ export const backend = {
 // fetch("/api/exhibit/<id>/state")`}
             />
             <p className="mt-4 text-[13px] text-ink-3">
-              动手试：<Cross href="/workshop" label="打开工坊" />。
+              动手试：
+              <Cross href="/workshop" label="打开工坊" />。
             </p>
           </Section>
 
           <Section id="atelier" no="07" title="陈列廊">
             <p className="mb-4 max-w-[46em] text-[14px] leading-[1.9] text-ink-2">
-              陈列廊是中庭自身公共组件的活文档：每个示例都是真实组件，所见即所用。右上角的密度切换（舒适 / 紧凑）改变全站留白与行距，偏好会被记住。
+              陈列廊是中庭自身公共组件的活文档：每个示例都是真实组件，所见即所用。右上角的密度切换（舒适
+              / 紧凑）改变全站留白与行距，偏好会被记住。
             </p>
             <p className="text-[13px] text-ink-3">
-              动手试：<Cross href="/atelier" label="打开陈列廊" />。
+              动手试：
+              <Cross href="/atelier" label="打开陈列廊" />。
             </p>
           </Section>
 
@@ -275,7 +319,9 @@ export const backend = {
                 "移动端：底部楼层导航横滑切换房间；侧栏在窄屏收拢为图标。",
               ]}
             />
-            <p className="mt-4 text-[13px] text-ink-3">提示：先按 ⌘K，再输入「踩坑」试试——应该能直接跳到那篇记录。</p>
+            <p className="mt-4 text-[13px] text-ink-3">
+              提示：先按 ⌘K，再输入「踩坑」试试——应该能直接跳到那篇记录。
+            </p>
           </Section>
 
           <Section id="desktop" no="09" title="桌面端">
@@ -291,13 +337,27 @@ export const backend = {
 
             <details className="group/why mt-4 max-w-[46em]">
               <summary className="cursor-pointer list-none text-[12.5px] text-ink-3 transition-colors duration-150 hover:text-ink-2">
-                <span className="mr-1.5 inline-block transition-transform duration-150 group-open/why:rotate-90">▸</span>
+                <span className="mr-1.5 inline-block transition-transform duration-150 group-open/why:rotate-90">
+                  ▸
+                </span>
                 为什么会需要一张证书？
               </summary>
               <div className="mt-2.5 space-y-2.5 rounded-ctl border border-line bg-wash px-4 py-3.5 text-[13px] leading-[1.85] text-ink-2">
-                <p>加速工具的工作方式是「中间人」：应用访问 github.com 时，请求先经过本机的加速代理，由它转发到 GitHub——这是它能加速的原因。</p>
-                <p>但 HTTPS 的规则是「对方必须出示可信证书」。GitHub 出示的是权威机构签发的证书；而加速代理要替 GitHub 回应，就只能出示<strong>它自己签发</strong>的证书——系统默认不认识这个签发者，所有 HTTPS 请求会被当作不安全直接拒绝。</p>
-                <p>所以加速工具都提供「安装证书到系统」的一键操作——证书进入系统信任列表后，中庭会<strong>自动跟随系统</strong>，无需任何配置；导出成文件放到应用约定位置也一样。只需要做一次；工具更新证书后需要重新安装。</p>
+                <p>
+                  加速工具的工作方式是「中间人」：应用访问 github.com
+                  时，请求先经过本机的加速代理，由它转发到 GitHub——这是它能加速的原因。
+                </p>
+                <p>
+                  但 HTTPS 的规则是「对方必须出示可信证书」。GitHub
+                  出示的是权威机构签发的证书；而加速代理要替 GitHub 回应，就只能出示
+                  <strong>它自己签发</strong>的证书——系统默认不认识这个签发者，所有 HTTPS
+                  请求会被当作不安全直接拒绝。
+                </p>
+                <p>
+                  所以加速工具都提供「安装证书到系统」的一键操作——证书进入系统信任列表后，中庭会
+                  <strong>自动跟随系统</strong>
+                  ，无需任何配置；导出成文件放到应用约定位置也一样。只需要做一次；工具更新证书后需要重新安装。
+                </p>
               </div>
             </details>
           </Section>
@@ -307,14 +367,18 @@ export const backend = {
               items={[
                 "房间空白、但文章能显示：多半是网络加速工具的证书没被加载——按第 09 节把证书放到 userData/certs/ 并重启应用。",
                 "把安装包给别人装，需要什么：① 应用未签名，首次打开需右键选「打开」一次（系统安全确认）；② 在连接页配置对方自己的 GitHub 仓库与令牌；③ 代理证书跟随系统信任——对方把代理工具的证书装进系统即可，中庭自动识别，不用额外配置。",
-"令牌保存后输入框仍是空的：设计如此——令牌只写本机不回显，留空表示保持不变；保存成功会有提示。",
+                "令牌保存后输入框仍是空的：设计如此——令牌只写本机不回显，留空表示保持不变；保存成功会有提示。",
                 "中庭会部署到公网吗：当前不会——内容仅本机与桌面端使用，写入能力也只开放给桌面端；若未来想分享只读快照，docs/DEPLOY.md 保留了完整方案。",
                 "发布后列表多久刷新：写入即失效、立即重取；日常阅读走缓存（先旧后新），源站故障时自动保旧数据，不会白屏。",
               ]}
             />
             <div className="mt-6 flex flex-wrap gap-3">
-              <ButtonLink href="/connect" variant="secondary">去设置</ButtonLink>
-              <ButtonLink href="/" variant="secondary">回中庭</ButtonLink>
+              <ButtonLink href="/connect" variant="secondary">
+                去设置
+              </ButtonLink>
+              <ButtonLink href="/" variant="secondary">
+                回中庭
+              </ButtonLink>
             </div>
           </Section>
         </div>

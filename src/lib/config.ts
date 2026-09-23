@@ -63,7 +63,10 @@ export async function readStoredConfig(): Promise<StoredConfig> {
 }
 
 /** 每家内容源对应的环境变量名（优先级：环境变量 > data/config.json） */
-const ENV_FIELDS: Record<ProviderKey, { owner: string; repo: string; branch: string; token: string }> = {
+const ENV_FIELDS: Record<
+  ProviderKey,
+  { owner: string; repo: string; branch: string; token: string }
+> = {
   github: {
     owner: "GITHUB_OWNER",
     repo: "GITHUB_REPO",
@@ -143,7 +146,8 @@ export function sanitizeDemoProjects(input: unknown): DemoProject[] {
     let id = typeof item.id === "string" ? item.id.trim().toLowerCase() : "";
     if (!DEMO_ID_RE.test(id)) id = demoIdFromName(name);
     if (!id && kind === "repo") id = demoIdFromName(repo.split("/").pop() ?? "");
-    if (!id && kind === "url") id = demoIdFromName(url.replace(/^https?:\/\//i, "").split(/[/.]/)[0] ?? "");
+    if (!id && kind === "url")
+      id = demoIdFromName(url.replace(/^https?:\/\//i, "").split(/[/.]/)[0] ?? "");
     if (!id) id = `p-${out.length + 1}`;
     let unique = id;
     for (let n = 2; seen.has(unique); n += 1) unique = `${id}-${n}`;
@@ -156,8 +160,7 @@ export function sanitizeDemoProjects(input: unknown): DemoProject[] {
       if (!/^[\w.-]+(\/[\w.-]+)?$/.test(repo)) continue; // 允许只填仓库名
       const branch =
         typeof item.branch === "string" && item.branch.trim() ? item.branch.trim() : "main";
-      const dir =
-        typeof item.dir === "string" ? item.dir.trim().replace(/^\/+|\/+$/g, "") : "";
+      const dir = typeof item.dir === "string" ? item.dir.trim().replace(/^\/+|\/+$/g, "") : "";
       if (dir.includes("..") || dir.startsWith(".")) continue;
       out.push({
         id: unique,
@@ -310,7 +313,9 @@ export async function githubProfileUrl(): Promise<string> {
  * 画廊仓库：优先 GITHUB_GALLERY_* / GITEE_GALLERY_*（按默认内容源选择前缀），
  * 其次 config.json 的 galleryRepo，未设置时落到默认内容源的主仓库。
  */
-export async function resolveGalleryConfig(): Promise<{ provider: ProviderKey } & ResolvedRepoConfig> {
+export async function resolveGalleryConfig(): Promise<
+  { provider: ProviderKey } & ResolvedRepoConfig
+> {
   const provider = await defaultProviderKey();
   const base = await resolveRepoConfig(provider);
   const stored = await readStoredConfig();

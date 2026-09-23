@@ -43,3 +43,14 @@ jobs:
 
       - name: 类型检查
         run: pnpm exec tsc --noEmit
+
+      # Electron 壳是纯 JS，不在上面那次 tsc 的 include 范围内（主配置只收 .ts/.tsx）。
+      # 单独过一遍 checkJs，拦住未定义标识符一类的错误。
+      - name: Electron 壳类型检查
+        run: pnpm exec tsc -p electron-app/tsconfig.json
+
+      - name: 代码检查（ESLint，error 阻断）
+        run: pnpm exec eslint .
+
+      - name: 格式检查（Prettier）
+        run: pnpm exec prettier --check .

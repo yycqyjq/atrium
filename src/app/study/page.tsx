@@ -1,7 +1,10 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Footer from "@/components/shell/Footer";
-import StudyBrowser, { type BrowserPost, type BrowserSection } from "@/components/study/StudyBrowser";
+import StudyBrowser, {
+  type BrowserPost,
+  type BrowserSection,
+} from "@/components/study/StudyBrowser";
 import FloorNav from "@/components/shell/FloorNav";
 import PageHeader from "@/components/ui/PageHeader";
 import Loading from "@/components/ui/Loading";
@@ -56,8 +59,8 @@ async function StudyFloor() {
   if (reason === "not-configured") {
     return (
       <SetupTeaser
-        title='书房还没接通内容源。'
-        sub='几分钟连好仓库，之后写文章、读文章都在这里。'
+        title="书房还没接通内容源。"
+        sub="几分钟连好仓库，之后写文章、读文章都在这里。"
       />
     );
   }

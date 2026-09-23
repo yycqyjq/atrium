@@ -81,7 +81,11 @@ export function collectImageRefs(body: string): ImageRef[] {
       if (!raw) continue;
       const inner = m[0].indexOf(raw, m[0].indexOf("src") + 3);
       if (inner < 0) continue;
-      refs.push({ url: raw, start: from + m.index + inner, end: from + m.index + inner + raw.length });
+      refs.push({
+        url: raw,
+        start: from + m.index + inner,
+        end: from + m.index + inner + raw.length,
+      });
     }
   }
 

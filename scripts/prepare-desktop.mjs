@@ -10,7 +10,6 @@
 import {
   cpSync,
   existsSync,
-  lstatSync,
   mkdirSync,
   readFileSync,
   renameSync,
@@ -104,7 +103,8 @@ function fixLinks(dir) {
       // 目标可能指向原 standalone 树（需映射到 desktop-server 的对应位置），也可能已在 out 内
       let mapped = null;
       if (resolved.startsWith(out + sep)) mapped = resolved;
-      else if (resolved.startsWith(standalone + sep)) mapped = out + resolved.slice(standalone.length);
+      else if (resolved.startsWith(standalone + sep))
+        mapped = out + resolved.slice(standalone.length);
       if (mapped) {
         const rel = relative(dirname(full), mapped);
         unlinkSync(full);

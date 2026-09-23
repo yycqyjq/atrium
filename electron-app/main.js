@@ -31,12 +31,16 @@ const APP_REPO = "yycqyjq/atrium";
 function collectSystemCerts() {
   try {
     if (process.platform === "darwin") {
+      /** @type {import("node:child_process").SpawnSyncOptionsWithStringEncoding} */
       const opts = { encoding: "utf8", timeout: 15000, maxBuffer: 32 * 1024 * 1024 };
       const run = (kc) => {
         try {
           const result = spawnSync("/usr/bin/security", ["find-certificate", "-a", "-p", kc], opts);
           if (result.error || result.status !== 0) {
-            console.warn(`[electron] 证书导出失败 ${kc}:`, result.error?.message ?? `exit ${result.status}`);
+            console.warn(
+              `[electron] 证书导出失败 ${kc}:`,
+              result.error?.message ?? `exit ${result.status}`,
+            );
             return "";
           }
           console.log(`[electron] 证书导出 ${kc}: ${result.stdout.length} 字节`);
@@ -71,7 +75,10 @@ function collectSystemCerts() {
         maxBuffer: 32 * 1024 * 1024,
       });
       if (result.error || result.status !== 0) {
-        console.warn("[electron] Windows 证书导出失败（忽略）:", result.error?.message ?? `exit ${result.status}`);
+        console.warn(
+          "[electron] Windows 证书导出失败（忽略）:",
+          result.error?.message ?? `exit ${result.status}`,
+        );
         return "";
       }
       return result.stdout;
@@ -150,6 +157,7 @@ function serverPlan() {
 function startServer() {
   return new Promise((resolve, reject) => {
     const plan = serverPlan();
+    /** @type {NodeJS.ProcessEnv} */
     const env = {
       ...process.env,
       ELECTRON_RUN_AS_NODE: "1",
@@ -171,7 +179,7 @@ function startServer() {
     env.ATRIUM_DATA_DIR =
       env.ATRIUM_DATA_DIR ||
       (IS_PACKAGED ? path.join(app.getPath("userData"), "data") : path.join(ROOT, "data"));
-      env.ATRIUM_ALLOW_WRITE = env.ATRIUM_ALLOW_WRITE || "1"; // 桌面端开放写作
+    env.ATRIUM_ALLOW_WRITE = env.ATRIUM_ALLOW_WRITE || "1"; // 桌面端开放写作
 
     serverProc = spawn(process.execPath, [plan.entry], {
       cwd: plan.cwd,
@@ -206,8 +214,12 @@ function startServer() {
 
 /** 语义化版本比较：a > b 返回 1，相等 0，小于 -1 */
 function compareVersions(a, b) {
-  const pa = String(a).split(".").map((n) => Number(n) || 0);
-  const pb = String(b).split(".").map((n) => Number(n) || 0);
+  const pa = String(a)
+    .split(".")
+    .map((n) => Number(n) || 0);
+  const pb = String(b)
+    .split(".")
+    .map((n) => Number(n) || 0);
   for (let i = 0; i < Math.max(pa.length, pb.length); i += 1) {
     const diff = (pa[i] || 0) - (pb[i] || 0);
     if (diff !== 0) return diff > 0 ? 1 : -1;
@@ -228,7 +240,7 @@ async function checkForUpdate(interactive) {
       new Promise((_, rej) => setTimeout(() => rej(new Error("查询超时")), 10000)),
     ]);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const release = (await res.json());
+    const release = await res.json();
     const latest = String(release.tag_name || "").replace(/^v/, "");
     const current = app.getVersion();
     if (!latest || compareVersions(latest, current) <= 0) {
@@ -297,6 +309,7 @@ async function createWindow() {
 
 /** 应用菜单：中文语义 + 常用快捷键（Cmd+N 写作台、Cmd+1..4 切房间） */
 function buildMenu() {
+  /** @type {import("electron").MenuItemConstructorOptions[]} */
   const template = [
     {
       label: "中庭",
@@ -314,17 +327,41 @@ function buildMenu() {
     {
       label: "房间",
       submenu: [
-        { label: "中庭（首页）", accelerator: "Cmd+1", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/`) },
-        { label: "书房", accelerator: "Cmd+2", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study`) },
-        { label: "画廊", accelerator: "Cmd+3", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/gallery`) },
-        { label: "工具房", accelerator: "Cmd+4", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/tools`) },
-        { label: "陈列廊", accelerator: "Cmd+5", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/atelier`) },
+        {
+          label: "中庭（首页）",
+          accelerator: "Cmd+1",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/`),
+        },
+        {
+          label: "书房",
+          accelerator: "Cmd+2",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study`),
+        },
+        {
+          label: "画廊",
+          accelerator: "Cmd+3",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/gallery`),
+        },
+        {
+          label: "工具房",
+          accelerator: "Cmd+4",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/tools`),
+        },
+        {
+          label: "陈列廊",
+          accelerator: "Cmd+5",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/atelier`),
+        },
       ],
     },
     {
       label: "写作",
       submenu: [
-        { label: "新文章（写作台）", accelerator: "CmdOrCtrl+N", click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study/write`) },
+        {
+          label: "新文章（写作台）",
+          accelerator: "CmdOrCtrl+N",
+          click: () => win?.webContents.loadURL(`http://127.0.0.1:${PORT}/study/write`),
+        },
       ],
     },
     {
@@ -341,7 +378,10 @@ function buildMenu() {
     },
     {
       label: "窗口",
-      submenu: [{ label: "最小化", role: "minimize" }, { label: "关闭窗口", role: "close" }],
+      submenu: [
+        { label: "最小化", role: "minimize" },
+        { label: "关闭窗口", role: "close" },
+      ],
     },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

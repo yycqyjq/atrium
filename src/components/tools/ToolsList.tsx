@@ -13,7 +13,13 @@ import { IconPencil, IconX } from "@/components/icons";
 import type { ToolGroup } from "@/lib/tools";
 
 /** 工具房列表 + 即时搜索 + 书签删除（可写环境下显示） */
-export default function ToolsList({ groups, canWrite = false }: { groups: ToolGroup[]; canWrite?: boolean }) {
+export default function ToolsList({
+  groups,
+  canWrite = false,
+}: {
+  groups: ToolGroup[];
+  canWrite?: boolean;
+}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
@@ -23,9 +29,12 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
   async function remove(name: string, url: string) {
     setConfirmDelete(null);
     try {
-      const res = await fetch(`/api/tools?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`, {
-        method: "DELETE",
-      });
+      const res = await fetch(
+        `/api/tools?name=${encodeURIComponent(name)}&url=${encodeURIComponent(url)}`,
+        {
+          method: "DELETE",
+        },
+      );
       const data = (await res.json()) as { ok?: boolean; error?: string };
       if (!res.ok || !data.ok) throw new Error(data.error ?? "移除失败，请稍后再试");
       showToast(`已移除「${name}」。`);
@@ -65,63 +74,76 @@ export default function ToolsList({ groups, canWrite = false }: { groups: ToolGr
         <>
           {filtered.map((group) => {
             return (
-            <section key={group.name} className="mb-10">
-              <SectionHeading id={`cat-${group.name}`} title={group.name} count={`${group.items.length} 个`} className="mb-4" />
-              <ul className="gap-3 md:columns-2 xl:columns-3">
-                {group.items.map((tool) => {
-                  const key = `${tool.name}|${tool.url}`;
-                  return (
-                    <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
-                      <ActionCard
-                        actions={
-                          canWrite
-                            ? [
-                                {
-                                  key: "edit",
-                                  label: `编辑 ${tool.name}`,
-                                  icon: <IconPencil className="size-3.5" />,
-                                  onClick: () => {
-                                    setEditTarget({ name: tool.name, url: tool.url, description: tool.description, category: tool.category });
-                                    setConfirmDelete(null);
+              <section key={group.name} className="mb-10">
+                <SectionHeading
+                  id={`cat-${group.name}`}
+                  title={group.name}
+                  count={`${group.items.length} 个`}
+                  className="mb-4"
+                />
+                <ul className="gap-3 md:columns-2 xl:columns-3">
+                  {group.items.map((tool) => {
+                    const key = `${tool.name}|${tool.url}`;
+                    return (
+                      <li key={`${tool.category}/${tool.name}`} className="mb-3 break-inside-avoid">
+                        <ActionCard
+                          actions={
+                            canWrite
+                              ? [
+                                  {
+                                    key: "edit",
+                                    label: `编辑 ${tool.name}`,
+                                    icon: <IconPencil className="size-3.5" />,
+                                    onClick: () => {
+                                      setEditTarget({
+                                        name: tool.name,
+                                        url: tool.url,
+                                        description: tool.description,
+                                        category: tool.category,
+                                      });
+                                      setConfirmDelete(null);
+                                    },
                                   },
-                                },
-                                {
-                                  key: "remove",
-                                  label: `移除 ${tool.name}`,
-                                  icon: <IconX className="size-3.5" />,
-                                  onClick: () => setConfirmDelete(key),
-                                },
-                              ]
-                            : []
-                        }
-                        confirming={confirmDelete === key}
-                        confirmText={`从清单移除「${tool.name}」？`}
-                        onConfirm={() => remove(tool.name, tool.url)}
-                        onCancelConfirm={() => setConfirmDelete(null)}
-                      >
-                        <a
-                          href={tool.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                                  {
+                                    key: "remove",
+                                    label: `移除 ${tool.name}`,
+                                    icon: <IconX className="size-3.5" />,
+                                    onClick: () => setConfirmDelete(key),
+                                  },
+                                ]
+                              : []
+                          }
+                          confirming={confirmDelete === key}
+                          confirmText={`从清单移除「${tool.name}」？`}
+                          onConfirm={() => remove(tool.name, tool.url)}
+                          onCancelConfirm={() => setConfirmDelete(null)}
                         >
-                          <ToolCardContent
-                            name={tool.name}
-                            url={tool.url}
-                            description={tool.description}
-                            showArrow={!canWrite}
-                          />
-                        </a>
-                      </ActionCard>
-                    </li>
-                  );
-                })}
-              </ul>
-            </section>
-          );})}
+                          <a
+                            href={tool.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block rounded-ctl border border-line px-4 py-3.5 transition-colors duration-200 hover:border-line-strong"
+                          >
+                            <ToolCardContent
+                              name={tool.name}
+                              url={tool.url}
+                              description={tool.description}
+                              showArrow={!canWrite}
+                            />
+                          </a>
+                        </ActionCard>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            );
+          })}
 
           <p className="text-[12.5px] tracking-[0.05em] text-ink-3">
-            {q ? `${total} / ${groups.reduce((n, g) => n + g.items.length, 0)} 个工具` : `共 ${total} 个工具`}
+            {q
+              ? `${total} / ${groups.reduce((n, g) => n + g.items.length, 0)} 个工具`
+              : `共 ${total} 个工具`}
           </p>
         </>
       )}

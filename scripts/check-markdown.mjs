@@ -69,9 +69,7 @@ const elements = [];
   }
 })(tree);
 
-const headingIds = elements
-  .filter((n) => /^h[1-6]$/.test(n.tagName))
-  .map((n) => n.properties?.id);
+const headingIds = elements.filter((n) => /^h[1-6]$/.test(n.tagName)).map((n) => n.properties?.id);
 const highlightSpans = elements.filter((n) => {
   const cls = n.properties?.className;
   return Array.isArray(cls) && cls.some((c) => String(c).startsWith("hljs-"));
@@ -81,7 +79,9 @@ console.log("标题锚点 ids:", headingIds.join(" | "));
 console.log("高亮 span 数:", highlightSpans.length);
 console.log(
   "高亮类别样例:",
-  [...new Set(highlightSpans.flatMap((n) => n.properties.className).filter((c) => c !== "hljs"))].slice(0, 6).join(", "),
+  [...new Set(highlightSpans.flatMap((n) => n.properties.className).filter((c) => c !== "hljs"))]
+    .slice(0, 6)
+    .join(", "),
 );
 
 const expectIds = ["简介", "子节-code", "简介-1"];

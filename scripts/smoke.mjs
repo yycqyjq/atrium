@@ -23,8 +23,15 @@ const apis = [
   { path: "/api/config", expect: (d) => d && typeof d === "object" && "repos" in d },
   { path: "/api/providers", expect: (d) => d && typeof d === "object" },
   { path: "/api/posts", expect: (d) => d && Array.isArray(d.items) },
-  { path: "/api/search-index", expect: (d) => d && Array.isArray(d.posts) && Array.isArray(d.exhibits) },
-  { path: "/api/demo/bricks/dist/exhibits/toast.js?fresh=1", expect: "text/javascript", text: true },
+  {
+    path: "/api/search-index",
+    expect: (d) => d && Array.isArray(d.posts) && Array.isArray(d.exhibits),
+  },
+  {
+    path: "/api/demo/bricks/dist/exhibits/toast.js?fresh=1",
+    expect: "text/javascript",
+    text: true,
+  },
   { path: "/rss.xml", expect: () => true, text: true },
   { path: "/sitemap.xml", expect: () => true, text: true },
 ];
@@ -33,13 +40,21 @@ let failed = 0;
 const t0 = Date.now();
 
 async function fetchText(path) {
-  const res = await fetch(BASE + path, { signal: AbortSignal.timeout(TIMEOUT), headers: { "User-Agent": "atrium-smoke" } });
+  const res = await fetch(BASE + path, {
+    signal: AbortSignal.timeout(TIMEOUT),
+    headers: { "User-Agent": "atrium-smoke" },
+  });
   const text = await res.text();
   return { status: res.status, text, type: res.headers.get("content-type") ?? "" };
 }
 
-function ok(line) { console.log("  ✔ " + line); }
-function bad(line) { failed += 1; console.log("  ✘ " + line); }
+function ok(line) {
+  console.log("  ✔ " + line);
+}
+function bad(line) {
+  failed += 1;
+  console.log("  ✘ " + line);
+}
 
 console.log(`中庭冒烟巡检 · ${BASE}\n`);
 
@@ -48,9 +63,15 @@ for (const page of pages) {
   try {
     const { status, text } = await fetchText(page.path);
     const expectStatus = page.expectStatus ?? [200];
-    if (!expectStatus.includes(status)) { bad(`${page.path} → HTTP ${status}（期望 ${expectStatus.join("/")}）`); continue; }
+    if (!expectStatus.includes(status)) {
+      bad(`${page.path} → HTTP ${status}（期望 ${expectStatus.join("/")}）`);
+      continue;
+    }
     const missing = page.markers.filter((m) => !text.includes(m));
-    if (missing.length) { bad(`${page.path} → 缺少标记 ${missing.join(", ")}`); continue; }
+    if (missing.length) {
+      bad(`${page.path} → 缺少标记 ${missing.join(", ")}`);
+      continue;
+    }
     ok(`${page.path} → ${status}`);
   } catch (err) {
     bad(`${page.path} → ${err.message}`);
@@ -61,9 +82,15 @@ console.log("接口：");
 for (const api of apis) {
   try {
     const { status, text, type } = await fetchText(api.path);
-    if (status !== 200) { bad(`${api.path} → HTTP ${status}`); continue; }
+    if (status !== 200) {
+      bad(`${api.path} → HTTP ${status}`);
+      continue;
+    }
     if (api.text) {
-      if (typeof api.expect === "string" && !type.includes(api.expect)) { bad(`${api.path} → content-type ${type}`); continue; }
+      if (typeof api.expect === "string" && !type.includes(api.expect)) {
+        bad(`${api.path} → content-type ${type}`);
+        continue;
+      }
       ok(`${api.path} → 200`);
       continue;
     }

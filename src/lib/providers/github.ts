@@ -1,10 +1,5 @@
 import { resolveRepoConfig, type ResolvedRepoConfig } from "@/lib/config";
-import {
-  ProviderError,
-  type RepoEntry,
-  type RepoFile,
-  type RepoProvider,
-} from "./types";
+import { ProviderError, type RepoEntry, type RepoFile, type RepoProvider } from "./types";
 
 export async function githubProvider(override?: ResolvedRepoConfig): Promise<RepoProvider> {
   const cfg = override ?? (await resolveRepoConfig("github"));

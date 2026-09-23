@@ -28,7 +28,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "请求体不是合法 JSON" }, { status: 400 });
   }
 
-  const rel = (typeof payload.path === "string" ? payload.path.trim() : "").replace(/^\/+|\/+$/g, "");
+  const rel = (typeof payload.path === "string" ? payload.path.trim() : "").replace(
+    /^\/+|\/+$/g,
+    "",
+  );
   if (!rel || rel.includes("..") || rel.split("/").some((seg) => !seg || seg.startsWith("."))) {
     return NextResponse.json({ error: "路径不合法" }, { status: 400 });
   }
@@ -69,7 +72,11 @@ export async function POST(request: Request) {
 
     // 同目录冲突检查（不区分大小写，避免与既有文件撞名）
     const entries = await provider.listDir(parentDir);
-    if (entries.some((entry) => entry.name.toLowerCase() === newName.toLowerCase() && entry.name !== oldName)) {
+    if (
+      entries.some(
+        (entry) => entry.name.toLowerCase() === newName.toLowerCase() && entry.name !== oldName,
+      )
+    ) {
       return NextResponse.json({ error: "同名文件已存在" }, { status: 409 });
     }
 

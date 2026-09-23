@@ -13,14 +13,7 @@ type Props = {
 };
 
 /** 共用搜索输入框：放大镜图标；按 / 聚焦（全局搜索占 ⌘K），Esc 清空并失焦 */
-export function SearchInput({
-  value,
-  onChange,
-  onFocus,
-  onBlur,
-  inputRef,
-  placeholder,
-}: Props) {
+export function SearchInput({ value, onChange, onFocus, onBlur, inputRef, placeholder }: Props) {
   const innerRef = useRef<HTMLInputElement>(null);
   const ref = inputRef ?? innerRef;
 
@@ -28,7 +21,8 @@ export function SearchInput({
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       const typing =
-        target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
+        target &&
+        (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable);
       if (e.key === "/" && !typing) {
         e.preventDefault();
         ref.current?.focus();

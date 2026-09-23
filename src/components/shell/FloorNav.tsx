@@ -136,91 +136,98 @@ export default function FloorNav() {
 
   return (
     <>
-    <nav aria-label="楼层目录" className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 shell:block">
-      <ul className="flex flex-col items-end">
-        {items.map((item, i) => {
-          const isCurrent = i === current;
-          const isAncestor = ancestors.has(i);
-          const isHovered = hovered === i;
-          return (
-            <li key={item.id} className="h-7">
-              <button
-                type="button"
-                data-floor-row
-                data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                onClick={() => jump(i)}
-                onMouseEnter={() => setHovered(i)}
-                onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
-                onFocus={() => setHovered(i)}
-                onBlur={() => setHovered((h) => (h === i ? null : h))}
-                aria-label={item.title}
-                className="relative flex h-7 w-[44px] cursor-pointer items-center justify-end outline-none"
-              >
-                {/* 标题：划过时在同位浮现，其余项保持横杠 */}
-                <span
-                  aria-hidden
-                  data-floor-label
-                  className={`absolute right-0 flex h-7 items-center whitespace-nowrap px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
-                    isHovered ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
-                  } ${
-                    isCurrent
-                      ? "font-semibold text-accent"
-                      : isAncestor
-                        ? "text-accent/60"
-                        : "text-ink"
-                  }`}
-                >
-                  {item.title}
-                </span>
-
-                {/* 横杠：该行被划过时收拢 */}
-                <span
-                  aria-hidden
-                  data-floor-bar
-                  data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
-                  style={{ width: isHovered ? 0 : (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0) }}
-                  className={`block rounded-full transition-all duration-200 ${
-                    item.level === 1 ? "h-[3px]" : "h-[2.5px]"
-                  } ${isHovered ? "opacity-0" : "opacity-100"} ${
-                    isCurrent ? "bg-accent" : isAncestor ? "bg-accent/40" : "bg-line-strong"
-                  }`}
-                />
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
-
-    {/* 窄屏（<shell 断点）：底部横向楼层条，桌面右侧导轨的紧凑替代。
-        容器 inset-x-0 全宽但必须 pointer-events-none：否则透明区域会盖住页面底部、拦截侧栏按钮等点击；药丸本体再收回。 */}
-    <nav
-      aria-label="楼层目录·移动端"
-      className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 shell:hidden"
-    >
-      <div
-        ref={stripRef}
-        className="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-raised/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      <nav
+        aria-label="楼层目录"
+        className="fixed right-5 top-1/2 z-40 hidden -translate-y-1/2 shell:block"
       >
-        {items.map((item, i) => {
-          const isCurrent = i === current;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => jump(i)}
-              className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[11.5px] tracking-[0.02em] transition-colors duration-150 ${
-                isCurrent
-                  ? "bg-accent-soft font-medium text-accent-ink"
-                  : "text-ink-3 hover:bg-wash hover:text-ink-2"
-              }`}
-            >
-              {item.title}
-            </button>
-          );
-        })}
-      </div>
-    </nav>
+        <ul className="flex flex-col items-end">
+          {items.map((item, i) => {
+            const isCurrent = i === current;
+            const isAncestor = ancestors.has(i);
+            const isHovered = hovered === i;
+            return (
+              <li key={item.id} className="h-7">
+                <button
+                  type="button"
+                  data-floor-row
+                  data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
+                  onClick={() => jump(i)}
+                  onMouseEnter={() => setHovered(i)}
+                  onMouseLeave={() => setHovered((h) => (h === i ? null : h))}
+                  onFocus={() => setHovered(i)}
+                  onBlur={() => setHovered((h) => (h === i ? null : h))}
+                  aria-label={item.title}
+                  className="relative flex h-7 w-[44px] cursor-pointer items-center justify-end outline-none"
+                >
+                  {/* 标题：划过时在同位浮现，其余项保持横杠 */}
+                  <span
+                    aria-hidden
+                    data-floor-label
+                    className={`absolute right-0 flex h-7 items-center whitespace-nowrap px-2.5 text-[12.5px] leading-none transition-[opacity,transform] duration-200 ease-out ${
+                      isHovered ? "translate-x-0 opacity-100" : "translate-x-[4px] opacity-0"
+                    } ${
+                      isCurrent
+                        ? "font-semibold text-accent"
+                        : isAncestor
+                          ? "text-accent/60"
+                          : "text-ink"
+                    }`}
+                  >
+                    {item.title}
+                  </span>
+
+                  {/* 横杠：该行被划过时收拢 */}
+                  <span
+                    aria-hidden
+                    data-floor-bar
+                    data-state={isCurrent ? "current" : isAncestor ? "ancestor" : "idle"}
+                    style={{
+                      width: isHovered
+                        ? 0
+                        : (BAR_WIDTH[item.level] ?? 12) + (isCurrent ? CURRENT_EXTRA : 0),
+                    }}
+                    className={`block rounded-full transition-all duration-200 ${
+                      item.level === 1 ? "h-[3px]" : "h-[2.5px]"
+                    } ${isHovered ? "opacity-0" : "opacity-100"} ${
+                      isCurrent ? "bg-accent" : isAncestor ? "bg-accent/40" : "bg-line-strong"
+                    }`}
+                  />
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {/* 窄屏（<shell 断点）：底部横向楼层条，桌面右侧导轨的紧凑替代。
+        容器 inset-x-0 全宽但必须 pointer-events-none：否则透明区域会盖住页面底部、拦截侧栏按钮等点击；药丸本体再收回。 */}
+      <nav
+        aria-label="楼层目录·移动端"
+        className="pointer-events-none fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 shell:hidden"
+      >
+        <div
+          ref={stripRef}
+          className="pointer-events-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-full border border-line bg-raised/95 px-1.5 py-1.5 shadow-lg backdrop-blur-sm [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
+          {items.map((item, i) => {
+            const isCurrent = i === current;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => jump(i)}
+                className={`shrink-0 whitespace-nowrap rounded-full px-2.5 py-1 text-[11.5px] tracking-[0.02em] transition-colors duration-150 ${
+                  isCurrent
+                    ? "bg-accent-soft font-medium text-accent-ink"
+                    : "text-ink-3 hover:bg-wash hover:text-ink-2"
+                }`}
+              >
+                {item.title}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </>
   );
 }

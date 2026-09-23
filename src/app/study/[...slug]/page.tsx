@@ -223,9 +223,7 @@ async function StudySlugBody({ params }: Props) {
   const directPosts = dir.posts;
   const childSections: BrowserSection[] = dir.folders.map((folder) => ({
     folder: { name: folder.name, path: folder.path, total: folder.total },
-    posts: dir.allPosts
-      .filter((p) => parentDir(p.path) === folder.path)
-      .map(toBrowserPost),
+    posts: dir.allPosts.filter((p) => parentDir(p.path) === folder.path).map(toBrowserPost),
   }));
   const total = dir.allPosts.filter((p) => p.path.startsWith(`${dir.path}/`)).length;
 

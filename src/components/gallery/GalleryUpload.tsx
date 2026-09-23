@@ -69,7 +69,9 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
 
     if (ok > 0 && failed.length === 0) {
       setState("done");
-      setMessage(`已上传 ${ok} 张到 ${target === ROOT ? "仓库根" : target}。图床仓库刷新后即可在画廊看到。`);
+      setMessage(
+        `已上传 ${ok} 张到 ${target === ROOT ? "仓库根" : target}。图床仓库刷新后即可在画廊看到。`,
+      );
       router.refresh();
     } else if (ok > 0) {
       setState("done");
@@ -136,11 +138,7 @@ export default function GalleryUpload({ dir, albums }: { dir: string; albums: st
         )}
       </div>
       {state === "error" || state === "done" ? (
-        <p
-          className={`mt-3 text-[12.5px] ${
-            state === "error" ? "text-accent-ink" : "text-ink-3"
-          }`}
-        >
+        <p className={`mt-3 text-[12.5px] ${state === "error" ? "text-accent-ink" : "text-ink-3"}`}>
           {message}
           {state === "error" ? " " : ""}
           {state === "done" ? " " : ""}

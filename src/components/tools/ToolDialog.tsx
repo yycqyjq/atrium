@@ -113,7 +113,11 @@ export default function ToolDialog({
         setDescription(data.description);
         filled.push("描述");
       }
-      setParseNote(filled.length > 0 ? `已从网页带回${filled.join("与")}，可修改。` : "未发现可回填的信息，手动补充即可。");
+      setParseNote(
+        filled.length > 0
+          ? `已从网页带回${filled.join("与")}，可修改。`
+          : "未发现可回填的信息，手动补充即可。",
+      );
     } catch {
       setParseNote("解析失败，可手动填写");
     } finally {
@@ -182,11 +186,23 @@ export default function ToolDialog({
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <FieldLabel htmlFor="tool-name">名称 *</FieldLabel>
-            <Input id="tool-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="工具名称" autoFocus />
+            <Input
+              id="tool-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="工具名称"
+              autoFocus
+            />
           </div>
           <div>
             <FieldLabel htmlFor="tool-url">地址 *</FieldLabel>
-            <Input id="tool-url" value={url} onChange={(e) => setUrl(e.target.value)} onPaste={onUrlPaste} placeholder="https://" />
+            <Input
+              id="tool-url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              onPaste={onUrlPaste}
+              placeholder="https://"
+            />
             {parsing ? (
               <div className="mt-2">
                 <Loading size="sm" label="正在解析站点信息…" />
@@ -209,12 +225,19 @@ export default function ToolDialog({
                 {parseNote}
               </p>
             ) : (
-              <p className="mt-2 text-[12px] text-ink-3">粘贴网址后自动解析标题与描述，并带上站点图标。</p>
+              <p className="mt-2 text-[12px] text-ink-3">
+                粘贴网址后自动解析标题与描述，并带上站点图标。
+              </p>
             )}
           </div>
           <div>
             <FieldLabel htmlFor="tool-desc">描述</FieldLabel>
-            <Input id="tool-desc" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="一句话说明（可选）" />
+            <Input
+              id="tool-desc"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="一句话说明（可选）"
+            />
           </div>
           <div>
             <FieldLabel htmlFor="tool-cat">分类</FieldLabel>

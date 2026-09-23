@@ -93,7 +93,9 @@ export default async function ExhibitPage({
                 <tbody>
                   {item.props.map((prop) => (
                     <tr key={prop.name} className="border-b border-line text-ink-2 last:border-0">
-                      <td className="px-4 py-2.5 font-mono text-[12px] text-accent-ink">{prop.name}</td>
+                      <td className="px-4 py-2.5 font-mono text-[12px] text-accent-ink">
+                        {prop.name}
+                      </td>
                       <td className="px-4 py-2.5 font-mono text-[12px]">{prop.type ?? ""}</td>
                       <td className="px-4 py-2.5 font-mono text-[12px]">{prop.default ?? ""}</td>
                       <td className="px-4 py-2.5">{prop.note ?? ""}</td>

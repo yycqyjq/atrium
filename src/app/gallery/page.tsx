@@ -44,18 +44,16 @@ async function GalleryFloor({ album, view }: { album?: string; view?: string }) 
   const total = sections.reduce((n, section) => n + section.images.length, 0);
 
   if (reason === "not-configured") {
-    return (
-      <SetupTeaser
-        title='画廊还没接通图片源。'
-        sub='连好仓库，照片就有了落脚的地方。'
-      />
-    );
+    return <SetupTeaser title="画廊还没接通图片源。" sub="连好仓库，照片就有了落脚的地方。" />;
   }
 
   return (
     <>
       {canUpload ? (
-        <GalleryUpload dir="" albums={sections.filter((s) => s.key !== "__root__").map((s) => s.name)} />
+        <GalleryUpload
+          dir=""
+          albums={sections.filter((s) => s.key !== "__root__").map((s) => s.name)}
+        />
       ) : null}
 
       {total === 0 ? (

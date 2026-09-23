@@ -112,7 +112,10 @@ export default function GalleryGrid({
   );
   const base = contextImages ? contextStart : 0;
   const [current, setCurrent] = useState<number | null>(
-    initialView != null && Number.isInteger(initialView) && initialView >= 0 && initialView < images.length
+    initialView != null &&
+      Number.isInteger(initialView) &&
+      initialView >= 0 &&
+      initialView < images.length
       ? base + initialView
       : null,
   );
@@ -136,8 +139,7 @@ export default function GalleryGrid({
     setCurrent(null);
   }, []);
   const step = useCallback(
-    (delta: number) =>
-      setCurrent((c) => (c == null ? c : (c + delta + list.length) % list.length)),
+    (delta: number) => setCurrent((c) => (c == null ? c : (c + delta + list.length) % list.length)),
     [list.length],
   );
 
@@ -346,7 +348,9 @@ export default function GalleryGrid({
                   {view.name}
                 </p>
                 {view.date ? (
-                  <span className="shrink-0 text-[11px] tabular-nums text-ink-3/80">{shortDate(view.date)}</span>
+                  <span className="shrink-0 text-[11px] tabular-nums text-ink-3/80">
+                    {shortDate(view.date)}
+                  </span>
                 ) : null}
               </div>
               <button
@@ -418,13 +422,17 @@ export default function GalleryGrid({
                   取消
                 </button>
                 {renameError ? (
-                  <span className="min-w-0 shrink truncate text-[12px] text-red-300">{renameError}</span>
+                  <span className="min-w-0 shrink truncate text-[12px] text-red-300">
+                    {renameError}
+                  </span>
                 ) : null}
               </div>
             ) : (
               <p className="min-w-0 truncate text-[12.5px] tracking-[0.03em] text-white/95">
                 {active.name}
-                {active.date ? <span className="text-white/55"> · {fullDate(active.date)}</span> : null}
+                {active.date ? (
+                  <span className="text-white/55"> · {fullDate(active.date)}</span>
+                ) : null}
               </p>
             )}
             <div className="flex shrink-0 items-center gap-4">

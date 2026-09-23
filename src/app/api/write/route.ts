@@ -140,7 +140,8 @@ export async function POST(request: Request) {
     }
 
     const contentBase64 = Buffer.from(content, "utf8").toString("base64");
-    const message = existingSha || sha ? `docs(study): 更新《${title}》` : `docs(study): 新增《${title}》`;
+    const message =
+      existingSha || sha ? `docs(study): 更新《${title}》` : `docs(study): 新增《${title}》`;
     await provider.putFile(filePath, contentBase64, message, sha ?? existingSha);
 
     // 改文件夹 = 移动：写入新路径后删除旧文件
@@ -171,7 +172,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "令牌没有写入权限（需要 repo 权限）" }, { status: 502 });
     }
     if (status === 422) {
-      return NextResponse.json({ error: "仓库端已更新（sha 过期），请刷新后重试" }, { status: 409 });
+      return NextResponse.json(
+        { error: "仓库端已更新（sha 过期），请刷新后重试" },
+        { status: 409 },
+      );
     }
     console.warn("[write] 发布失败：", message);
     return NextResponse.json({ error: "发布失败，请稍后再试" }, { status: 500 });

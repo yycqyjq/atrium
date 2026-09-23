@@ -36,7 +36,10 @@ const TYPE_BY_EXT: Record<string, string> = {
 
 function serve(bytes: Uint8Array, ext: string) {
   // 拷贝为独立的 ArrayBuffer（满足 BodyInit 类型）
-  const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+  const ab = bytes.buffer.slice(
+    bytes.byteOffset,
+    bytes.byteOffset + bytes.byteLength,
+  ) as ArrayBuffer;
   return new NextResponse(ab, {
     headers: {
       "Content-Type": TYPE_BY_EXT[ext] ?? "application/octet-stream",

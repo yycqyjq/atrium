@@ -32,11 +32,7 @@ const components: Components = {
     void node;
     const external = typeof href === "string" && /^https?:/i.test(href);
     return (
-      <a
-        href={href}
-        {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
-        {...rest}
-      >
+      <a href={href} {...(external ? { target: "_blank", rel: "noreferrer" } : {})} {...rest}>
         {children}
       </a>
     );

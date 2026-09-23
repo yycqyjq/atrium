@@ -34,7 +34,10 @@ function parseTools(raw: string): { categories: string[]; items: ToolItem[] } | 
     const items = data.items
       .filter(
         (t): t is Record<string, unknown> =>
-          Boolean(t) && typeof t === "object" && typeof (t as Record<string, unknown>).name === "string" && typeof (t as Record<string, unknown>).url === "string",
+          Boolean(t) &&
+          typeof t === "object" &&
+          typeof (t as Record<string, unknown>).name === "string" &&
+          typeof (t as Record<string, unknown>).url === "string",
       )
       .map((t) => ({
         name: String(t.name).trim(),
