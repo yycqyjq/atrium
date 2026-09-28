@@ -185,9 +185,9 @@ export async function githubProvider(override?: ResolvedRepoConfig): Promise<Rep
     rawUrlCandidates(filePath: string) {
       const encoded = encodeURI(filePath).replace(/#/g, "%23").replace(/\?/g, "%3F");
       return [
-        // 主源：jsDelivr 国内线路（对 raw 不稳定的网络环境更可靠；分支内容有短时缓存）
+        // 主源：jsDelivr CDN（走真实 CDN，不依赖本机 GitHub 加速工具；分支内容有短时缓存）
         `https://gcore.jsdelivr.net/gh/${cfg.owner}/${cfg.repo}@${cfg.branch}/${encoded}`,
-        // 备用：GitHub raw（永远最新，但部分网络环境不稳）
+        // 备用：GitHub raw（内容永远最新；但本机若装了 Watt Toolkit/Steam++ 会经其转发，退出即失效）
         `https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${encodeURIComponent(cfg.branch)}/${encoded}`,
       ];
     },

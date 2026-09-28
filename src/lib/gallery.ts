@@ -28,9 +28,13 @@ export function bustGalleryCache() {
 /**
  * 图床文件在「文章正文」里的引用地址。
  *
- * 用 jsDelivr（与 provider.rawUrl 的主源一致），**不要**换成 GitHub raw：
- * 实测本机网络下 raw.githubusercontent.com 直接超时（25s 无响应），
- * jsDelivr 的 gcore 线路 2s 内 200。既有文章用的是 raw 形式，那些图大概率一直是坏的。
+ * 用 jsDelivr，**不要**换成 GitHub raw——理由不是「raw 不通」，而是本机装了
+ * Watt Toolkit / Steam++ 之类的 GitHub 加速工具：它们把 raw.githubusercontent.com
+ * 写进 /etc/hosts 指向 127.0.0.1、自己在 :443 转发，**退出该工具这些链接就全挂**。
+ * jsDelivr 不在 hosts 里，走真实 CDN，无此依赖。
+ *
+ * （教训：曾把一次偶发超时归因为「raw 不可达」，进而误判既有文章的 raw 图片是坏的。
+ *   判断域名不可达前，先 ping 看它解析到哪、lsof 看有没有本地代理在听。）
  *
  * 注意 jsDelivr 对 @branch 有缓存，刚上传的文件可能有短暂延迟。
  */
