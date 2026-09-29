@@ -43,6 +43,6 @@ export default defineConfig([
     "certs/**", // 本机证书
     "release/**", // 打包产物
     "docs/screenshots/**", // 截图
-    ".workbuddy-ai/**", // AI 协作助手的本地工作日志
+    ".agent/**", // AI 协作助手的本地工作目录（含 workbuddy-ai 日志）
   ]),
 ]);
