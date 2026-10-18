@@ -18,8 +18,10 @@
 .trash-desktop-server-bloat/
 # AI 协作助手的本地工作目录（仓库为 public，不入版本控制）
 .agent/
+.workbuddy-ai/
 certs/*.pem
 data/config.json
+data/config.json.bak-*
 data/cache/
 desktop-server.bloat-*/
 desktop-server.old-*/

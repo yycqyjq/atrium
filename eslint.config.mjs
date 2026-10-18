@@ -44,5 +44,6 @@ export default defineConfig([
     "release/**", // 打包产物
     "docs/screenshots/**", // 截图
     ".agent/**", // AI 协作助手的本地工作目录（含 workbuddy-ai 日志）
+    ".workbuddy-ai/**", // 同上：旧路径残留（.md 日志，eslint 不扫，保持一致）
   ]),
 ]);
