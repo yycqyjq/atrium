@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { SearchInput } from "@/components/search/SearchBox";
+import Button from "@/components/ui/Button";
 import EmptyState from "@/components/ui/EmptyState";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { DemoCard, LinkProjectCard } from "@/components/workshop/DemoCard";
@@ -25,7 +27,25 @@ export default function WorkshopList({
   urlProjects: DemoProject[];
 }) {
   const [query, setQuery] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState("");
+  const router = useRouter();
   const q = query.trim().toLowerCase();
+
+  /** 手动刷新：绕过清单缓存真回源，再让服务端组件重渲染（列表与「数据可能过期」提示一起更新） */
+  const refresh = async () => {
+    setRefreshing(true);
+    setRefreshError("");
+    try {
+      const res = await fetch("/api/demos/refresh", { method: "POST" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      await router.refresh();
+    } catch (err) {
+      setRefreshError(err instanceof Error ? err.message : "刷新失败");
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const filteredSections = useMemo(() => {
     if (!q) return sections;
@@ -53,7 +73,19 @@ export default function WorkshopList({
 
   return (
     <>
-      <SearchInput value={query} onChange={setQuery} placeholder="搜索展品（名称、说明、分组）…" />
+      <SearchInput
+        value={query}
+        onChange={setQuery}
+        placeholder="搜索展品（名称、说明、分组）…"
+        trailing={
+          <span className="flex shrink-0 items-center gap-2">
+            {refreshError ? <span className="text-[12px] text-accent-ink">刷新失败</span> : null}
+            <Button variant="quiet" size="sm" onClick={refresh} disabled={refreshing}>
+              {refreshing ? "刷新中…" : "刷新"}
+            </Button>
+          </span>
+        }
+      />
 
       {total === 0 ? (
         <EmptyState

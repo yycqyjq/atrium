@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "工坊" };
 
 /** 工坊：接入的组件项目与展品陈列（分区 + 即时搜索 + 楼层目录） */
 async function WorkshopFloor() {
-  const { projects, items, errors } = await listDemos();
+  const { projects, items, errors, stale } = await listDemos();
   const multi = projects.length > 1;
 
   const sections: { key: string; title: string; items: DemoItem[] }[] = [];
@@ -48,6 +48,14 @@ async function WorkshopFloor() {
               {error}
             </Alert>
           ))}
+        </div>
+      ) : null}
+
+      {stale ? (
+        <div className="mb-5">
+          <Alert tone="ok" size="sm">
+            仓库暂不可达，当前展示的是上次成功获取的清单。点上方「刷新」可重试。
+          </Alert>
         </div>
       ) : null}
 

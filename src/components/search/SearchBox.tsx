@@ -10,10 +10,20 @@ type Props = {
   onBlur?: () => void;
   inputRef?: React.RefObject<HTMLInputElement | null>;
   placeholder: string;
+  /** 输入框同排右侧的附加操作（如「刷新」按钮）；不传则保持原布局 */
+  trailing?: React.ReactNode;
 };
 
 /** 共用搜索输入框：放大镜图标；按 / 聚焦（全局搜索占 ⌘K），Esc 清空并失焦 */
-export function SearchInput({ value, onChange, onFocus, onBlur, inputRef, placeholder }: Props) {
+export function SearchInput({
+  value,
+  onChange,
+  onFocus,
+  onBlur,
+  inputRef,
+  placeholder,
+  trailing,
+}: Props) {
   const innerRef = useRef<HTMLInputElement>(null);
   const ref = inputRef ?? innerRef;
 
@@ -37,21 +47,24 @@ export function SearchInput({ value, onChange, onFocus, onBlur, inputRef, placeh
   }, [onChange, ref]);
 
   return (
-    <div className="relative mb-5">
-      <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
-      <input
-        ref={ref}
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={onFocus}
-        onBlur={onBlur}
-        placeholder={placeholder}
-        className="w-full rounded-ctl border border-line bg-raised py-2.5 pl-10 pr-16 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent"
-      />
-      <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3 md:block">
-        /
-      </kbd>
+    <div className="mb-5 flex items-center gap-3">
+      <div className="relative flex-1">
+        <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-3" />
+        <input
+          ref={ref}
+          type="text"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onFocus={onFocus}
+          onBlur={onBlur}
+          placeholder={placeholder}
+          className="w-full rounded-ctl border border-line bg-raised py-2.5 pl-10 pr-16 text-[13.5px] outline-none transition-colors duration-150 placeholder:text-ink-3 hover:border-line-strong focus:border-accent"
+        />
+        <kbd className="pointer-events-none absolute right-3 top-1/2 hidden -translate-y-1/2 rounded border border-line px-1.5 py-0.5 font-mono text-[10.5px] text-ink-3 md:block">
+          /
+        </kbd>
+      </div>
+      {trailing}
     </div>
   );
 }

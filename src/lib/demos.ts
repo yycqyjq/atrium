@@ -30,6 +30,8 @@ export type DemosResult = {
   projects: DemoProject[];
   items: DemoItem[];
   errors: string[];
+  /** true = 回源失败或缓存过期后端出了旧数据，页面应提示数据可能不是最新 */
+  stale?: boolean;
 };
 
 const MANIFEST = "atrium.json";
@@ -225,11 +227,11 @@ async function listRepoItems(project: DemoProject): Promise<DemoItem[]> {
 }
 
 export async function listDemos(opts: { fresh?: boolean } = {}): Promise<DemosResult> {
-  const { value } = await cacheThrough("demos", LIST_TTL, buildDemos, {
+  const { value, stale } = await cacheThrough("demos", LIST_TTL, buildDemos, {
     force: opts.fresh,
     shouldCache: (v) => !(v.items.length === 0 && v.errors.length > 0),
   });
-  return value;
+  return { ...value, stale };
 }
 
 async function buildDemos(): Promise<DemosResult> {
