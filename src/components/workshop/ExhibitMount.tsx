@@ -54,15 +54,33 @@ export default function ExhibitMount({
     (async () => {
       try {
         for (const href of styles) ensureStyle(bust(href));
-        const mod = (await Promise.race([
-          import(/* webpackIgnore: true */ /* turbopackIgnore: true */ bust(moduleUrl)),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("取件超时（15 秒）")), 15000),
-          ),
-        ])) as {
-          mount?: MountFn;
-          default?: MountFn;
-        };
+
+        // 取件偶发失败（上游抖动、冷启动首连被拒）时自动重试几次：
+        // 否则一次瞬时抖动就让整件展品挂掉，只能手动点「刷新」——而刷新本质上就是重试取件。
+        const loadOnce = () =>
+          Promise.race([
+            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ bust(moduleUrl)),
+            new Promise<never>((_, reject) =>
+              setTimeout(() => reject(new Error("取件超时（15 秒）")), 15000),
+            ),
+          ]) as Promise<{ mount?: MountFn; default?: MountFn }>;
+
+        let mod: { mount?: MountFn; default?: MountFn } | undefined;
+        let lastError: unknown;
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          try {
+            mod = await loadOnce();
+            break;
+          } catch (err) {
+            lastError = err;
+            if (cancelled) return;
+            if (attempt < 2) {
+              await new Promise((resolve) => setTimeout(resolve, 800 * (attempt + 1)));
+              if (cancelled) return;
+            }
+          }
+        }
+        if (!mod) throw lastError;
         if (cancelled) return;
         const mount = mod.mount ?? mod.default;
         if (typeof mount !== "function") throw new Error("模块没有导出 mount 函数");
